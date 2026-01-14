@@ -32,7 +32,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["INIT-001"],
+      "dependencies": [
+        "INIT-001"
+      ],
       "acceptance_criteria": [
         "gateway/package.json with workspace dependency on shared",
         "seller-sdk/package.json with workspace dependency on shared",
@@ -49,7 +51,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["INIT-002"],
+      "dependencies": [
+        "INIT-002"
+      ],
       "acceptance_criteria": [
         "Root tsconfig.json with ES2022 target and strict mode",
         "Each package has tsconfig.json extending root config",
@@ -66,7 +70,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["INIT-003"],
+      "dependencies": [
+        "INIT-003"
+      ],
       "acceptance_criteria": [
         "vitest.config.ts at root with workspace pattern",
         "Test environment configured for node",
@@ -78,12 +84,14 @@
       "id": "TYPES-001",
       "description": "Define Beckn protocol types",
       "priority": 5,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["INIT-004"],
+      "dependencies": [
+        "INIT-004"
+      ],
       "acceptance_criteria": [
         "BecknMessage interface with context and message",
         "BecknContext with domain, action, transaction_id",
@@ -100,7 +108,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["TYPES-001"],
+      "dependencies": [
+        "TYPES-001"
+      ],
       "acceptance_criteria": [
         "UCPSearchQuery interface",
         "UCPCatalog with items array",
@@ -118,7 +128,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["TYPES-002"],
+      "dependencies": [
+        "TYPES-002"
+      ],
       "acceptance_criteria": [
         "MCPTool schema with input/output",
         "ondc_search tool schema",
@@ -135,7 +147,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["TYPES-003"],
+      "dependencies": [
+        "TYPES-003"
+      ],
       "acceptance_criteria": [
         "BecknMessageSchema Zod validator",
         "UCPSearchQuerySchema Zod validator",
@@ -152,7 +166,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["TYPES-004"],
+      "dependencies": [
+        "TYPES-004"
+      ],
       "acceptance_criteria": [
         "generateKeyPair() returns publicKey and privateKey",
         "Keys are base64 encoded strings",
@@ -169,7 +185,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CRYPTO-001"],
+      "dependencies": [
+        "CRYPTO-001"
+      ],
       "acceptance_criteria": [
         "signMessage(message, privateKey) returns signature",
         "verifySignature(message, signature, publicKey) returns boolean",
@@ -186,7 +204,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CRYPTO-002"],
+      "dependencies": [
+        "CRYPTO-002"
+      ],
       "acceptance_criteria": [
         "buildAuthHeader(subscriberId, privateKey, request) returns header string",
         "Format: Signature keyId=\"{subscriberId}|{keyId}|ed25519\",signature=\"{base64}\",created=\"{timestamp}\"",
@@ -203,7 +223,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["TYPES-004"],
+      "dependencies": [
+        "TYPES-004"
+      ],
       "acceptance_criteria": [
         "GatewayConfigSchema with required fields",
         "Fields: gatewayUrl, registryUrl, subscriberId, privateKey, environment",
@@ -220,7 +242,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CONFIG-001"],
+      "dependencies": [
+        "CONFIG-001"
+      ],
       "acceptance_criteria": [
         "loadConfig() reads from process.env",
         "Validates against GatewayConfigSchema",
@@ -237,7 +261,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CONFIG-002"],
+      "dependencies": [
+        "CONFIG-002"
+      ],
       "acceptance_criteria": [
         ".github/workflows/ci.yml created",
         "Triggers on push to main and pull requests",
@@ -254,7 +280,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CI-001"],
+      "dependencies": [
+        "CI-001"
+      ],
       "acceptance_criteria": [
         "Run pnpm build for all packages",
         "Cache node_modules for faster builds",
@@ -270,7 +298,9 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": ["CI-002"],
+      "dependencies": [
+        "CI-002"
+      ],
       "acceptance_criteria": [
         "Run pnpm typecheck for all packages",
         "Run eslint if configured",
@@ -286,7 +316,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["TYPES-004"],
+      "dependencies": [
+        "TYPES-004"
+      ],
       "acceptance_criteria": [
         "becknToUcpCatalog(on_search_response) returns UCPItem[]",
         "Maps: id, name, price, rating, images",
@@ -303,7 +335,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["TRANSLATE-001"],
+      "dependencies": [
+        "TRANSLATE-001"
+      ],
       "acceptance_criteria": [
         "normalizePrice(value, currency) returns UCPPrice",
         "normalizeRating(value, max) returns 0-5 scale rating",
@@ -320,7 +354,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["TRANSLATE-002"],
+      "dependencies": [
+        "TRANSLATE-002"
+      ],
       "acceptance_criteria": [
         "ucpToBecknIntent(search_query) returns Beckn intent",
         "Maps category, location, filters",
@@ -337,7 +373,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["CONFIG-002"],
+      "dependencies": [
+        "CONFIG-002"
+      ],
       "acceptance_criteria": [
         "ONDCClient class with baseURL and auth",
         "post(path, body) method with signing",
@@ -354,7 +392,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["HTTP-001"],
+      "dependencies": [
+        "HTTP-001"
+      ],
       "acceptance_criteria": [
         "Retry on 5xx errors with 100ms * 2^attempt backoff",
         "Max 3 retries",
@@ -371,7 +411,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["HTTP-002"],
+      "dependencies": [
+        "HTTP-002"
+      ],
       "acceptance_criteria": [
         "POST /on_search endpoint",
         "POST /on_select endpoint",
@@ -388,7 +430,10 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["WEBHOOK-001", "CRYPTO-003"],
+      "dependencies": [
+        "WEBHOOK-001",
+        "CRYPTO-003"
+      ],
       "acceptance_criteria": [
         "Extract Authorization header from request",
         "Verify signature using crypto module",
@@ -405,7 +450,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["WEBHOOK-002"],
+      "dependencies": [
+        "WEBHOOK-002"
+      ],
       "acceptance_criteria": [
         "Extract transaction_id from request context",
         "Match with pending request state",
@@ -422,7 +469,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["WEBHOOK-003"],
+      "dependencies": [
+        "WEBHOOK-003"
+      ],
       "acceptance_criteria": [
         "StateStore class with Map backing",
         "set(transactionId, state) stores state",
@@ -439,7 +488,9 @@
       "phase": "protocol",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": ["STATE-001"],
+      "dependencies": [
+        "STATE-001"
+      ],
       "acceptance_criteria": [
         "waitForCallback(transactionId, timeout) returns Promise",
         "Polls state store every 100ms",
@@ -456,7 +507,9 @@
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": ["STATE-002"],
+      "dependencies": [
+        "STATE-002"
+      ],
       "acceptance_criteria": [
         "McpServer instance created with stdio transport",
         "Server starts without errors",
@@ -473,7 +526,10 @@
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": ["MCP-001", "TRANSLATE-003"],
+      "dependencies": [
+        "MCP-001",
+        "TRANSLATE-003"
+      ],
       "acceptance_criteria": [
         "Tool registered with input schema",
         "Calls Beckn client with translated intent",
@@ -490,7 +546,9 @@
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": ["MCP-002"],
+      "dependencies": [
+        "MCP-002"
+      ],
       "acceptance_criteria": [
         "scoreItem(item, preferences) returns 0-1 score",
         "Formula: price_weight + distance_weight + rating_weight + delivery_weight",
@@ -507,7 +565,9 @@
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": ["PREF-001"],
+      "dependencies": [
+        "PREF-001"
+      ],
       "acceptance_criteria": [
         "normalizeWeights(user_weights) sums to 1.0",
         "Handles partial weights (fills rest evenly)",
@@ -524,7 +584,9 @@
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": ["PREF-002"],
+      "dependencies": [
+        "PREF-002"
+      ],
       "acceptance_criteria": [
         "Express server on random port",
         "POST /search endpoint returns async callback simulation",
