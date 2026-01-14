@@ -11,15 +11,6 @@ export {
   type KeyPair,
 } from './keys';
 
-// TODO: Implement signMessage and verifySignature in CRYPTO-002
-export async function signMessage(_message: string): Promise<string> {
-  throw new Error('Not implemented');
-}
-
-export function verifySignature(
-  _message: string,
-  _signature: string,
-  _publicKey: string
-): boolean {
-  throw new Error('Not implemented');
-}
+export { signMessage, verifySignature } from './signing';
+export { buildAuthHeader, parseAuthHeader } from './auth';
+export type { AuthHeaderRequest } from './auth';

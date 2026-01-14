@@ -5,6 +5,7 @@
 
 # Dependencies
 node_modules/
+.pnpm-store/
 pnpm-lock.yaml
 
 # Build outputs
@@ -12,12 +13,19 @@ dist/
 build/
 *.tsbuildinfo
 
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
 # OS
 .DS_Store
@@ -26,10 +34,25 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+.vitest/
 
 # Misc
 .cache/
 *.log
 
+# MCP
 .mcp.json
 mcp/
+
+# Node modules internals
+node_modules/.modules.yaml
+node_modules/.cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Session summaries (optional - remove if you want to track these)
+/tmp/summary/
+

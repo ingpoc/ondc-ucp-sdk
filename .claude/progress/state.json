@@ -1,7 +1,7 @@
 {
   "state": "IMPLEMENT",
   "entered_at": "2026-01-14T16:09:58+05:30",
-  "health_status": "HEALTHY",
+  "health_status": "OFFLINE",
   "history": [
     {
       "from": "START",
@@ -16,8 +16,8 @@
       "reason": "State transition"
     }
   ],
-  "feature_id": "CRYPTO-001",
+  "feature_id": "HTTP-002",
   "attempts": 1,
-  "last_updated": "2026-01-14T22:20:00+05:30",
-  "current_feature": "CRYPTO-001"
+  "last_updated": "2026-01-14T22:47:40+05:30",
+  "current_feature": "HTTP-002"
 }
