@@ -40,9 +40,9 @@ coverage/
 .cache/
 *.log
 
-# MCP
+# MCP config
 .mcp.json
-mcp/
+/mcp/
 
 # Node modules internals
 node_modules/.modules.yaml
