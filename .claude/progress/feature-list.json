@@ -103,7 +103,7 @@
       "id": "TYPES-002",
       "description": "Define UCP protocol types",
       "priority": 6,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
