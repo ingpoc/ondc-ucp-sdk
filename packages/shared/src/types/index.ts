@@ -5,3 +5,6 @@
 
 // Beckn protocol types
 export * from './beckn';
+
+// UCP protocol types
+export * from './ucp';
