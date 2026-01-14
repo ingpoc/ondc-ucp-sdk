@@ -16,8 +16,8 @@
       "reason": "State transition"
     }
   ],
-  "feature_id": "TYPES-002",
+  "feature_id": "CRYPTO-001",
   "attempts": 1,
-  "last_updated": "2026-01-14T21:59:00+05:30",
-  "current_feature": "TYPES-002"
+  "last_updated": "2026-01-14T22:20:00+05:30",
+  "current_feature": "CRYPTO-001"
 }
