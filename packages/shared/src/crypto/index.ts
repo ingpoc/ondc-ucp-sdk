@@ -1,7 +1,18 @@
-// Cryptographic utilities for ONDC signatures
+/**
+ * Crypto Module
+ * Cryptographic utilities for ONDC signatures
+ */
 
+export {
+  initCrypto,
+  generateKeyPair,
+  generateKeyPairFromSeed,
+  getPublicKey,
+  type KeyPair,
+} from './keys';
+
+// TODO: Implement signMessage and verifySignature in CRYPTO-002
 export async function signMessage(_message: string): Promise<string> {
-  // TODO: Implement libsodium-based signing
   throw new Error('Not implemented');
 }
 
@@ -10,6 +21,5 @@ export function verifySignature(
   _signature: string,
   _publicKey: string
 ): boolean {
-  // TODO: Implement signature verification
   throw new Error('Not implemented');
 }

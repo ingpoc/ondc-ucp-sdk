@@ -142,7 +142,7 @@
       "id": "TYPES-004",
       "description": "Create Zod schemas for validation",
       "priority": 8,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
