@@ -123,7 +123,7 @@
       "id": "TYPES-003",
       "description": "Define MCP tool types",
       "priority": 7,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
