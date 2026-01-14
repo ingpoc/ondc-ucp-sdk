@@ -1,149 +1,102 @@
 #!/bin/bash
-# TEMPLATE: restart-servers.sh
+# restart-servers.sh
 #
-# Purpose: Kill processes on specified ports and restart frontend/backend servers
+# Purpose: Build and optionally start dev servers for TypeScript monorepo
 #
-# CUSTOMIZE THIS for your project:
-# - Update ports for your services
-# - Update start commands for your stack
-# - Add additional services as needed
+# Usage: ./restart-servers.sh [--build-only|--watch]
+#   --build-only  Only build, don't start watch mode
+#   --watch       Start TypeScript in watch mode (default if no flags)
 #
-# Usage: ./restart-servers.sh [--no-frontend|--no-backend]
+# For this SDK project:
+# - Builds all packages in the monorepo
+# - Optionally watches for changes
 
 set -e
 
-FRONTEND_PORT=3000
-BACKEND_PORT=8000
-NO_FRONTEND=false
-NO_BACKEND=false
+BUILD_ONLY=false
+WATCH_MODE=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --no-frontend)
-      NO_FRONTEND=true
+    --build-only)
+      BUILD_ONLY=true
       shift
       ;;
-    --no-backend)
-      NO_BACKEND=true
+    --watch)
+      WATCH_MODE=true
       shift
       ;;
     *)
-      echo "Usage: $0 [--no-frontend] [--no-backend]"
+      echo "Usage: $0 [--build-only] [--watch]"
       exit 1
       ;;
   esac
 done
 
-echo "=== Restarting Servers ==="
+echo "=== ONDC Agent Gateway Build ==="
 
 # ============================================================================
-# Kill existing processes
+# Check dependencies
 # ============================================================================
 
-kill_port() {
-  local port=$1
-  local pid=$(lsof -ti:$port 2>/dev/null || true)
-
-  if [ -n "$pid" ]; then
-    echo "Killing process on port $port (PID: $pid)"
-    kill -9 $pid 2>/dev/null || true
-    sleep 1
-  else
-    echo "No process found on port $port"
-  fi
-}
-
-if [ "$NO_FRONTEND" = false ]; then
-  kill_port $FRONTEND_PORT
-fi
-
-if [ "$NO_BACKEND" = false ]; then
-  kill_port $BACKEND_PORT
+if [ ! -d "node_modules" ]; then
+  echo "Installing dependencies..."
+  pnpm install
 fi
 
 # ============================================================================
-# Start backend (FastAPI)
-# ============================================================================
-
-if [ "$NO_BACKEND" = false ]; then
-  echo ""
-  echo "Starting backend on port $BACKEND_PORT..."
-
-  if [ -d "gateway" ]; then
-    cd gateway
-    nohup uvicorn app.main:app --reload --host 0.0.0.0 --port $BACKEND_PORT > ../logs/backend.log 2>&1 &
-    BACKEND_PID=$!
-    echo "Backend started (PID: $BACKEND_PID, logs: logs/backend.log)"
-    cd ..
-  else
-    echo "Warning: gateway/ directory not found, skipping backend" >&2
-  fi
-fi
-
-# ============================================================================
-# Start frontend (Next.js)
-# ============================================================================
-
-if [ "$NO_FRONTEND" = false ]; then
-  echo ""
-  echo "Starting frontend on port $FRONTEND_PORT..."
-
-  if [ -d "frontend" ]; then
-    cd frontend
-    nohup npm run dev > ../logs/frontend.log 2>&1 &
-    FRONTEND_PID=$!
-    echo "Frontend started (PID: $FRONTEND_PID, logs: logs/frontend.log)"
-    cd ..
-  else
-    echo "Warning: frontend/ directory not found, skipping frontend" >&2
-  fi
-fi
-
-# ============================================================================
-# Wait for servers to be ready
+# Build all packages
 # ============================================================================
 
 echo ""
-echo "Waiting for servers to start..."
+echo "Building packages..."
 
-wait_for_service() {
-  local url=$1
-  local name=$2
-  local max_wait=30
-  local count=0
-
-  while [ $count -lt $max_wait ]; do
-    if curl -sf "$url" > /dev/null 2>&1; then
-      echo "✓ $name is ready"
-      return 0
-    fi
-    sleep 1
-    count=$((count + 1))
-    echo -n "."
-  done
-
-  echo ""
-  echo "✗ $name failed to start within ${max_wait}s" >&2
-  return 1
-}
-
-if [ "$NO_FRONTEND" = false ]; then
-  wait_for_service "http://localhost:$FRONTEND_PORT" "Frontend" || exit 1
-fi
-
-if [ "$NO_BACKEND" = false ]; then
-  wait_for_service "http://localhost:$BACKEND_PORT/api/health" "Backend" || exit 1
+if pnpm build 2>&1; then
+  echo "✓ Build successful"
+else
+  echo "✗ Build failed" >&2
+  exit 1
 fi
 
 # ============================================================================
-# Summary
+# Type check
 # ============================================================================
 
 echo ""
-echo "=== Servers restarted successfully ==="
-echo "Frontend: http://localhost:$FRONTEND_PORT"
-echo "Backend:  http://localhost:$BACKEND_PORT/api/health"
-echo "Logs:     logs/frontend.log, logs/backend.log"
+echo "Running type check..."
+
+if pnpm typecheck 2>&1; then
+  echo "✓ Type check passed"
+else
+  echo "✗ Type check failed" >&2
+  exit 1
+fi
+
+# ============================================================================
+# Optional watch mode
+# ============================================================================
+
+if [ "$BUILD_ONLY" = true ]; then
+  echo ""
+  echo "=== Build completed ==="
+  exit 0
+fi
+
+if [ "$WATCH_MODE" = true ]; then
+  echo ""
+  echo "Starting watch mode..."
+  echo "Press Ctrl+C to stop"
+  pnpm build --watch
+fi
+
+echo ""
+echo "=== Build completed ==="
+echo ""
+echo "Available commands:"
+echo "  pnpm build      - Build all packages"
+echo "  pnpm typecheck  - Type check all packages"
+echo "  pnpm test       - Run tests"
+echo "  pnpm dev        - Start development mode (when available)"
 
 exit 0

@@ -1,80 +1,83 @@
 #!/bin/bash
-# run-tests.sh - Batch API endpoint testing
-# Usage: ./run-tests.sh [base_url]
-# Default base_url: http://localhost:3000
+# run-tests.sh
 #
-# CUSTOMIZE FOR YOUR PROJECT:
-# 1. Update BASE_URL default to match your server
-# 2. Add/remove test_endpoint calls for your API routes
-# 3. Adjust expected status codes (not all are 200)
+# Purpose: Run unit tests for TypeScript monorepo using vitest
+#
+# Usage: ./run-tests.sh [--coverage] [--watch] [filter]
+#   --coverage  Generate coverage report
+#   --watch     Run in watch mode
+#   filter      Optional test file/pattern filter
+#
+# Exit codes:
+#   0 = All tests passed
+#   1 = Tests failed
 
 set -e
 
-BASE_URL="${1:-http://localhost:3000}"
+COVERAGE=false
+WATCH=false
+FILTER=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --coverage)
+      COVERAGE=true
+      shift
+      ;;
+    --watch)
+      WATCH=true
+      shift
+      ;;
+    -*)
+      echo "Usage: $0 [--coverage] [--watch] [filter]"
+      exit 1
+      ;;
+    *)
+      FILTER="$1"
+      shift
+      ;;
+  esac
+done
+
 EVIDENCE_DIR="/tmp/test-evidence"
 TIMESTAMP=$(date +%s)
-LOG_FILE="$EVIDENCE_DIR/api-tests-$TIMESTAMP.log"
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+LOG_FILE="$EVIDENCE_DIR/unit-tests-$TIMESTAMP.log"
 
 # Create evidence directory
 mkdir -p "$EVIDENCE_DIR"
 
-echo "Running API endpoint tests against: $BASE_URL"
+echo "=== Running Unit Tests ==="
 echo "Evidence log: $LOG_FILE"
 echo ""
 
-# Track results
-PASS=0
-FAIL=0
-TOTAL=0
+# Build test command
+CMD="pnpm test"
 
-# Test endpoint function
-test_endpoint() {
-  local name="$1"
-  local endpoint="$2"
-  local expected="${3:-200}"
-
-  TOTAL=$((TOTAL + 1))
-  printf "%-40s" "$name"
-
-  # Make request and capture status
-  status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL$endpoint" 2>/dev/null || echo "000")
-
-  if [ "$status" = "$expected" ]; then
-    echo -e "${GREEN}✓ PASS${NC} (HTTP $status)"
-    PASS=$((PASS + 1))
-    echo "✓ $name: HTTP $status" >> "$LOG_FILE"
-  else
-    echo -e "${RED}✗ FAIL${NC} (got $status, expected $expected)"
-    FAIL=$((FAIL + 1))
-    echo "✗ $name: HTTP $status (expected $expected)" >> "$LOG_FILE"
-  fi
-}
-
-echo "=== Core API Endpoints ==="
-# TODO: Add your API endpoints here
-# Example:
-# test_endpoint "Health Check" "/api/health"
-# test_endpoint "Users API" "/api/users"
-# test_endpoint "Status" "/api/status"
-
-echo -e "${YELLOW}⚠ No endpoints configured yet${NC}"
-echo -e "${YELLOW}  Edit this script and add test_endpoint calls for your API routes${NC}"
-
-echo ""
-echo "=== Summary ==="
-echo "Total: $TOTAL | ${GREEN}Pass: $PASS${NC} | ${RED}Fail: $FAIL${NC}"
-echo "Full log: $LOG_FILE"
-
-# Exit codes: 0=pass, 1=fail
-if [ $FAIL -eq 0 ]; then
-  exit 0
+if [ "$WATCH" = true ]; then
+  CMD="$CMD -- --watch"
+elif [ "$COVERAGE" = true ]; then
+  CMD="$CMD -- --coverage --run"
 else
-  exit 1
+  CMD="$CMD -- --run"
 fi
 
+if [ -n "$FILTER" ]; then
+  CMD="$CMD $FILTER"
+fi
+
+echo "Running: $CMD"
+echo ""
+
+# Run tests and capture output
+if $CMD 2>&1 | tee "$LOG_FILE"; then
+  echo ""
+  echo "✅ All tests passed"
+  echo "Full log: $LOG_FILE"
+  exit 0
+else
+  echo ""
+  echo "❌ Tests failed"
+  echo "Full log: $LOG_FILE"
+  exit 1
+fi
