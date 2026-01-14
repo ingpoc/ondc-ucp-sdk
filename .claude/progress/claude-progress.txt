@@ -1,0 +1,2 @@
+=== Session 2025-01-14 ===
+Initializing ONDC-Agent Gateway project. Completed project structure setup with initialization scripts, hooks, and feature list (29 features). Started INIT-001: monorepo setup with pnpm workspaces. Created root config files and packages/shared. Next: Create gateway/seller-sdk structures.
