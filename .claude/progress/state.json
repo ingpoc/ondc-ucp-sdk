@@ -1,7 +1,7 @@
 {
   "state": "IMPLEMENT",
   "entered_at": "2026-01-14T16:09:58+05:30",
-  "health_status": "UNKNOWN",
+  "health_status": "OFFLINE",
   "history": [
     {
       "from": "START",
@@ -16,8 +16,8 @@
       "reason": "State transition"
     }
   ],
-  "feature_id": "",
+  "feature_id": "TYPES-001",
   "attempts": 1,
-  "last_updated": "2026-01-14T15:49:53Z",
-  "current_feature": "INIT-004"
+  "last_updated": "2026-01-14T21:53:58+05:30",
+  "current_feature": "TYPES-001"
 }
