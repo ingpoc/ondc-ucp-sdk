@@ -1,7 +1,7 @@
 {
   "state": "IMPLEMENT",
   "entered_at": "2026-01-14T16:09:58+05:30",
-  "health_status": "OFFLINE",
+  "health_status": "HEALTHY",
   "history": [
     {
       "from": "START",
