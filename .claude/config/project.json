@@ -1,0 +1,17 @@
+{
+  "project_type": "typescript-monorepo",
+  "framework": "node",
+  "language": "TypeScript",
+  "dev_server_port": 3000,
+  "test_command": "pnpm test",
+  "health_check": "pnpm build",
+  "typecheck_command": "pnpm typecheck",
+  "lint_command": "pnpm lint",
+  "required_env": [],
+  "required_services": [],
+  "packages": [
+    "packages/gateway",
+    "packages/seller-sdk",
+    "packages/shared"
+  ]
+}

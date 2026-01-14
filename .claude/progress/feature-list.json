@@ -1,0 +1,391 @@
+{
+  "project": "ondc-agent-gateway",
+  "version": "0.1.0",
+  "tiers": {
+    "mvp": "Minimum viable: MCP search tool working",
+    "core": "Full checkout flow + seller SDK",
+    "full": "Production ready with all features"
+  },
+  "features": [
+    {
+      "id": "INIT-001",
+      "description": "Set up monorepo with pnpm workspaces",
+      "priority": 1,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "pnpm workspace configured",
+        "3 packages: gateway, seller-sdk, shared",
+        "TypeScript configured",
+        "Vitest configured"
+      ],
+      "phase": "foundation"
+    },
+    {
+      "id": "INIT-002",
+      "description": "Create shared types package (Beckn, UCP, MCP)",
+      "priority": 2,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Beckn protocol types defined",
+        "UCP types defined",
+        "MCP tool types defined",
+        "Zod schemas for validation"
+      ],
+      "phase": "foundation"
+    },
+    {
+      "id": "INIT-003",
+      "description": "Implement Ed25519 crypto module",
+      "priority": 3,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Key generation working",
+        "Sign/verify functions",
+        "Authorization header builder",
+        "Unit tests passing"
+      ],
+      "phase": "foundation"
+    },
+    {
+      "id": "INIT-004",
+      "description": "Set up config/validation with Zod",
+      "priority": 4,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Config schema defined",
+        "Environment variable loading",
+        "Validation on startup"
+      ],
+      "phase": "foundation"
+    },
+    {
+      "id": "INIT-005",
+      "description": "Configure CI/CD pipeline",
+      "priority": 5,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "GitHub Actions workflow",
+        "Build, lint, test on PR",
+        "Type checking"
+      ],
+      "phase": "foundation"
+    },
+    {
+      "id": "PROTO-001",
+      "description": "Implement Beckn to UCP translator (on_search)",
+      "priority": 6,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Beckn catalog to UCP items",
+        "Price/rating normalization",
+        "Seller info mapping"
+      ],
+      "phase": "protocol"
+    },
+    {
+      "id": "PROTO-002",
+      "description": "Implement UCP to Beckn translator (search)",
+      "priority": 7,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "UCP search query to Beckn intent",
+        "Filters mapping",
+        "Location handling"
+      ],
+      "phase": "protocol"
+    },
+    {
+      "id": "PROTO-003",
+      "description": "ONDC HTTP client with retry",
+      "priority": 8,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Axios client configured",
+        "Retry logic with backoff",
+        "Request signing integrated"
+      ],
+      "phase": "protocol"
+    },
+    {
+      "id": "PROTO-004",
+      "description": "Webhook receiver for callbacks",
+      "priority": 9,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Express endpoint for /on_search",
+        "Signature verification",
+        "Transaction ID correlation"
+      ],
+      "phase": "protocol"
+    },
+    {
+      "id": "PROTO-005",
+      "description": "State store + async poller",
+      "priority": 10,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "In-memory store working",
+        "Promise resolution on callback",
+        "Timeout handling"
+      ],
+      "phase": "protocol"
+    },
+    {
+      "id": "MCP-001",
+      "description": "MCP server initialization",
+      "priority": 11,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "McpServer instance created",
+        "stdio transport working",
+        "Tool registration framework"
+      ],
+      "phase": "mcp"
+    },
+    {
+      "id": "MCP-002",
+      "description": "ondc_search MCP tool",
+      "priority": 12,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Tool registered with schema",
+        "Calls protocol layer",
+        "Returns ranked results"
+      ],
+      "phase": "mcp"
+    },
+    {
+      "id": "MCP-003",
+      "description": "Preference engine",
+      "priority": 13,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Scoring algorithm implemented",
+        "Weight normalization",
+        "Style matching bonus"
+      ],
+      "phase": "mcp"
+    },
+    {
+      "id": "MCP-004",
+      "description": "Mock ONDC gateway for testing",
+      "priority": 14,
+      "status": "pending",
+      "tier": "mvp",
+      "acceptance": [
+        "Mock server with /search endpoint",
+        "Async callback simulation",
+        "Test catalog data"
+      ],
+      "phase": "mcp"
+    },
+    {
+      "id": "CHECKOUT-001",
+      "description": "Select/Init translators",
+      "priority": 15,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "UCP checkout to Beckn select",
+        "Beckn on_select to UCP quote",
+        "Init flow translation"
+      ],
+      "phase": "checkout"
+    },
+    {
+      "id": "CHECKOUT-002",
+      "description": "Checkout session management",
+      "priority": 16,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "Session creation/retrieval",
+        "State transitions",
+        "Expiry handling"
+      ],
+      "phase": "checkout"
+    },
+    {
+      "id": "CHECKOUT-003",
+      "description": "ondc_checkout MCP tool",
+      "priority": 17,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "Create action working",
+        "Complete action working",
+        "Error handling"
+      ],
+      "phase": "checkout"
+    },
+    {
+      "id": "CHECKOUT-004",
+      "description": "UPI payment handling",
+      "priority": 18,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "UPI VPA validation",
+        "Payment confirmation flow",
+        "Error states"
+      ],
+      "phase": "checkout"
+    },
+    {
+      "id": "REST-001",
+      "description": "UCP REST API - discovery endpoint",
+      "priority": 19,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "/.well-known/ucp endpoint",
+        "Capabilities declaration",
+        "Version info"
+      ],
+      "phase": "rest"
+    },
+    {
+      "id": "REST-002",
+      "description": "UCP REST API - shopping endpoints",
+      "priority": 20,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "/shopping/search working",
+        "/shopping/checkout working",
+        "/shopping/order working"
+      ],
+      "phase": "rest"
+    },
+    {
+      "id": "SELLER-001",
+      "description": "Seller SDK - Beckn endpoint receivers",
+      "priority": 21,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "/search handler",
+        "/select, /init, /confirm handlers",
+        "Beckn to UCP translation"
+      ],
+      "phase": "seller"
+    },
+    {
+      "id": "SELLER-002",
+      "description": "Seller SDK - UCP endpoint exposers",
+      "priority": 22,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "/.well-known/ucp for sellers",
+        "/shopping/* endpoints",
+        "Direct UCP agent support"
+      ],
+      "phase": "seller"
+    },
+    {
+      "id": "SELLER-003",
+      "description": "Seller SDK - Handler interface",
+      "priority": 23,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "SellerUCPHandlers interface",
+        "onSearch, onCheckout handlers",
+        "Type-safe implementation"
+      ],
+      "phase": "seller"
+    },
+    {
+      "id": "SELLER-004",
+      "description": "ONDC registration flow",
+      "priority": 24,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "Registry subscription",
+        "Key registration",
+        "Site verification"
+      ],
+      "phase": "seller"
+    },
+    {
+      "id": "SELLER-005",
+      "description": "Catalog sync",
+      "priority": 25,
+      "status": "pending",
+      "tier": "core",
+      "acceptance": [
+        "Product CRUD",
+        "Inventory updates",
+        "Price updates"
+      ],
+      "phase": "seller"
+    },
+    {
+      "id": "POLISH-001",
+      "description": "Redis state store option",
+      "priority": 26,
+      "status": "pending",
+      "tier": "full",
+      "acceptance": [
+        "Redis adapter",
+        "Configurable backend",
+        "Connection pooling"
+      ],
+      "phase": "polish"
+    },
+    {
+      "id": "POLISH-002",
+      "description": "Advanced preference engine",
+      "priority": 27,
+      "status": "pending",
+      "tier": "full",
+      "acceptance": [
+        "ML-based scoring",
+        "Historical preference learning",
+        "A/B testing support"
+      ],
+      "phase": "polish"
+    },
+    {
+      "id": "POLISH-003",
+      "description": "Documentation + examples",
+      "priority": 28,
+      "status": "pending",
+      "tier": "full",
+      "acceptance": [
+        "API documentation",
+        "Claude agent example",
+        "Seller integration example"
+      ],
+      "phase": "polish"
+    },
+    {
+      "id": "POLISH-004",
+      "description": "npm publish + Docker image",
+      "priority": 29,
+      "status": "pending",
+      "tier": "full",
+      "acceptance": [
+        "Published to npm",
+        "Docker image built",
+        "docker-compose ready"
+      ],
+      "phase": "polish"
+    }
+  ]
+}
