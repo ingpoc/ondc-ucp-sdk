@@ -5,8 +5,10 @@
 
 /** Price with currency */
 export interface UCPPrice {
-  amount: number;
+  amount?: number;
   currency: string;
+  /** String value (used in Beckn translations) */
+  value?: string;
 }
 
 /** Image reference */
@@ -37,10 +39,20 @@ export interface UCPContact {
 
 /** Location with coordinates */
 export interface UCPLocation {
-  address?: UCPAddress;
+  address?: UCPAddress | string;
   gps?: string;
   city?: string;
   country?: string;
+  /** Latitude coordinate */
+  latitude?: number;
+  /** Longitude coordinate */
+  longitude?: number;
+  /** State/province */
+  state?: string;
+  /** Postal/ZIP code */
+  postalCode?: string;
+  /** Search radius in kilometers */
+  radius?: number;
 }
 
 /** Time range */

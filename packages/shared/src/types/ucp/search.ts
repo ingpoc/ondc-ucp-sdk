@@ -7,6 +7,8 @@ import type { UCPLocation, UCPMetadata } from './common';
 
 /** Search query from agent to gateway */
 export interface UCPSearchQuery {
+  /** Free text search term (alias for text) */
+  query?: string;
   /** Free text search term */
   text?: string;
   /** Category filter */

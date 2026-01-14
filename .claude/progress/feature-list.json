@@ -502,7 +502,7 @@
       "id": "MCP-001",
       "description": "Initialize MCP server with SDK",
       "priority": 27,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",

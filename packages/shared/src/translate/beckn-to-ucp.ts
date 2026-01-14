@@ -5,7 +5,6 @@
 
 import type {
   BecknOnSearchResponse,
-  BecknCatalog,
   BecknProvider,
   BecknItem,
   BecknPrice,
@@ -182,9 +181,11 @@ function translateLocation(location?: BecknLocation): UCPLocation | undefined {
   let latitude: number | undefined;
   let longitude: number | undefined;
   if (gps) {
-    const [lat, lng] = gps.split(',').map((s) => parseFloat(s.trim()));
-    if (!isNaN(lat)) latitude = lat;
-    if (!isNaN(lng)) longitude = lng;
+    const parts = gps.split(',').map((s) => parseFloat(s.trim()));
+    const lat = parts[0];
+    const lng = parts[1];
+    if (lat !== undefined && !isNaN(lat)) latitude = lat;
+    if (lng !== undefined && !isNaN(lng)) longitude = lng;
   }
 
   return {

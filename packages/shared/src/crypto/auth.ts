@@ -4,7 +4,7 @@
  */
 
 import { createHash } from 'crypto';
-import { signMessage } from './signing';
+import { signMessage, verifySignature } from './signing';
 
 /**
  * Compute SHA-256 hash and return base64 encoded string
@@ -104,7 +104,11 @@ export function parseAuthHeader(header: string): {
   let match;
 
   while ((match = regex.exec(pairsStr)) !== null) {
-    pairs[match[1]] = match[2];
+    const key = match[1];
+    const value = match[2];
+    if (key !== undefined && value !== undefined) {
+      pairs[key] = value;
+    }
   }
 
   // Validate required fields
@@ -125,10 +129,73 @@ export function parseAuthHeader(header: string): {
   }
 
   return {
-    subscriberId,
-    keyId,
+    subscriberId: subscriberId ?? '',
+    keyId: keyId ?? '',
     algorithm,
     signature: pairs.signature,
     created: pairs.created,
+  };
+}
+
+/**
+ * Verified authorization header result
+ */
+export interface VerifiedAuth {
+  /** Subscriber ID from the header */
+  subscriberId: string;
+  /** Key ID from the header */
+  keyId: string;
+  /** Whether the signature is valid */
+  valid: boolean;
+}
+
+/**
+ * Verify ONDC Authorization header
+ *
+ * @param header - Authorization header value
+ * @param body - Raw request body (JSON string)
+ * @param publicKey - Base64 encoded Ed25519 public key of the subscriber
+ * @returns Verification result with subscriber info and validity
+ *
+ * @example
+ * ```ts
+ * const result = await verifyAuthHeader(
+ *   'Signature keyId="ondc.example.com|key-1|ed25519",signature="...",created="2025-..."',
+ *   JSON.stringify(requestBody),
+ *   publicKey
+ * );
+ * if (result.valid) {
+ *   console.log('Request from:', result.subscriberId);
+ * }
+ * ```
+ */
+export async function verifyAuthHeader(
+  header: string,
+  body: string,
+  publicKey: string
+): Promise<VerifiedAuth> {
+  // Parse the header
+  const parsed = parseAuthHeader(header);
+  if (!parsed) {
+    return {
+      subscriberId: '',
+      keyId: '',
+      valid: false,
+    };
+  }
+
+  // Hash the request body using SHA-256
+  const hashBase64 = sha256Base64(body);
+
+  // Create signing string: body hash + created timestamp
+  const signingString = `${hashBase64}.${parsed.created}`;
+
+  // Verify the signature
+  const isValid = verifySignature(signingString, parsed.signature, publicKey);
+
+  return {
+    subscriberId: parsed.subscriberId,
+    keyId: parsed.keyId,
+    valid: isValid,
   };
 }

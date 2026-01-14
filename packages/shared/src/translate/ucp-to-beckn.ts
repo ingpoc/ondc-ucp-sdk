@@ -30,7 +30,7 @@ export function ucpToBecknIntent(query: UCPSearchQuery): BecknIntent {
   if (query.query || query.category) {
     intent.item = {
       descriptor: {
-        name: query.query ?? undefined,
+        name: query.query ?? '',
       },
     };
   }
@@ -73,11 +73,11 @@ export function ucpToBecknIntent(query: UCPSearchQuery): BecknIntent {
     };
 
     // Add radius if provided (as 5km circle)
-    if (location.radius !== undefined && gps) {
+    if (location.radius !== undefined && gps && intent.fulfillment?.start?.location) {
       // Beckn uses circle with radius in specified units
       // Converting radius to meters (Beckn standard)
       const radiusMeters = location.radius * 1000;
-      intent.fulfillment.start.location!.circle = {
+      intent.fulfillment.start.location.circle = {
         gps,
         radius: {
           value: String(radiusMeters),

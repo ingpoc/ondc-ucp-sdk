@@ -13,6 +13,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -37,6 +41,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -105,7 +113,7 @@ describe('Beckn to UCP Translator', () => {
       expect(result.items).toHaveLength(1);
       expect(result.totalCount).toBe(1);
 
-      const item = result.items[0];
+      const item = result.items[0]!;
       expect(item.id).toBe('item-1');
       expect(item.name).toBe('Smartphone');
       expect(item.description).toBe('A great smartphone');
@@ -128,6 +136,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -161,7 +173,7 @@ describe('Beckn to UCP Translator', () => {
 
       expect(result.items).toHaveLength(1);
 
-      const item = result.items[0];
+      const item = result.items[0]!;
       expect(item.name).toBe('Basic Item');
       expect(item.description).toBeUndefined();
       expect(item.images).toEqual([]);
@@ -179,6 +191,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -212,8 +228,8 @@ describe('Beckn to UCP Translator', () => {
 
       expect(result.items).toHaveLength(3);
       expect(result.totalCount).toBe(3);
-      expect(result.items[0].provider.id).toBe('provider-1');
-      expect(result.items[2].provider.id).toBe('provider-2');
+      expect(result.items[0]!.provider.id).toBe('provider-1');
+      expect(result.items[2]!.provider.id).toBe('provider-2');
     });
 
     it('should translate GPS coordinates correctly', () => {
@@ -221,6 +237,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -254,7 +274,7 @@ describe('Beckn to UCP Translator', () => {
 
       const result = becknToUcpCatalog(response);
 
-      const provider = result.items[0].provider;
+      const provider = result.items[0]!.provider;
       expect(provider.location?.latitude).toBe(28.6139);
       expect(provider.location?.longitude).toBe(77.209);
       expect(provider.location?.city).toBe('Delhi');
@@ -268,6 +288,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -297,7 +321,7 @@ describe('Beckn to UCP Translator', () => {
 
       const result = becknToUcpCatalog(response);
 
-      expect(result.items[0].description).toBe('This is a long description');
+      expect(result.items[0]!.description).toBe('This is a long description');
     });
 
     it('should handle item without price', () => {
@@ -305,6 +329,10 @@ describe('Beckn to UCP Translator', () => {
         context: {
           domain: 'ondc',
           action: 'on_search',
+          country: 'IND',
+          city: 'std:011',
+          bap_id: 'bap.example.com',
+          bap_uri: 'https://bap.example.com',
           transaction_id: 'tx123',
           message_id: 'msg123',
           timestamp: '2025-01-14T10:00:00.000Z',
@@ -330,7 +358,7 @@ describe('Beckn to UCP Translator', () => {
 
       const result = becknToUcpCatalog(response);
 
-      expect(result.items[0].price).toEqual({ currency: 'INR', value: '0' });
+      expect(result.items[0]!.price).toEqual({ currency: 'INR', value: '0' });
     });
   });
 });

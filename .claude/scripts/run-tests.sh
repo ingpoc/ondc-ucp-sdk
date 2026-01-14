@@ -12,7 +12,7 @@
 #   0 = All tests passed
 #   1 = Tests failed
 
-set -e
+set -eo pipefail
 
 COVERAGE=false
 WATCH=false

@@ -12,5 +12,5 @@ export {
 } from './keys';
 
 export { signMessage, verifySignature } from './signing';
-export { buildAuthHeader, parseAuthHeader } from './auth';
-export type { AuthHeaderRequest } from './auth';
+export { buildAuthHeader, parseAuthHeader, verifyAuthHeader } from './auth';
+export type { AuthHeaderRequest, VerifiedAuth } from './auth';
