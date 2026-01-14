@@ -1,391 +1,541 @@
 {
+  "$schema": "feature-list-schema.json",
+  "version": "1.0.0",
   "project": "ondc-agent-gateway",
-  "version": "0.1.0",
-  "tiers": {
-    "mvp": "Minimum viable: MCP search tool working",
-    "core": "Full checkout flow + seller SDK",
-    "full": "Production ready with all features"
-  },
+  "description": "MCP-first gateway bridging AI agents with ONDC network",
+  "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+  "created": "2025-01-14",
+  "updated": "2025-01-14",
   "features": [
     {
       "id": "INIT-001",
-      "description": "Set up monorepo with pnpm workspaces",
+      "description": "Set up pnpm workspace configuration",
       "priority": 1,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
-      "acceptance": [
-        "pnpm workspace configured",
-        "3 packages: gateway, seller-sdk, shared",
-        "TypeScript configured",
-        "Vitest configured"
-      ],
-      "phase": "foundation"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "pnpm-workspace.yaml configured with packages/*",
+        "Root package.json with workspace scripts",
+        "3 packages defined: gateway, seller-sdk, shared"
+      ]
     },
     {
       "id": "INIT-002",
-      "description": "Create shared types package (Beckn, UCP, MCP)",
+      "description": "Create package.json for each workspace package",
       "priority": 2,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
-      "acceptance": [
-        "Beckn protocol types defined",
-        "UCP types defined",
-        "MCP tool types defined",
-        "Zod schemas for validation"
-      ],
-      "phase": "foundation"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["INIT-001"],
+      "acceptance_criteria": [
+        "gateway/package.json with workspace dependency on shared",
+        "seller-sdk/package.json with workspace dependency on shared",
+        "shared/package.json with libsodium and zod dependencies",
+        "All packages have build, typecheck, clean scripts"
+      ]
     },
     {
       "id": "INIT-003",
-      "description": "Implement Ed25519 crypto module",
+      "description": "Configure TypeScript for all packages",
       "priority": 3,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
-      "acceptance": [
-        "Key generation working",
-        "Sign/verify functions",
-        "Authorization header builder",
-        "Unit tests passing"
-      ],
-      "phase": "foundation"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["INIT-002"],
+      "acceptance_criteria": [
+        "Root tsconfig.json with ES2022 target and strict mode",
+        "Each package has tsconfig.json extending root config",
+        "tsup.config.ts in each package for bundling",
+        "pnpm typecheck passes for all packages"
+      ]
     },
     {
       "id": "INIT-004",
-      "description": "Set up config/validation with Zod",
+      "description": "Configure Vitest for testing",
       "priority": 4,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
-      "acceptance": [
-        "Config schema defined",
-        "Environment variable loading",
-        "Validation on startup"
-      ],
-      "phase": "foundation"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["INIT-003"],
+      "acceptance_criteria": [
+        "vitest.config.ts at root with workspace pattern",
+        "Test environment configured for node",
+        "Coverage provider configured (v8)",
+        "pnpm test command available"
+      ]
     },
     {
-      "id": "INIT-005",
-      "description": "Configure CI/CD pipeline",
+      "id": "TYPES-001",
+      "description": "Define Beckn protocol types",
       "priority": 5,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "GitHub Actions workflow",
-        "Build, lint, test on PR",
-        "Type checking"
-      ],
-      "phase": "foundation"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["INIT-004"],
+      "acceptance_criteria": [
+        "BecknMessage interface with context and message",
+        "BecknContext with domain, action, transaction_id",
+        "on_search, on_select, on_init, on_confirm types",
+        "Exported from packages/shared/src/types/beckn/"
+      ]
     },
     {
-      "id": "PROTO-001",
-      "description": "Implement Beckn to UCP translator (on_search)",
+      "id": "TYPES-002",
+      "description": "Define UCP protocol types",
       "priority": 6,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Beckn catalog to UCP items",
-        "Price/rating normalization",
-        "Seller info mapping"
-      ],
-      "phase": "protocol"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["TYPES-001"],
+      "acceptance_criteria": [
+        "UCPSearchQuery interface",
+        "UCPCatalog with items array",
+        "UCPSession with items and buyer info",
+        "UCPOrder with status and details",
+        "Exported from packages/shared/src/types/ucp/"
+      ]
     },
     {
-      "id": "PROTO-002",
-      "description": "Implement UCP to Beckn translator (search)",
+      "id": "TYPES-003",
+      "description": "Define MCP tool types",
       "priority": 7,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "UCP search query to Beckn intent",
-        "Filters mapping",
-        "Location handling"
-      ],
-      "phase": "protocol"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["TYPES-002"],
+      "acceptance_criteria": [
+        "MCPTool schema with input/output",
+        "ondc_search tool schema",
+        "ondc_checkout tool schema",
+        "Exported from packages/shared/src/types/mcp/"
+      ]
     },
     {
-      "id": "PROTO-003",
-      "description": "ONDC HTTP client with retry",
+      "id": "TYPES-004",
+      "description": "Create Zod schemas for validation",
       "priority": 8,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Axios client configured",
-        "Retry logic with backoff",
-        "Request signing integrated"
-      ],
-      "phase": "protocol"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["TYPES-003"],
+      "acceptance_criteria": [
+        "BecknMessageSchema Zod validator",
+        "UCPSearchQuerySchema Zod validator",
+        "MCPToolInputSchema Zod validator",
+        "Exported from packages/shared/src/validation/"
+      ]
     },
     {
-      "id": "PROTO-004",
-      "description": "Webhook receiver for callbacks",
+      "id": "CRYPTO-001",
+      "description": "Implement Ed25519 key generation",
       "priority": 9,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Express endpoint for /on_search",
-        "Signature verification",
-        "Transaction ID correlation"
-      ],
-      "phase": "protocol"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": [
+        "generateKeyPair() returns publicKey and privateKey",
+        "Keys are base64 encoded strings",
+        "Uses libsodium-wrappers crypto_sign_keypair()",
+        "Unit test: generates valid key pair"
+      ]
     },
     {
-      "id": "PROTO-005",
-      "description": "State store + async poller",
+      "id": "CRYPTO-002",
+      "description": "Implement Ed25519 sign and verify functions",
       "priority": 10,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "In-memory store working",
-        "Promise resolution on callback",
-        "Timeout handling"
-      ],
-      "phase": "protocol"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CRYPTO-001"],
+      "acceptance_criteria": [
+        "signMessage(message, privateKey) returns signature",
+        "verifySignature(message, signature, publicKey) returns boolean",
+        "Uses libsodium crypto_sign_detached() and crypto_sign_verify_detached()",
+        "Unit tests: sign + verify round trip works"
+      ]
     },
     {
-      "id": "MCP-001",
-      "description": "MCP server initialization",
+      "id": "CRYPTO-003",
+      "description": "Build ONDC Authorization header",
       "priority": 11,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "McpServer instance created",
-        "stdio transport working",
-        "Tool registration framework"
-      ],
-      "phase": "mcp"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CRYPTO-002"],
+      "acceptance_criteria": [
+        "buildAuthHeader(subscriberId, privateKey, request) returns header string",
+        "Format: Signature keyId=\"{subscriberId}|{keyId}|ed25519\",signature=\"{base64}\",created=\"{timestamp}\"",
+        "Includes request body hash in signature",
+        "Unit test: generates valid ONDC auth header"
+      ]
     },
     {
-      "id": "MCP-002",
-      "description": "ondc_search MCP tool",
+      "id": "CONFIG-001",
+      "description": "Set up Zod config schema",
       "priority": 12,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Tool registered with schema",
-        "Calls protocol layer",
-        "Returns ranked results"
-      ],
-      "phase": "mcp"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": [
+        "GatewayConfigSchema with required fields",
+        "Fields: gatewayUrl, registryUrl, subscriberId, privateKey, environment",
+        "Default values for optional fields",
+        "Exported from packages/shared/src/config/"
+      ]
     },
     {
-      "id": "MCP-003",
-      "description": "Preference engine",
+      "id": "CONFIG-002",
+      "description": "Implement environment variable loading",
       "priority": 13,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Scoring algorithm implemented",
-        "Weight normalization",
-        "Style matching bonus"
-      ],
-      "phase": "mcp"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CONFIG-001"],
+      "acceptance_criteria": [
+        "loadConfig() reads from process.env",
+        "Validates against GatewayConfigSchema",
+        "Throws clear error on validation failure",
+        "Unit test: loads valid config, rejects invalid config"
+      ]
     },
     {
-      "id": "MCP-004",
-      "description": "Mock ONDC gateway for testing",
+      "id": "CI-001",
+      "description": "Create GitHub Actions workflow file",
       "priority": 14,
       "status": "pending",
       "tier": "mvp",
-      "acceptance": [
-        "Mock server with /search endpoint",
-        "Async callback simulation",
-        "Test catalog data"
-      ],
-      "phase": "mcp"
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CONFIG-002"],
+      "acceptance_criteria": [
+        ".github/workflows/ci.yml created",
+        "Triggers on push to main and pull requests",
+        "Runs on ubuntu-latest",
+        "Node.js setup action"
+      ]
     },
     {
-      "id": "CHECKOUT-001",
-      "description": "Select/Init translators",
+      "id": "CI-002",
+      "description": "Add build step to CI workflow",
       "priority": 15,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "UCP checkout to Beckn select",
-        "Beckn on_select to UCP quote",
-        "Init flow translation"
-      ],
-      "phase": "checkout"
+      "tier": "mvp",
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CI-001"],
+      "acceptance_criteria": [
+        "Run pnpm build for all packages",
+        "Cache node_modules for faster builds",
+        "Fail workflow if build fails"
+      ]
     },
     {
-      "id": "CHECKOUT-002",
-      "description": "Checkout session management",
+      "id": "CI-003",
+      "description": "Add lint and typecheck to CI workflow",
       "priority": 16,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "Session creation/retrieval",
-        "State transitions",
-        "Expiry handling"
-      ],
-      "phase": "checkout"
+      "tier": "mvp",
+      "phase": "foundation",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 1: Foundation",
+      "dependencies": ["CI-002"],
+      "acceptance_criteria": [
+        "Run pnpm typecheck for all packages",
+        "Run eslint if configured",
+        "Fail workflow if any check fails"
+      ]
     },
     {
-      "id": "CHECKOUT-003",
-      "description": "ondc_checkout MCP tool",
+      "id": "TRANSLATE-001",
+      "description": "Implement Beckn to UCP catalog translator",
       "priority": 17,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "Create action working",
-        "Complete action working",
-        "Error handling"
-      ],
-      "phase": "checkout"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": [
+        "becknToUcpCatalog(on_search_response) returns UCPItem[]",
+        "Maps: id, name, price, rating, images",
+        "Handles provider/seller info mapping",
+        "Unit test: translates sample ONDC catalog"
+      ]
     },
     {
-      "id": "CHECKOUT-004",
-      "description": "UPI payment handling",
+      "id": "TRANSLATE-002",
+      "description": "Implement price and rating normalization",
       "priority": 18,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "UPI VPA validation",
-        "Payment confirmation flow",
-        "Error states"
-      ],
-      "phase": "checkout"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["TRANSLATE-001"],
+      "acceptance_criteria": [
+        "normalizePrice(value, currency) returns UCPPrice",
+        "normalizeRating(value, max) returns 0-5 scale rating",
+        "Handles missing/null values",
+        "Unit tests: edge cases covered"
+      ]
     },
     {
-      "id": "REST-001",
-      "description": "UCP REST API - discovery endpoint",
+      "id": "TRANSLATE-003",
+      "description": "Implement UCP to Beckn search translator",
       "priority": 19,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "/.well-known/ucp endpoint",
-        "Capabilities declaration",
-        "Version info"
-      ],
-      "phase": "rest"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["TRANSLATE-002"],
+      "acceptance_criteria": [
+        "ucpToBecknIntent(search_query) returns Beckn intent",
+        "Maps category, location, filters",
+        "Handles location lat/long",
+        "Unit test: translates UCP search to Beckn intent"
+      ]
     },
     {
-      "id": "REST-002",
-      "description": "UCP REST API - shopping endpoints",
+      "id": "HTTP-001",
+      "description": "Implement ONDC HTTP client with axios",
       "priority": 20,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "/shopping/search working",
-        "/shopping/checkout working",
-        "/shopping/order working"
-      ],
-      "phase": "rest"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["CONFIG-002"],
+      "acceptance_criteria": [
+        "ONDCClient class with baseURL and auth",
+        "post(path, body) method with signing",
+        "Injects Authorization header from crypto module",
+        "Unit test: makes signed HTTP request"
+      ]
     },
     {
-      "id": "SELLER-001",
-      "description": "Seller SDK - Beckn endpoint receivers",
+      "id": "HTTP-002",
+      "description": "Add retry logic with exponential backoff",
       "priority": 21,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "/search handler",
-        "/select, /init, /confirm handlers",
-        "Beckn to UCP translation"
-      ],
-      "phase": "seller"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["HTTP-001"],
+      "acceptance_criteria": [
+        "Retry on 5xx errors with 100ms * 2^attempt backoff",
+        "Max 3 retries",
+        "Jitter for retry thundering herd",
+        "Unit test: retry on 503, success on retry"
+      ]
     },
     {
-      "id": "SELLER-002",
-      "description": "Seller SDK - UCP endpoint exposers",
+      "id": "WEBHOOK-001",
+      "description": "Create Express webhook receiver",
       "priority": 22,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "/.well-known/ucp for sellers",
-        "/shopping/* endpoints",
-        "Direct UCP agent support"
-      ],
-      "phase": "seller"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["HTTP-002"],
+      "acceptance_criteria": [
+        "POST /on_search endpoint",
+        "POST /on_select endpoint",
+        "POST /on_confirm endpoint",
+        "Raw body parser for signature verification"
+      ]
     },
     {
-      "id": "SELLER-003",
-      "description": "Seller SDK - Handler interface",
+      "id": "WEBHOOK-002",
+      "description": "Implement webhook signature verification",
       "priority": 23,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "SellerUCPHandlers interface",
-        "onSearch, onCheckout handlers",
-        "Type-safe implementation"
-      ],
-      "phase": "seller"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["WEBHOOK-001", "CRYPTO-003"],
+      "acceptance_criteria": [
+        "Extract Authorization header from request",
+        "Verify signature using crypto module",
+        "Return 401 if signature invalid",
+        "Unit test: rejects invalid signature"
+      ]
     },
     {
-      "id": "SELLER-004",
-      "description": "ONDC registration flow",
+      "id": "WEBHOOK-003",
+      "description": "Implement transaction ID correlation",
       "priority": 24,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "Registry subscription",
-        "Key registration",
-        "Site verification"
-      ],
-      "phase": "seller"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["WEBHOOK-002"],
+      "acceptance_criteria": [
+        "Extract transaction_id from request context",
+        "Match with pending request state",
+        "Route callback to waiting promise",
+        "Unit test: callback resolves pending request"
+      ]
     },
     {
-      "id": "SELLER-005",
-      "description": "Catalog sync",
+      "id": "STATE-001",
+      "description": "Implement in-memory state store",
       "priority": 25,
       "status": "pending",
-      "tier": "core",
-      "acceptance": [
-        "Product CRUD",
-        "Inventory updates",
-        "Price updates"
-      ],
-      "phase": "seller"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["WEBHOOK-003"],
+      "acceptance_criteria": [
+        "StateStore class with Map backing",
+        "set(transactionId, state) stores state",
+        "get(transactionId) retrieves state",
+        "delete(transactionId) removes state"
+      ]
     },
     {
-      "id": "POLISH-001",
-      "description": "Redis state store option",
+      "id": "STATE-002",
+      "description": "Implement async poller with timeout",
       "priority": 26,
       "status": "pending",
-      "tier": "full",
-      "acceptance": [
-        "Redis adapter",
-        "Configurable backend",
-        "Connection pooling"
-      ],
-      "phase": "polish"
+      "tier": "mvp",
+      "phase": "protocol",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
+      "dependencies": ["STATE-001"],
+      "acceptance_criteria": [
+        "waitForCallback(transactionId, timeout) returns Promise",
+        "Polls state store every 100ms",
+        "Rejects after timeout (default 5s search, 30s checkout)",
+        "Unit test: resolves on callback, times out without"
+      ]
     },
     {
-      "id": "POLISH-002",
-      "description": "Advanced preference engine",
+      "id": "MCP-001",
+      "description": "Initialize MCP server with SDK",
       "priority": 27,
       "status": "pending",
-      "tier": "full",
-      "acceptance": [
-        "ML-based scoring",
-        "Historical preference learning",
-        "A/B testing support"
-      ],
-      "phase": "polish"
+      "tier": "mvp",
+      "phase": "mcp",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
+      "dependencies": ["STATE-002"],
+      "acceptance_criteria": [
+        "McpServer instance created with stdio transport",
+        "Server starts without errors",
+        "Graceful shutdown on SIGINT",
+        "Unit test: server lifecycle"
+      ]
     },
     {
-      "id": "POLISH-003",
-      "description": "Documentation + examples",
+      "id": "MCP-002",
+      "description": "Implement ondc_search MCP tool",
       "priority": 28,
       "status": "pending",
-      "tier": "full",
-      "acceptance": [
-        "API documentation",
-        "Claude agent example",
-        "Seller integration example"
-      ],
-      "phase": "polish"
+      "tier": "mvp",
+      "phase": "mcp",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
+      "dependencies": ["MCP-001", "TRANSLATE-003"],
+      "acceptance_criteria": [
+        "Tool registered with input schema",
+        "Calls Beckn client with translated intent",
+        "Waits for on_search callback via state store",
+        "Returns UCP-formatted results"
+      ]
     },
     {
-      "id": "POLISH-004",
-      "description": "npm publish + Docker image",
+      "id": "PREF-001",
+      "description": "Implement preference scoring algorithm",
       "priority": 29,
       "status": "pending",
-      "tier": "full",
-      "acceptance": [
-        "Published to npm",
-        "Docker image built",
-        "docker-compose ready"
-      ],
-      "phase": "polish"
+      "tier": "mvp",
+      "phase": "mcp",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
+      "dependencies": ["MCP-002"],
+      "acceptance_criteria": [
+        "scoreItem(item, preferences) returns 0-1 score",
+        "Formula: price_weight + distance_weight + rating_weight + delivery_weight",
+        "Normalized inputs for fair comparison",
+        "Unit test: scores sample items"
+      ]
+    },
+    {
+      "id": "PREF-002",
+      "description": "Implement weight normalization",
+      "priority": 30,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "mcp",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
+      "dependencies": ["PREF-001"],
+      "acceptance_criteria": [
+        "normalizeWeights(user_weights) sums to 1.0",
+        "Handles partial weights (fills rest evenly)",
+        "Default weights: price=0.3, distance=0.2, rating=0.25, delivery=0.15",
+        "Unit test: normalizes various inputs"
+      ]
+    },
+    {
+      "id": "MOCK-001",
+      "description": "Create mock ONDC gateway server",
+      "priority": 31,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "mcp",
+      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
+      "dependencies": ["PREF-002"],
+      "acceptance_criteria": [
+        "Express server on random port",
+        "POST /search endpoint returns async callback simulation",
+        "Returns sample catalog data after delay",
+        "Used for integration testing"
+      ]
     }
-  ]
+  ],
+  "phases": {
+    "foundation": "INIT-001--CI-003",
+    "protocol": "TRANSLATE-001--STATE-002",
+    "mcp": "MCP-001--MOCK-001"
+  }
 }
