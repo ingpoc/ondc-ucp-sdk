@@ -9,7 +9,7 @@ import { MockGateway, type MockGatewayConfig } from '@ondc-agent/gateway';
 
 // Import StateStore and session types for cart management
 import { StateStore } from '@ondc-agent/gateway';
-import type { UCPSession, UCPSessionItem, UCPSessionStatus } from '@ondc-agent/shared';
+import type { UCPSession, UCPSessionItem, UCPSessionStatus, UCPQuote } from '@ondc-agent/shared';
 
 // Temporarily disabled agent service due to libsodium dependency issue
 // import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
@@ -462,6 +462,39 @@ app.delete('/api/cart/:itemId', (req: Request, res: Response) => {
 });
 
 /**
+ * PUT /api/cart/buyer - Update buyer information
+ */
+app.put('/api/cart/buyer', (req: Request, res: Response) => {
+  try {
+    const { sessionId, name, email, phone, billingAddress, taxId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ error: 'Missing required field: sessionId' });
+      return;
+    }
+
+    const session = getOrCreateSession(sessionId);
+
+    // Update buyer information
+    if (name !== undefined) session.buyer.name = name;
+    if (email !== undefined) session.buyer.contact.email = email;
+    if (phone !== undefined) session.buyer.contact.phone = phone;
+    if (billingAddress !== undefined) session.buyer.billingAddress = billingAddress;
+    if (taxId !== undefined) session.buyer.taxId = taxId;
+
+    updateSession(session);
+
+    res.json({
+      success: true,
+      session,
+    });
+  } catch (error) {
+    console.error('Update buyer info error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
  * PUT /api/cart/:itemId - Update item quantity
  */
 app.put('/api/cart/:itemId', (req: Request, res: Response) => {
@@ -508,6 +541,188 @@ app.put('/api/cart/:itemId', (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Update cart item error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+// ============================================================================
+// SDK-BUYER-CART-003: Checkout API endpoint
+// ============================================================================
+
+/**
+ * Helper: Get item name (handles both UCPItem and BecknItem)
+ */
+function getItemName(item: any): string {
+  // BecknItem uses descriptor.name
+  if (item.descriptor?.name) {
+    return item.descriptor.name;
+  }
+  // UCPItem uses name
+  if (item.name) {
+    return item.name;
+  }
+  return 'Item';
+}
+
+/**
+ * Helper: Calculate UCPQuote from cart items
+ */
+function calculateQuote(session: UCPSession): UCPQuote {
+  let subtotal = 0;
+
+  // Calculate subtotal from cart items
+  for (const sessionItem of session.items) {
+    const itemPrice = sessionItem.item.price?.value
+      ? parseFloat(sessionItem.item.price.value)
+      : sessionItem.item.price?.amount ?? 0;
+    subtotal += itemPrice * sessionItem.quantity;
+  }
+
+  // Calculate delivery cost (simplified - in real scenario, from provider)
+  const deliveryCost = subtotal >= 500 ? 0 : 50; // Free delivery for orders >= 500
+
+  // Calculate tax (18% GST)
+  const taxRate = 0.18;
+  const tax = subtotal * taxRate;
+
+  // Calculate total
+  const total = subtotal + deliveryCost + tax;
+
+  const quote: UCPQuote = {
+    subtotal: {
+      value: subtotal.toFixed(2),
+      currency: 'INR',
+    },
+    deliveryCost: {
+      value: deliveryCost.toFixed(2),
+      currency: 'INR',
+    },
+    tax: {
+      value: tax.toFixed(2),
+      currency: 'INR',
+    },
+    total: {
+      value: total.toFixed(2),
+      currency: 'INR',
+    },
+    breakup: [
+      ...session.items.map((sessionItem) => {
+        const itemPrice = sessionItem.item.price?.value
+          ? parseFloat(sessionItem.item.price.value)
+          : sessionItem.item.price?.amount ?? 0;
+        return {
+          title: getItemName(sessionItem.item),
+          type: 'item' as const,
+          price: {
+            value: (itemPrice * sessionItem.quantity).toFixed(2),
+            currency: 'INR',
+          },
+          itemId: sessionItem.item.id,
+          quantity: sessionItem.quantity,
+        };
+      }),
+      {
+        title: 'Delivery Charges',
+        type: 'delivery' as const,
+        price: {
+          value: deliveryCost.toFixed(2),
+          currency: 'INR',
+        },
+      },
+      {
+        title: 'GST (18%)',
+        type: 'tax' as const,
+        price: {
+          value: tax.toFixed(2),
+          currency: 'INR',
+        },
+      },
+    ],
+    ttl: 'PT10M', // 10 minute validity
+  };
+
+  return quote;
+}
+
+/**
+ * POST /api/checkout - Generate quote for cart checkout
+ */
+app.post('/api/checkout', (req: Request, res: Response) => {
+  try {
+    const { sessionId, deliveryAddress, preferences } = req.body;
+
+    // Validate sessionId
+    if (!sessionId) {
+      res.status(400).json({ error: 'Missing required field: sessionId' });
+      return;
+    }
+
+    // Get session from store
+    const existingSession = cartStore.get(sessionId);
+    if (!existingSession?.data) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+
+    const session = existingSession.data as UCPSession;
+
+    // Validate cart has items
+    if (session.items.length === 0) {
+      res.status(400).json({ error: 'Cart is empty' });
+      return;
+    }
+
+    // Validate buyer information (basic validation)
+    if (!session.buyer.name || !session.buyer.contact.email || !session.buyer.contact.phone) {
+      res.status(400).json({
+        error: 'Missing buyer information. Please provide name, email, and phone.',
+      });
+      return;
+    }
+
+    // Generate UCPQuote with pricing breakdown
+    const quote = calculateQuote(session);
+
+    // Update session with quote and delivery address
+    session.quote = quote;
+    if (deliveryAddress) {
+      session.deliveryAddress = deliveryAddress;
+    }
+    session.status = 'quote_received';
+
+    updateSession(session);
+
+    // TODO: Integrate SellerClient.init() when libsodium issue is resolved
+    // Currently disabled due to libsodium-wrappers ESM binding issues
+    // See packages/website/api-server/src/index.ts:150-163
+    //
+    // Future implementation:
+    // const sellerClient = new SellerClient({
+    //   baseUrl: mockGateway.getBaseUrl(),
+    //   subscriberId: 'poc-website',
+    //   privateKey: process.env.ONDC_PRIVATE_KEY,
+    // });
+    //
+    // const initResult = await sellerClient.init({
+    //   providerId: session.items[0].item._provider || 'provider-1',
+    //   items: session.items.map(item => ({
+    //     id: item.item.id,
+    //     quantity: item.quantity,
+    //   })),
+    //   billing: {
+    //     name: session.buyer.name,
+    //     phone: session.buyer.contact.phone,
+    //     email: session.buyer.contact.email,
+    //   },
+    // });
+
+    res.json({
+      success: true,
+      session,
+      quote,
+    });
+  } catch (error) {
+    console.error('Checkout error:', error);
     res.status(500).json({ error: String(error) });
   }
 });
