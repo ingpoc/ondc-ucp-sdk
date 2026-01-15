@@ -25,3 +25,10 @@ Completed final 2 MVP features: PREF-002 (weight normalization with tests) and M
 
 Next: Project is complete - ready for integration testing or deployment.
 
+=== Session Summary: 2025-01-15 ===
+Creating POC webapps (buyer + seller) with phased approach: Phase 1 (Direct SDK) to identify core gaps, then Phase 2 (Agent layer) to determine SDK vs Skill boundaries. Created 14 atomic features (WEBSITE-001--AGENT-005). Ready to start WEBSITE-001: Create website/api-server package. Next: Create api-server with Express + direct SDK imports.
+
+Progress: 29/43 features complete
+Current: WEBSITE-001
+Next: WEBSITE-002
+

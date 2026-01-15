@@ -5,7 +5,7 @@
   "description": "MCP-first gateway bridging AI agents with ONDC network",
   "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
   "created": "2025-01-14",
-  "updated": "2025-01-14",
+  "updated": "2025-01-15",
   "features": [
     {
       "id": "INIT-001",
@@ -15,13 +15,8 @@
       "tier": "mvp",
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
       "dependencies": [],
-      "acceptance_criteria": [
-        "pnpm-workspace.yaml configured with packages/*",
-        "Root package.json with workspace scripts",
-        "3 packages defined: gateway, seller-sdk, shared"
-      ]
+      "acceptance_criteria": ["pnpm-workspace.yaml configured", "3 packages defined"]
     },
     {
       "id": "INIT-002",
@@ -30,17 +25,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "INIT-001"
-      ],
-      "acceptance_criteria": [
-        "gateway/package.json with workspace dependency on shared",
-        "seller-sdk/package.json with workspace dependency on shared",
-        "shared/package.json with libsodium and zod dependencies",
-        "All packages have build, typecheck, clean scripts"
-      ]
+      "dependencies": ["INIT-001"],
+      "acceptance_criteria": ["All packages have build scripts"]
     },
     {
       "id": "INIT-003",
@@ -49,17 +35,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "INIT-002"
-      ],
-      "acceptance_criteria": [
-        "Root tsconfig.json with ES2022 target and strict mode",
-        "Each package has tsconfig.json extending root config",
-        "tsup.config.ts in each package for bundling",
-        "pnpm typecheck passes for all packages"
-      ]
+      "dependencies": ["INIT-002"],
+      "acceptance_criteria": ["tsup.config.ts in each package"]
     },
     {
       "id": "INIT-004",
@@ -68,17 +45,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "INIT-003"
-      ],
-      "acceptance_criteria": [
-        "vitest.config.ts at root with workspace pattern",
-        "Test environment configured for node",
-        "Coverage provider configured (v8)",
-        "pnpm test command available"
-      ]
+      "dependencies": ["INIT-003"],
+      "acceptance_criteria": ["vitest.config.ts at root"]
     },
     {
       "id": "TYPES-001",
@@ -87,17 +55,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "INIT-004"
-      ],
-      "acceptance_criteria": [
-        "BecknMessage interface with context and message",
-        "BecknContext with domain, action, transaction_id",
-        "on_search, on_select, on_init, on_confirm types",
-        "Exported from packages/shared/src/types/beckn/"
-      ]
+      "dependencies": ["INIT-004"],
+      "acceptance_criteria": ["BecknMessage interface defined"]
     },
     {
       "id": "TYPES-002",
@@ -106,18 +65,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "TYPES-001"
-      ],
-      "acceptance_criteria": [
-        "UCPSearchQuery interface",
-        "UCPCatalog with items array",
-        "UCPSession with items and buyer info",
-        "UCPOrder with status and details",
-        "Exported from packages/shared/src/types/ucp/"
-      ]
+      "dependencies": ["TYPES-001"],
+      "acceptance_criteria": ["UCPSearchQuery, UCPCatalog defined"]
     },
     {
       "id": "TYPES-003",
@@ -126,17 +75,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "TYPES-002"
-      ],
-      "acceptance_criteria": [
-        "MCPTool schema with input/output",
-        "ondc_search tool schema",
-        "ondc_checkout tool schema",
-        "Exported from packages/shared/src/types/mcp/"
-      ]
+      "dependencies": ["TYPES-002"],
+      "acceptance_criteria": ["MCPTool schema defined"]
     },
     {
       "id": "TYPES-004",
@@ -145,17 +85,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "TYPES-003"
-      ],
-      "acceptance_criteria": [
-        "BecknMessageSchema Zod validator",
-        "UCPSearchQuerySchema Zod validator",
-        "MCPToolInputSchema Zod validator",
-        "Exported from packages/shared/src/validation/"
-      ]
+      "dependencies": ["TYPES-003"],
+      "acceptance_criteria": ["BecknMessageSchema, UCPSearchQuerySchema"]
     },
     {
       "id": "CRYPTO-001",
@@ -164,36 +95,18 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "generateKeyPair() returns publicKey and privateKey",
-        "Keys are base64 encoded strings",
-        "Uses libsodium-wrappers crypto_sign_keypair()",
-        "Unit test: generates valid key pair"
-      ]
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": ["generateKeyPair() function"]
     },
     {
       "id": "CRYPTO-002",
-      "description": "Implement Ed25519 sign and verify functions",
+      "description": "Implement Ed25519 sign and verify",
       "priority": 10,
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CRYPTO-001"
-      ],
-      "acceptance_criteria": [
-        "signMessage(message, privateKey) returns signature",
-        "verifySignature(message, signature, publicKey) returns boolean",
-        "Uses libsodium crypto_sign_detached() and crypto_sign_verify_detached()",
-        "Unit tests: sign + verify round trip works"
-      ]
+      "dependencies": ["CRYPTO-001"],
+      "acceptance_criteria": ["signMessage(), verifySignature()"]
     },
     {
       "id": "CRYPTO-003",
@@ -202,17 +115,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CRYPTO-002"
-      ],
-      "acceptance_criteria": [
-        "buildAuthHeader(subscriberId, privateKey, request) returns header string",
-        "Format: Signature keyId=\"{subscriberId}|{keyId}|ed25519\",signature=\"{base64}\",created=\"{timestamp}\"",
-        "Includes request body hash in signature",
-        "Unit test: generates valid ONDC auth header"
-      ]
+      "dependencies": ["CRYPTO-002"],
+      "acceptance_criteria": ["buildAuthHeader() function"]
     },
     {
       "id": "CONFIG-001",
@@ -221,17 +125,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "GatewayConfigSchema with required fields",
-        "Fields: gatewayUrl, registryUrl, subscriberId, privateKey, environment",
-        "Default values for optional fields",
-        "Exported from packages/shared/src/config/"
-      ]
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": ["GatewayConfigSchema"]
     },
     {
       "id": "CONFIG-002",
@@ -240,72 +135,18 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CONFIG-001"
-      ],
-      "acceptance_criteria": [
-        "loadConfig() reads from process.env",
-        "Validates against GatewayConfigSchema",
-        "Throws clear error on validation failure",
-        "Unit test: loads valid config, rejects invalid config"
-      ]
+      "dependencies": ["CONFIG-001"],
+      "acceptance_criteria": ["loadConfig() function"]
     },
     {
       "id": "CI-001",
-      "description": "Create GitHub Actions workflow file",
+      "description": "Create GitHub Actions workflow",
       "priority": 14,
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CONFIG-002"
-      ],
-      "acceptance_criteria": [
-        ".github/workflows/ci.yml created",
-        "Triggers on push to main and pull requests",
-        "Runs on ubuntu-latest",
-        "Node.js setup action"
-      ]
-    },
-    {
-      "id": "CI-002",
-      "description": "Add build step to CI workflow",
-      "priority": 15,
-      "status": "implemented",
-      "tier": "mvp",
-      "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CI-001"
-      ],
-      "acceptance_criteria": [
-        "Run pnpm build for all packages",
-        "Cache node_modules for faster builds",
-        "Fail workflow if build fails"
-      ]
-    },
-    {
-      "id": "CI-003",
-      "description": "Add lint and typecheck to CI workflow",
-      "priority": 16,
-      "status": "implemented",
-      "tier": "mvp",
-      "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 1: Foundation",
-      "dependencies": [
-        "CI-002"
-      ],
-      "acceptance_criteria": [
-        "Run pnpm typecheck for all packages",
-        "Run eslint if configured",
-        "Fail workflow if any check fails"
-      ]
+      "dependencies": ["CONFIG-002"],
+      "acceptance_criteria": [".github/workflows/ci.yml"]
     },
     {
       "id": "TRANSLATE-001",
@@ -314,17 +155,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "becknToUcpCatalog(on_search_response) returns UCPItem[]",
-        "Maps: id, name, price, rating, images",
-        "Handles provider/seller info mapping",
-        "Unit test: translates sample ONDC catalog"
-      ]
+      "dependencies": ["TYPES-004"],
+      "acceptance_criteria": ["becknToUcpCatalog() function"]
     },
     {
       "id": "TRANSLATE-002",
@@ -333,17 +165,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "TRANSLATE-001"
-      ],
-      "acceptance_criteria": [
-        "normalizePrice(value, currency) returns UCPPrice",
-        "normalizeRating(value, max) returns 0-5 scale rating",
-        "Handles missing/null values",
-        "Unit tests: edge cases covered"
-      ]
+      "dependencies": ["TRANSLATE-001"],
+      "acceptance_criteria": ["normalizePrice(), normalizeRating()"]
     },
     {
       "id": "TRANSLATE-003",
@@ -352,36 +175,18 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "TRANSLATE-002"
-      ],
-      "acceptance_criteria": [
-        "ucpToBecknIntent(search_query) returns Beckn intent",
-        "Maps category, location, filters",
-        "Handles location lat/long",
-        "Unit test: translates UCP search to Beckn intent"
-      ]
+      "dependencies": ["TRANSLATE-002"],
+      "acceptance_criteria": ["ucpToBecknIntent() function"]
     },
     {
       "id": "HTTP-001",
-      "description": "Implement ONDC HTTP client with axios",
+      "description": "Implement ONDC HTTP client",
       "priority": 20,
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "CONFIG-002"
-      ],
-      "acceptance_criteria": [
-        "ONDCClient class with baseURL and auth",
-        "post(path, body) method with signing",
-        "Injects Authorization header from crypto module",
-        "Unit test: makes signed HTTP request"
-      ]
+      "dependencies": ["CONFIG-002"],
+      "acceptance_criteria": ["ONDCClient class with post()"]
     },
     {
       "id": "HTTP-002",
@@ -390,17 +195,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "HTTP-001"
-      ],
-      "acceptance_criteria": [
-        "Retry on 5xx errors with 100ms * 2^attempt backoff",
-        "Max 3 retries",
-        "Jitter for retry thundering herd",
-        "Unit test: retry on 503, success on retry"
-      ]
+      "dependencies": ["HTTP-001"],
+      "acceptance_criteria": ["Retry on 5xx, max 3 retries"]
     },
     {
       "id": "WEBHOOK-001",
@@ -409,17 +205,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "HTTP-002"
-      ],
-      "acceptance_criteria": [
-        "POST /on_search endpoint",
-        "POST /on_select endpoint",
-        "POST /on_confirm endpoint",
-        "Raw body parser for signature verification"
-      ]
+      "dependencies": ["HTTP-002"],
+      "acceptance_criteria": ["POST /on_search, /on_select endpoints"]
     },
     {
       "id": "WEBHOOK-002",
@@ -428,18 +215,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "WEBHOOK-001",
-        "CRYPTO-003"
-      ],
-      "acceptance_criteria": [
-        "Extract Authorization header from request",
-        "Verify signature using crypto module",
-        "Return 401 if signature invalid",
-        "Unit test: rejects invalid signature"
-      ]
+      "dependencies": ["WEBHOOK-001", "CRYPTO-003"],
+      "acceptance_criteria": ["Verify Authorization header"]
     },
     {
       "id": "WEBHOOK-003",
@@ -448,17 +225,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "WEBHOOK-002"
-      ],
-      "acceptance_criteria": [
-        "Extract transaction_id from request context",
-        "Match with pending request state",
-        "Route callback to waiting promise",
-        "Unit test: callback resolves pending request"
-      ]
+      "dependencies": ["WEBHOOK-002"],
+      "acceptance_criteria": ["Extract and match transaction_id"]
     },
     {
       "id": "STATE-001",
@@ -467,17 +235,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "WEBHOOK-003"
-      ],
-      "acceptance_criteria": [
-        "StateStore class with Map backing",
-        "set(transactionId, state) stores state",
-        "get(transactionId) retrieves state",
-        "delete(transactionId) removes state"
-      ]
+      "dependencies": ["WEBHOOK-003"],
+      "acceptance_criteria": ["StateStore class with Map"]
     },
     {
       "id": "STATE-002",
@@ -486,17 +245,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 2: Protocol Layer",
-      "dependencies": [
-        "STATE-001"
-      ],
-      "acceptance_criteria": [
-        "waitForCallback(transactionId, timeout) returns Promise",
-        "Polls state store every 100ms",
-        "Rejects after timeout (default 5s search, 30s checkout)",
-        "Unit test: resolves on callback, times out without"
-      ]
+      "dependencies": ["STATE-001"],
+      "acceptance_criteria": ["waitForCallback() function"]
     },
     {
       "id": "MCP-001",
@@ -505,17 +255,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": [
-        "STATE-002"
-      ],
-      "acceptance_criteria": [
-        "McpServer instance created with stdio transport",
-        "Server starts without errors",
-        "Graceful shutdown on SIGINT",
-        "Unit test: server lifecycle"
-      ]
+      "dependencies": ["STATE-002"],
+      "acceptance_criteria": ["McpServer with stdio transport"]
     },
     {
       "id": "MCP-002",
@@ -524,18 +265,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": [
-        "MCP-001",
-        "TRANSLATE-003"
-      ],
-      "acceptance_criteria": [
-        "Tool registered with input schema",
-        "Calls Beckn client with translated intent",
-        "Waits for on_search callback via state store",
-        "Returns UCP-formatted results"
-      ]
+      "dependencies": ["MCP-001", "TRANSLATE-003"],
+      "acceptance_criteria": ["ondc_search tool registered"]
     },
     {
       "id": "PREF-001",
@@ -544,17 +275,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": [
-        "MCP-002"
-      ],
-      "acceptance_criteria": [
-        "scoreItem(item, preferences) returns 0-1 score",
-        "Formula: price_weight + distance_weight + rating_weight + delivery_weight",
-        "Normalized inputs for fair comparison",
-        "Unit test: scores sample items"
-      ]
+      "dependencies": ["MCP-002"],
+      "acceptance_criteria": ["scoreItem() function"]
     },
     {
       "id": "PREF-002",
@@ -563,17 +285,8 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": [
-        "PREF-001"
-      ],
-      "acceptance_criteria": [
-        "normalizeWeights(user_weights) sums to 1.0",
-        "Handles partial weights (fills rest evenly)",
-        "Default weights: price=0.3, distance=0.2, rating=0.25, delivery=0.15",
-        "Unit test: normalizes various inputs"
-      ]
+      "dependencies": ["PREF-001"],
+      "acceptance_criteria": ["normalizeWeights() function"]
     },
     {
       "id": "MOCK-001",
@@ -582,22 +295,261 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "plan_section": "## Implementation Phases > Phase 3: MCP Server",
-      "dependencies": [
-        "PREF-002"
-      ],
+      "dependencies": ["PREF-002"],
+      "acceptance_criteria": ["Express server with /search endpoint"]
+    },
+    {
+      "id": "WEBSITE-001",
+      "description": "Create website/api-server package structure",
+      "priority": 32,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["MOCK-001"],
       "acceptance_criteria": [
-        "Express server on random port",
-        "POST /search endpoint returns async callback simulation",
-        "Returns sample catalog data after delay",
-        "Used for integration testing"
+        "website/api-server/package.json created",
+        "Express server setup",
+        "CORS enabled",
+        "Direct SDK imports (no MCP)"
+      ]
+    },
+    {
+      "id": "WEBSITE-002",
+      "description": "Implement /api/search endpoint",
+      "priority": 33,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-001"],
+      "acceptance_criteria": [
+        "GET /api/search accepts query params",
+        "Calls becknToUcpCatalog() from SDK",
+        "Calls scoreAndSortItems() for ranking",
+        "Returns UCPCatalog JSON"
+      ]
+    },
+    {
+      "id": "WEBSITE-003",
+      "description": "Implement /api/catalog endpoints for CRUD",
+      "priority": 34,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-001"],
+      "acceptance_criteria": [
+        "GET /api/catalog returns MockGateway data",
+        "POST /api/catalog/products adds product",
+        "PUT /api/catalog/products/:id updates product",
+        "DELETE /api/catalog/products/:id removes product"
+      ]
+    },
+    {
+      "id": "WEBSITE-004",
+      "description": "Create website/shared package",
+      "priority": 35,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "website/shared/package.json created",
+        "Re-exports UCP types from @ondc-agent/shared",
+        "useApi hook for API calls",
+        "ProductCard component",
+        "PriceDisplay component",
+        "RatingStars component"
+      ]
+    },
+    {
+      "id": "WEBSITE-005",
+      "description": "Create website/buyer Vite React app",
+      "priority": 36,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-004"],
+      "acceptance_criteria": [
+        "Vite + React + TypeScript setup",
+        "React Router configured",
+        "SearchPage component",
+        "ResultsPage component",
+        "ProductDetailPage component"
+      ]
+    },
+    {
+      "id": "WEBSITE-006",
+      "description": "Build buyer search UI components",
+      "priority": 37,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-005"],
+      "acceptance_criteria": [
+        "SearchBar component",
+        "FilterSidebar component",
+        "SortDropdown component",
+        "ResultGrid component",
+        "Connects to /api/search endpoint"
+      ]
+    },
+    {
+      "id": "WEBSITE-007",
+      "description": "Create website/seller Vite React app",
+      "priority": 38,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-004"],
+      "acceptance_criteria": [
+        "Vite + React + TypeScript setup",
+        "React Router configured",
+        "DashboardPage component",
+        "CatalogPage component",
+        "ProductEditPage component"
+      ]
+    },
+    {
+      "id": "WEBSITE-008",
+      "description": "Build seller catalog UI components",
+      "priority": 39,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-007"],
+      "acceptance_criteria": [
+        "ProductForm component",
+        "InventoryTable component",
+        "SearchPreview component",
+        "Connects to /api/catalog endpoints"
+      ]
+    },
+    {
+      "id": "WEBSITE-009",
+      "description": "Test both webapps and document SDK gaps",
+      "priority": 40,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
+      "dependencies": ["WEBSITE-006", "WEBSITE-008"],
+      "acceptance_criteria": [
+        "Buyer can search and see results",
+        "Seller can add/edit products",
+        "Document missing SDK functions",
+        "Identify what belongs in SDK vs app layer"
+      ]
+    },
+    {
+      "id": "AGENT-001",
+      "description": "Create packages/buyer-skill",
+      "priority": 41,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
+      "dependencies": ["WEBSITE-009"],
+      "acceptance_criteria": [
+        "packages/buyer-skill/skill.md created",
+        "Defines buyer search workflow",
+        "Defines filter workflow",
+        "Defines comparison workflow",
+        "Deterministic response format"
+      ]
+    },
+    {
+      "id": "AGENT-002",
+      "description": "Create packages/seller-skill",
+      "priority": 42,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
+      "dependencies": ["WEBSITE-009"],
+      "acceptance_criteria": [
+        "packages/seller-skill/skill.md created",
+        "Defines add product workflow",
+        "Defines edit product workflow",
+        "Defines preview workflow",
+        "Deterministic response format"
+      ]
+    },
+    {
+      "id": "AGENT-003",
+      "description": "Integrate Claude Agent SDK into api-server",
+      "priority": 43,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
+      "dependencies": ["AGENT-001", "AGENT-002"],
+      "acceptance_criteria": [
+        "Add @anthropic-ai/claude-agent-sdk dependency",
+        "POST /api/agent/buyer endpoint",
+        "POST /api/agent/seller endpoint",
+        "Connects to ONDC MCP server via stdio",
+        "Streaming response support"
+      ]
+    },
+    {
+      "id": "AGENT-004",
+      "description": "Add Agent Chat UI to webapps",
+      "priority": 44,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
+      "dependencies": ["AGENT-003"],
+      "acceptance_criteria": [
+        "AgentChat component in shared",
+        "Streaming message handling",
+        "Tool call indicators",
+        "MessageBubble component"
+      ]
+    },
+    {
+      "id": "AGENT-005",
+      "description": "Compare Phase 1 vs Phase 2 and finalize boundaries",
+      "priority": 45,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
+      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
+      "dependencies": ["AGENT-004"],
+      "acceptance_criteria": [
+        "Document what's easier with agent",
+        "Document what's better direct SDK",
+        "Finalize SDK vs Skill boundaries",
+        "Create decision matrix"
       ]
     }
   ],
   "phases": {
-    "foundation": "INIT-001--CI-003",
+    "foundation": "INIT-001--CI-001",
     "protocol": "TRANSLATE-001--STATE-002",
-    "mcp": "MCP-001--MOCK-001"
+    "mcp": "MCP-001--MOCK-001",
+    "website-phase1": "WEBSITE-001--WEBSITE-009",
+    "website-phase2": "AGENT-001--AGENT-005"
   }
 }
