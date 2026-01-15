@@ -746,7 +746,7 @@
       "id": "WEEK1-004",
       "description": "Implement SellerClient confirm method with ONDC protocol",
       "priority": 47,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [

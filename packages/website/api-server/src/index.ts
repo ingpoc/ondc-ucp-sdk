@@ -4,6 +4,9 @@ import cors from 'cors';
 // Avoid importing from main @ondc-agent/shared to prevent libsodium dependency issues
 import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknItem, BecknCatalog } from '@ondc-agent/shared';
 
+// Import MockGateway for realistic ONDC simulation
+import { MockGateway, type MockGatewayConfig } from '@ondc-agent/gateway';
+
 // Temporarily disabled agent service due to libsodium dependency issue
 // import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
 
@@ -50,79 +53,54 @@ const PORT = process.env.PORT || 3001;
 // Store pending callbacks for async ONDC responses
 const pendingCallbacks = new Map<string, (data: BecknOnSearchResponse) => void>();
 
-// In-memory product catalog for CRUD operations (POC only)
-const mockCatalog: BecknCatalog = {
-  'bpp/descriptor': {
-    name: 'POC Seller Catalog',
-    short_desc: 'Mock catalog for POC testing',
-  },
-  'bpp/providers': [
-    {
-      id: 'provider-1',
-      descriptor: {
-        name: 'Test Provider',
-        short_desc: 'Provider for POC',
-      },
-      locations: [
-        {
-          id: 'loc-1',
-          gps: '12.97,77.59',
-          address: {
-            locality: 'HSR Layout',
-            city: 'Bengaluru',
-            area_code: '560102',
-            state: 'Karnataka',
-          },
-        },
-      ],
-      items: [
-        {
-          id: 'prod-001',
-          descriptor: {
-            name: 'Fresh Organic Mango',
-            short_desc: 'Sweet and juicy organic mangoes from local farms',
-          },
-          price: {
-            currency: 'INR',
-            value: '150',
-          },
-          category_id: 'cat-1',
-          fulfillment_id: 'ful-1',
-        },
-        {
-          id: 'prod-002',
-          descriptor: {
-            name: 'Organic Apple',
-            short_desc: 'Crisp and sweet organic apples',
-          },
-          price: {
-            currency: 'INR',
-            value: '120',
-          },
-          category_id: 'cat-1',
-          fulfillment_id: 'ful-1',
-        },
-        {
-          id: 'prod-003',
-          descriptor: {
-            name: 'Test Banana',
-            short_desc: 'Yellow ripe bananas for testing',
-          },
-          price: {
-            currency: 'INR',
-            value: '50',
-          },
-          category_id: 'cat-1',
-          fulfillment_id: 'ful-1',
-        },
-      ],
-    },
-  ],
+// Create MockGateway instance with realistic behavior
+// Configure: 0-2000ms delay, 10-50 items for realistic testing
+const mockGatewayConfig: MockGatewayConfig = {
+  callbackDelay: Math.floor(Math.random() * 2000), // 0-2000ms delay
+  autoCallback: true,
 };
 
-// Get the first provider's items array
+const mockGateway = new MockGateway(mockGatewayConfig);
+
+// Start MockGateway when api-server starts
+let mockGatewayPort: number | null = null;
+
+// Get catalog from MockGateway (updated dynamically)
+const getMockCatalog = (): BecknCatalog => {
+  // The MockGateway has an internal catalog that's accessible via its config
+  // For now, we'll return a default catalog that can be updated
+  return mockGateway.getApp().get('catalog') || mockGateway['config']?.catalog || {
+    'bpp/descriptor': {
+      name: 'Mock ONDC Gateway',
+      short_desc: 'Mock gateway for realistic testing',
+    },
+    'bpp/providers': [],
+  };
+};
+
+// Get the first provider's items array from MockGateway catalog
 const getItems = (): BecknItem[] => {
-  const provider = mockCatalog['bpp/providers']?.[0];
+  const catalog = getMockCatalog();
+  const provider = catalog['bpp/providers']?.[0];
+
+  // If no providers exist, create a default one for CRUD operations
+  if (!provider) {
+    const defaultProvider = {
+      id: 'provider-1',
+      descriptor: {
+        name: 'Default Provider',
+        short_desc: 'Provider for CRUD operations',
+      },
+      items: [],
+    };
+    // Update the catalog with default provider
+    if (!catalog['bpp/providers']) {
+      catalog['bpp/providers'] = [];
+    }
+    catalog['bpp/providers'].push(defaultProvider);
+    return defaultProvider.items;
+  }
+
   return provider?.items ?? [];
 };
 
@@ -132,7 +110,15 @@ app.use(express.json());
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'healthy', service: 'api-server' });
+  res.json({
+    status: 'healthy',
+    service: 'api-server',
+    mockGateway: {
+      running: mockGateway.isRunning(),
+      port: mockGatewayPort,
+      url: mockGateway.getBaseUrl(),
+    },
+  });
 });
 
 // ONDC callback endpoint
@@ -191,7 +177,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
       ? (typeof location === 'string' ? JSON.parse(location) : location)
       : undefined;
 
-    // Return products from mock catalog with search filtering
+    // Return products from MockGateway catalog with search filtering
     const catalog = becknToUcpCatalog({
       context: {
         domain: 'nic2004:52110',
@@ -206,7 +192,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
         core_version: '1.2.0',
       },
       message: {
-        catalog: mockCatalog,
+        catalog: getMockCatalog(),
       },
     });
 
@@ -234,9 +220,9 @@ app.get('/api/search', async (req: Request, res: Response) => {
   }
 });
 
-// Catalog CRUD endpoints (POC - in-memory)
+// Catalog CRUD endpoints (using MockGateway catalog)
 app.get('/api/catalog', (_req: Request, res: Response) => {
-  res.json(mockCatalog);
+  res.json(getMockCatalog());
 });
 
 app.post('/api/catalog/products', (req: Request, res: Response) => {
@@ -297,8 +283,19 @@ app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
 // TODO: Fix @anthropic-ai/claude-agent-sdk dependency issue
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`API server running on http://localhost:${PORT}`);
+
+  // Start MockGateway for realistic ONDC simulation
+  try {
+    mockGatewayPort = await mockGateway.start();
+    console.log(`MockGateway running on port ${mockGatewayPort} for realistic testing`);
+
+    // Log MockGateway configuration
+    console.log(`MockGateway config: delay=${mockGatewayConfig.callbackDelay}ms, autoCallback=${mockGatewayConfig.autoCallback}`);
+  } catch (error) {
+    console.error('Failed to start MockGateway:', error);
+  }
 });
 
 export { app };

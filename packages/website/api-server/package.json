@@ -19,6 +19,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@ondc-agent/gateway": "workspace:*",
     "@ondc-agent/seller-sdk": "workspace:*",
     "@ondc-agent/shared": "workspace:*",
     "cors": "^2.8.5",

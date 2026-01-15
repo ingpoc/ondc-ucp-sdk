@@ -88,28 +88,18 @@ export interface BillingInfo {
   email: string;
   /** Tax ID (GSTIN) */
   taxId?: string;
-  /** Address */
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    postalCode?: string;
-    country?: string;
-  };
+  /** Address as string */
+  address?: string;
 }
 
 /**
  * Payment information
  */
 export interface PaymentInfo {
-  /** Payment type (ON-FULFILLMENT, PRE-ORDER, etc.) */
-  type?: string;
+  /** Payment type (PRE-FULFILLMENT, ON-FULFILLMENT, POST-FULFILLMENT) */
+  type?: 'PRE-FULFILLMENT' | 'ON-FULFILLMENT' | 'POST-FULFILLMENT';
   /** Payment status */
-  status?: string;
-  /** Payment method code */
-  method?: string;
-  /** Transaction ID reference */
-  transactionId?: string;
+  status?: 'PAID' | 'NOT-PAID';
 }
 
 /**
@@ -375,16 +365,8 @@ export class SellerClient {
       name: params.billing.name,
       phone: params.billing.phone,
       email: params.billing.email,
-      taxId: params.billing.taxId,
-      address: params.billing.address
-        ? {
-            street: params.billing.address.street,
-            city: params.billing.address.city,
-            state: params.billing.address.state,
-            area_code: params.billing.address.postalCode,
-            country: params.billing.address.country,
-          }
-        : undefined,
+      tax_number: params.billing.taxId,
+      address: params.billing.address,
     };
 
     // Build init request
@@ -461,16 +443,8 @@ export class SellerClient {
       name: params.billing.name,
       phone: params.billing.phone,
       email: params.billing.email,
-      taxId: params.billing.taxId,
-      address: params.billing.address
-        ? {
-            street: params.billing.address.street,
-            city: params.billing.address.city,
-            state: params.billing.address.state,
-            area_code: params.billing.address.postalCode,
-            country: params.billing.address.country,
-          }
-        : undefined,
+      tax_number: params.billing.taxId,
+      address: params.billing.address,
     };
 
     // Build confirm request

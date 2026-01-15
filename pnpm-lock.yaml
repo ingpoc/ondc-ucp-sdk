@@ -121,6 +121,9 @@ importers:
 
   packages/website/api-server:
     dependencies:
+      '@ondc-agent/gateway':
+        specifier: workspace:*
+        version: link:../../gateway
       '@ondc-agent/seller-sdk':
         specifier: workspace:*
         version: link:../../seller-sdk

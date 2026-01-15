@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ONDCClient, BecknMessage } from '@ondc-agent/shared';
+import { ONDCClient, BecknMessage, BecknCatalog, BecknContext } from '@ondc-agent/shared';
 import { Express } from 'express';
 
 declare class Gateway {
@@ -411,4 +411,93 @@ declare class CallbackManager {
     };
 }
 
-export { AsyncPoller, CallbackManager, type CallbackManagerConfig, Gateway, type MCPServerConfig, ONDCMcpServer, type PendingRequest, type PollResult, type PollerConfig, type SearchToolDependencies, StateStore, type StateStoreConfig, type WebhookHandler, WebhookServer, type WebhookServerConfig, createCallbackError, createCallbackResult, registerSearchTool };
+/**
+ * Mock ONDC Gateway Server
+ * Simulates ONDC network for integration testing
+ */
+
+/**
+ * Mock gateway configuration
+ */
+interface MockGatewayConfig {
+    /** Callback delay in ms (default: 100) */
+    callbackDelay?: number;
+    /** Whether to automatically send callbacks (default: true) */
+    autoCallback?: boolean;
+    /** Custom catalog data */
+    catalog?: BecknCatalog;
+}
+/**
+ * Mock gateway response types
+ */
+interface MockGatewayResponse {
+    message: {
+        ack: {
+            status: 'ACK' | 'NACK';
+        };
+    };
+}
+/**
+ * Mock ONDC Gateway Server
+ * Simulates ONDC network behavior for integration testing
+ */
+declare class MockGateway {
+    private app;
+    private server;
+    private port;
+    private config;
+    private callbackUrls;
+    constructor(config?: MockGatewayConfig);
+    /**
+     * Setup Express routes
+     */
+    private setupRoutes;
+    /**
+     * Send on_search callback
+     */
+    private sendOnSearchCallback;
+    /**
+     * Start the mock gateway server
+     * @returns Promise resolving to the assigned port
+     */
+    start(): Promise<number>;
+    /**
+     * Stop the mock gateway server
+     */
+    stop(): Promise<void>;
+    /**
+     * Get the base URL of the mock gateway
+     */
+    getBaseUrl(): string;
+    /**
+     * Get the current port
+     */
+    getPort(): number;
+    /**
+     * Check if server is running
+     */
+    isRunning(): boolean;
+    /**
+     * Update catalog data
+     */
+    setCatalog(catalog: BecknCatalog): void;
+    /**
+     * Update callback delay
+     */
+    setCallbackDelay(delay: number): void;
+    /**
+     * Manually trigger a callback for a transaction
+     */
+    triggerCallback(transactionId: string, context: BecknContext): Promise<void>;
+    /**
+     * Get Express app for custom middleware
+     */
+    getApp(): Express;
+}
+/**
+ * Create and start a mock gateway
+ * Convenience function for quick setup in tests
+ */
+declare function createMockGateway(config?: MockGatewayConfig): Promise<MockGateway>;
+
+export { AsyncPoller, CallbackManager, type CallbackManagerConfig, Gateway, type MCPServerConfig, MockGateway, type MockGatewayConfig, type MockGatewayResponse, ONDCMcpServer, type PendingRequest, type PollResult, type PollerConfig, type SearchToolDependencies, StateStore, type StateStoreConfig, type WebhookHandler, WebhookServer, type WebhookServerConfig, createCallbackError, createCallbackResult, createMockGateway, registerSearchTool };

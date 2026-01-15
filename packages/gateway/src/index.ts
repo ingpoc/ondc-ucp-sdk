@@ -19,3 +19,6 @@ export type { PollerConfig, PollResult } from './state/poller';
 
 export { CallbackManager } from './callback/manager';
 export type { CallbackManagerConfig } from './callback/manager';
+
+export { MockGateway, createMockGateway } from './testing/mock-gateway';
+export type { MockGatewayConfig, MockGatewayResponse } from './testing/mock-gateway';

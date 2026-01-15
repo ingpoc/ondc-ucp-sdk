@@ -370,13 +370,7 @@ describe('SellerClient', () => {
           name: 'Test User',
           phone: '+919876543212',
           email: 'test@example.com',
-          address: {
-            street: '123 Main St',
-            city: 'Bangalore',
-            state: 'KA',
-            postalCode: '560001',
-            country: 'IND',
-          },
+          address: '123 Main St, Bangalore 560001',
         },
       });
 
@@ -462,13 +456,7 @@ describe('SellerClient', () => {
           name: 'Test User',
           phone: '+919876543212',
           email: 'test@example.com',
-          address: {
-            street: '456 Oak Ave',
-            city: 'Mumbai',
-            state: 'MH',
-            postalCode: '400001',
-            country: 'IND',
-          },
+          address: '456 Oak Ave, Mumbai 400001',
         },
       });
 
