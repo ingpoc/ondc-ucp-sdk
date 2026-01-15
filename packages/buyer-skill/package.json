@@ -1,0 +1,13 @@
+{
+  "name": "@ondc-agent/buyer-skill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI agent workflows for ONDC buyer operations",
+  "type": "module",
+  "scripts": {
+    "search": "bash scripts/search_workflow.sh",
+    "filter": "bash scripts/filter_results.sh",
+    "compare": "bash scripts/compare_items.sh",
+    "select": "bash scripts/select_product.sh"
+  }
+}

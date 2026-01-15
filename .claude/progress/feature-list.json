@@ -574,7 +574,7 @@
       "id": "WEBSITE-009",
       "description": "Test both webapps and document SDK gaps",
       "priority": 40,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
