@@ -799,7 +799,7 @@
       "id": "WEEK2-001",
       "description": "Implement progressive disclosure via SSE endpoint",
       "priority": 50,
-      "status": "pending",
+      "status": "implemented",
       "tier": "core",
       "phase": "week2",
       "dependencies": [

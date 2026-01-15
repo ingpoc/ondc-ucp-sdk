@@ -291,4 +291,178 @@ describe('ondc_search handler', () => {
     await expect(handler({ category: 'grocery' })).rejects.toThrow('Timeout');
     expect(mockStateStore.delete).toHaveBeenCalledTimes(1);
   });
+
+  // WEEK2-002: Streaming support tests
+  describe('streaming mode (WEEK2-002)', () => {
+    it('should support stream parameter in input schema', () => {
+      const call = mockRegisterTool.mock.calls[0];
+      const registeredSchema = call?.[1]?.inputSchema;
+      expect(registeredSchema?.stream).toBeDefined();
+      // Zod optional() returns a ZodOptional schema, not a boolean
+      expect(registeredSchema?.stream).toHaveProperty('optional');
+    });
+
+    it('should return batches when stream=true', async () => {
+      // Mock response with 12 items to test batching
+      const multiItemResponse = {
+        ...sampleBecknResponse,
+        message: {
+          catalog: {
+            'bpp/providers': [
+              {
+                id: 'provider-1',
+                descriptor: { name: 'Store' },
+                items: Array(12)
+                  .fill(null)
+                  .map((_, i) => ({
+                    id: `item-${i}`,
+                    descriptor: { name: `Product ${i}` },
+                    price: { currency: 'INR', value: '100' },
+                  })),
+              },
+            ],
+          },
+        },
+      };
+
+      (mockPoller.waitForCallback as ReturnType<typeof vi.fn>).mockResolvedValue(
+        multiItemResponse
+      );
+
+      const result = (await handler({
+        category: 'grocery',
+        stream: true,
+        maxResults: 12, // Ensure we get all 12 items
+      })) as {
+        structuredContent: {
+          mode: string;
+          batches: Array<{
+            type: string;
+            batch: unknown[];
+            batchNumber: number;
+            totalBatches: number;
+          }>;
+        };
+      };
+
+      expect(result.structuredContent.mode).toBe('stream');
+      expect(result.structuredContent.batches).toHaveLength(3); // 12 items / 5 per batch = 3 batches
+      expect(result.structuredContent.batches[0].batchNumber).toBe(1);
+      expect(result.structuredContent.batches[0].batch).toHaveLength(5);
+      expect(result.structuredContent.batches[1].batch).toHaveLength(5);
+      expect(result.structuredContent.batches[2].batch).toHaveLength(2);
+    });
+
+    it('should maintain backward compatibility when stream not specified', async () => {
+      const result = (await handler({ category: 'grocery' })) as {
+        structuredContent: { mode: string; items: unknown[] };
+      };
+
+      // Default behavior should be standard mode (non-streaming)
+      expect(result.structuredContent.mode).toBe('standard');
+      expect(result.structuredContent.items).toBeDefined();
+      expect(result.structuredContent.items).toBeInstanceOf(Array);
+    });
+
+    it('should maintain backward compatibility when stream=false', async () => {
+      const result = (await handler({
+        category: 'grocery',
+        stream: false,
+      })) as {
+        structuredContent: { mode: string; items: unknown[] };
+      };
+
+      expect(result.structuredContent.mode).toBe('standard');
+      expect(result.structuredContent.items).toBeDefined();
+    });
+
+    it('should include batch metadata in streaming mode', async () => {
+      const multiItemResponse = {
+        ...sampleBecknResponse,
+        message: {
+          catalog: {
+            'bpp/providers': [
+              {
+                id: 'provider-1',
+                descriptor: { name: 'Store' },
+                items: Array(7)
+                  .fill(null)
+                  .map((_, i) => ({
+                    id: `item-${i}`,
+                    descriptor: { name: `Product ${i}` },
+                    price: { currency: 'INR', value: '100' },
+                  })),
+              },
+            ],
+          },
+        },
+      };
+
+      (mockPoller.waitForCallback as ReturnType<typeof vi.fn>).mockResolvedValue(
+        multiItemResponse
+      );
+
+      const result = (await handler({
+        category: 'grocery',
+        stream: true,
+      })) as {
+        structuredContent: {
+          batches: Array<{
+            batchNumber: number;
+            totalBatches: number;
+            totalItems: number;
+            isComplete: boolean;
+          }>;
+        };
+      };
+
+      const firstBatch = result.structuredContent.batches[0];
+      expect(firstBatch.batchNumber).toBe(1);
+      expect(firstBatch.totalBatches).toBe(2); // 7 items / 5 per batch = 2 batches
+      expect(firstBatch.totalItems).toBe(7);
+      expect(firstBatch.isComplete).toBe(false);
+
+      const lastBatch = result.structuredContent.batches[1];
+      expect(lastBatch.isComplete).toBe(true);
+    });
+
+    it('should handle empty results in streaming mode', async () => {
+      const emptyResponse = {
+        ...sampleBecknResponse,
+        message: {
+          catalog: {
+            'bpp/providers': [
+              {
+                id: 'provider-1',
+                descriptor: { name: 'Store' },
+                items: [],
+              },
+            ],
+          },
+        },
+      };
+
+      (mockPoller.waitForCallback as ReturnType<typeof vi.fn>).mockResolvedValue(
+        emptyResponse
+      );
+
+      const result = (await handler({
+        category: 'grocery',
+        stream: true,
+      })) as {
+        structuredContent: { mode: string; batches: unknown[] };
+      };
+
+      expect(result.structuredContent.mode).toBe('stream');
+      expect(result.structuredContent.batches).toHaveLength(0);
+    });
+
+    it('should update tool description with streaming info', () => {
+      const call = mockRegisterTool.mock.calls[0];
+      const description = call?.[1]?.description;
+
+      expect(description).toContain('stream=true');
+      expect(description).toContain('progressive disclosure');
+    });
+  });
 });

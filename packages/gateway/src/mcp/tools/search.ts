@@ -13,6 +13,7 @@ import type { AsyncPoller } from '../../state/poller';
 
 /**
  * Input schema for ondc_search tool (Zod version for MCP SDK)
+ * WEEK2-002: Added stream parameter for progressive disclosure
  */
 const searchInputSchema = {
   category: z.string().describe('Product or service category (e.g., "grocery", "restaurant")'),
@@ -28,6 +29,7 @@ const searchInputSchema = {
     sortBy: z.enum(['price', 'rating', 'distance', 'relevance']).optional().describe('Sort order'),
   }).optional().describe('Search preferences'),
   maxResults: z.number().min(1).max(100).optional().describe('Maximum results (default: 10)'),
+  stream: z.boolean().optional().describe('Enable progressive disclosure (returns batches)'),
 };
 
 /**
@@ -54,6 +56,7 @@ const searchOutputSchema = {
 
 /**
  * Search tool input type
+ * WEEK2-002: Added optional stream parameter
  */
 type SearchInput = {
   category: string;
@@ -69,6 +72,7 @@ type SearchInput = {
     sortBy?: 'price' | 'rating' | 'distance' | 'relevance';
   };
   maxResults?: number;
+  stream?: boolean; // WEEK2-002: Enable progressive disclosure
 };
 
 /**
@@ -124,6 +128,7 @@ function inputToUcpQuery(input: SearchInput): UCPSearchQuery {
 
 /**
  * Register ondc_search tool with MCP server
+ * WEEK2-002: Enhanced with streaming support
  *
  * @param server - MCP server instance
  * @param deps - Tool dependencies (client, state store, poller)
@@ -138,11 +143,12 @@ export function registerSearchTool(
     'ondc_search',
     {
       title: 'ONDC Search',
-      description: 'Search for products and services on the ONDC network',
+      description: 'Search for products and services on the ONDC network. Set stream=true for progressive disclosure with batched results.',
       inputSchema: searchInputSchema,
       outputSchema: searchOutputSchema,
     },
     async (input: SearchInput) => {
+      const { stream = false } = input; // WEEK2-002: Extract stream parameter
       // Generate transaction ID
       const transactionId = generateTransactionId();
 
@@ -195,8 +201,43 @@ export function registerSearchTool(
       // Apply maxResults limit
       const limitedItems = catalog.items.slice(0, input.maxResults ?? 10);
 
-      // Format output
+      // WEEK2-002: Handle streaming mode with progressive disclosure
+      if (stream) {
+        const batchSize = 5; // Match api-server SSE batch size
+        const batches = [];
+
+        for (let i = 0; i < limitedItems.length; i += batchSize) {
+          const batch = limitedItems.slice(i, i + batchSize);
+          const batchNumber = Math.floor(i / batchSize) + 1;
+          const totalBatches = Math.ceil(limitedItems.length / batchSize);
+
+          batches.push({
+            type: 'results',
+            batch,
+            batchNumber,
+            totalBatches,
+            totalItems: limitedItems.length,
+            isComplete: i + batchSize >= limitedItems.length,
+          });
+        }
+
+        // Return all batches as structured output
+        const output = {
+          mode: 'stream',
+          transactionId,
+          totalCount: catalog.totalCount ?? limitedItems.length,
+          batches,
+        };
+
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify(output, null, 2) }],
+          structuredContent: output,
+        };
+      }
+
+      // Non-streaming mode (backward compatible)
       const output = {
+        mode: 'standard',
         items: limitedItems.map((item) => ({
           id: item.id,
           name: item.name,
