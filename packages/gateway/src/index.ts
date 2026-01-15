@@ -5,6 +5,9 @@ export { Gateway } from './gateway';
 export { ONDCMcpServer } from './mcp/server';
 export type { MCPServerConfig } from './mcp/server';
 
+export { registerSearchTool } from './mcp/tools/search';
+export type { SearchToolDependencies } from './mcp/tools/search';
+
 export { WebhookServer } from './webhook/server';
 export type { WebhookHandler, WebhookServerConfig } from './webhook/server';
 
