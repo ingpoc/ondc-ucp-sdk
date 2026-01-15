@@ -6,6 +6,7 @@ import { AgentChatPage } from './pages/AgentChatPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrdersPage } from './pages/OrdersPage';
+import { OrderDetailPage } from './pages/OrderDetailPage';
 
 export function App() {
   return (
@@ -25,6 +26,7 @@ export function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/agent" element={<AgentChatPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
