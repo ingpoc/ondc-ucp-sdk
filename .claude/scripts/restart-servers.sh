@@ -1,102 +1,70 @@
 #!/bin/bash
 # restart-servers.sh
 #
-# Purpose: Build and optionally start dev servers for TypeScript monorepo
+# Purpose: Restart dev servers for ondc-agent-gateway
 #
-# Usage: ./restart-servers.sh [--build-only|--watch]
-#   --build-only  Only build, don't start watch mode
-#   --watch       Start TypeScript in watch mode (default if no flags)
-#
-# For this SDK project:
-# - Builds all packages in the monorepo
-# - Optionally watches for changes
+# Restarts:
+# - API server (port 3001)
+# - Seller webapp (port 3002)
+# - Buyer webapp (port 3000)
 
-set -e
+echo "=== Restarting ONDC Servers ==="
 
-BUILD_ONLY=false
-WATCH_MODE=false
+# Kill existing processes
+echo "Stopping servers..."
+pkill -f "node.*api-server" || true
+pkill -f "node.*seller" || true
+pkill -f "node.*buyer" || true
+sleep 1
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --build-only)
-      BUILD_ONLY=true
-      shift
-      ;;
-    --watch)
-      WATCH_MODE=true
-      shift
-      ;;
-    *)
-      echo "Usage: $0 [--build-only] [--watch]"
-      exit 1
-      ;;
-  esac
-done
+# Start API server
+echo "Starting API server (port 3001)..."
+cd /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/api-server
+node dist/index.js > /tmp/api-server.log 2>&1 &
+API_PID=$!
+sleep 2
 
-echo "=== ONDC Agent Gateway Build ==="
+# Start seller webapp
+echo "Starting seller webapp (port 3002)..."
+cd /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/seller
+npm run dev > /tmp/seller.log 2>&1 &
+SELLER_PID=$!
+sleep 2
 
-# ============================================================================
-# Check dependencies
-# ============================================================================
+# Start buyer webapp
+echo "Starting buyer webapp (port 3000)..."
+cd /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/buyer
+npm run dev > /tmp/buyer.log 2>&1 &
+BUYER_PID=$!
+sleep 2
 
-if [ ! -d "node_modules" ]; then
-  echo "Installing dependencies..."
-  pnpm install
-fi
-
-# ============================================================================
-# Build all packages
-# ============================================================================
-
+# Verify servers started
 echo ""
-echo "Building packages..."
-
-if pnpm build 2>&1; then
-  echo "✓ Build successful"
+echo "Verifying servers..."
+if curl -s http://localhost:3001/health >/dev/null 2>&1; then
+  echo "✓ API server (3001) running"
 else
-  echo "✗ Build failed" >&2
+  echo "✗ API server failed to start"
+  cat /tmp/api-server.log
   exit 1
 fi
 
-# ============================================================================
-# Type check
-# ============================================================================
-
-echo ""
-echo "Running type check..."
-
-if pnpm typecheck 2>&1; then
-  echo "✓ Type check passed"
+if curl -s http://localhost:3002/ >/dev/null 2>&1; then
+  echo "✓ Seller webapp (3002) running"
 else
-  echo "✗ Type check failed" >&2
+  echo "✗ Seller webapp failed to start"
+  cat /tmp/seller.log
   exit 1
 fi
 
-# ============================================================================
-# Optional watch mode
-# ============================================================================
-
-if [ "$BUILD_ONLY" = true ]; then
-  echo ""
-  echo "=== Build completed ==="
-  exit 0
-fi
-
-if [ "$WATCH_MODE" = true ]; then
-  echo ""
-  echo "Starting watch mode..."
-  echo "Press Ctrl+C to stop"
-  pnpm build --watch
+if curl -s http://localhost:3000/ >/dev/null 2>&1; then
+  echo "✓ Buyer webapp (3000) running"
+else
+  echo "✗ Buyer webapp failed to start"
+  cat /tmp/buyer.log
+  exit 1
 fi
 
 echo ""
-echo "=== Build completed ==="
-echo ""
-echo "Available commands:"
-echo "  pnpm build      - Build all packages"
-echo "  pnpm typecheck  - Type check all packages"
-echo "  pnpm test       - Run tests"
-echo "  pnpm dev        - Start development mode (when available)"
-
+echo "✅ All servers restarted successfully"
 exit 0

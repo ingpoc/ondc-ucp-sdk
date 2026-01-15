@@ -52,16 +52,20 @@ export function useApi<T>(
 /**
  * Hook for search API
  */
-export function useSearch(category: string, params?: Record<string, unknown>) {
-  const query = new URLSearchParams({
+export function useSearch(category: string, params?: { query?: string; preferences?: unknown; location?: unknown }) {
+  const queryParams = new URLSearchParams({
     category,
-    ...Object.fromEntries(
-      Object.entries(params ?? {}).map(([k, v]) => [
-        k,
-        typeof v === 'string' ? v : JSON.stringify(v),
-      ])
-    ),
-  }).toString();
+  });
 
-  return useApi(`/api/search?${query}`);
+  if (params?.query) {
+    queryParams.append('q', params.query);
+  }
+  if (params?.location) {
+    queryParams.append('location', JSON.stringify(params.location));
+  }
+  if (params?.preferences) {
+    queryParams.append('preferences', JSON.stringify(params.preferences));
+  }
+
+  return useApi(`/api/search?${queryParams.toString()}`);
 }
