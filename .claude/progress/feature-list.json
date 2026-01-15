@@ -994,7 +994,7 @@
       "id": "SDK-BUYER-SEARCH-001",
       "description": "Enable progressive disclosure via SSE streaming",
       "priority": 60,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
