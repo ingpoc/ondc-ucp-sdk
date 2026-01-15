@@ -4,9 +4,12 @@
 # Purpose: Restart dev servers for ondc-agent-gateway
 #
 # Restarts:
-# - API server (port 3001)
+# - API server (port 3001) - uses tsx watch for hot-reload
 # - Seller webapp (port 3002)
 # - Buyer webapp (port 3000)
+#
+# Note: API server now runs with tsx watch for development.
+# Code changes are automatically picked up without rebuild.
 
 echo "=== Restarting ONDC Servers ==="
 
@@ -19,15 +22,15 @@ rm -rf /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/
 
 # Kill existing processes
 echo "Stopping servers..."
-pkill -f "node.*api-server" || true
-pkill -f "node.*seller" || true
-pkill -f "node.*buyer" || true
+pkill -f "api-server" || true
+pkill -f "seller" || true
+pkill -f "buyer" || true
 sleep 1
 
 # Start API server
-echo "Starting API server (port 3001)..."
+echo "Starting API server (port 3001) with tsx watch..."
 cd /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/api-server
-node dist/index.js > /tmp/api-server.log 2>&1 &
+npx tsx watch src/index.ts > /tmp/api-server.log 2>&1 &
 API_PID=$!
 sleep 2
 

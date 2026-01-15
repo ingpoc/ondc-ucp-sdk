@@ -95,7 +95,7 @@ else
   echo "Testing API endpoints..."
 
   # Test /health
-  if curl -s http://localhost:3001/health | grep -q "ok"; then
+  if curl -s http://localhost:3001/health | grep -q "healthy"; then
     echo "✓ GET /health"
   else
     echo "✗ GET /health failed"
@@ -115,6 +115,39 @@ else
     echo "✓ GET /api/catalog"
   else
     echo "✗ GET /api/catalog failed"
+    API_TESTS_FAILED=true
+  fi
+
+  # Test POST /api/cart (add item)
+  if curl -s -X POST http://localhost:3001/api/cart \
+    -H "Content-Type: application/json" \
+    -d '{"sessionId":"test-health-check","item":{"id":"test-item","descriptor":{"name":"Test"}},"quantity":1}' \
+    >/dev/null 2>&1; then
+    echo "✓ POST /api/cart"
+  else
+    echo "✗ POST /api/cart failed"
+    API_TESTS_FAILED=true
+  fi
+
+  # Test PUT /api/cart/buyer (update buyer info)
+  if curl -s -X PUT http://localhost:3001/api/cart/buyer \
+    -H "Content-Type: application/json" \
+    -d '{"sessionId":"test-health-check","name":"Test","email":"test@test.com","phone":"+919999999999"}' \
+    >/dev/null 2>&1; then
+    echo "✓ PUT /api/cart/buyer"
+  else
+    echo "✗ PUT /api/cart/buyer failed"
+    API_TESTS_FAILED=true
+  fi
+
+  # Test POST /api/checkout
+  if curl -s -X POST http://localhost:3001/api/checkout \
+    -H "Content-Type: application/json" \
+    -d '{"sessionId":"test-health-check"}' \
+    >/dev/null 2>&1; then
+    echo "✓ POST /api/checkout"
+  else
+    echo "✗ POST /api/checkout failed"
     API_TESTS_FAILED=true
   fi
 fi
