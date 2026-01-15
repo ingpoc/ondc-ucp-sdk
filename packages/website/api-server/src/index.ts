@@ -3,13 +3,49 @@ import cors from 'cors';
 // Direct SDK imports - no MCP (POC website, not part of SDK)
 import { SellerClient } from '@ondc-agent/seller-sdk';
 import { becknToUcpCatalog, scoreAndSortItems } from '@ondc-agent/shared';
-import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation } from '@ondc-agent/shared';
+import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknItem, BecknCatalog } from '@ondc-agent/shared';
 
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
 // Store pending callbacks for async ONDC responses
 const pendingCallbacks = new Map<string, (data: BecknOnSearchResponse) => void>();
+
+// In-memory product catalog for CRUD operations (POC only)
+const mockCatalog: BecknCatalog = {
+  'bpp/descriptor': {
+    name: 'POC Seller Catalog',
+    short_desc: 'Mock catalog for POC testing',
+  },
+  'bpp/providers': [
+    {
+      id: 'provider-1',
+      descriptor: {
+        name: 'Test Provider',
+        short_desc: 'Provider for POC',
+      },
+      locations: [
+        {
+          id: 'loc-1',
+          gps: '12.97,77.59',
+          address: {
+            locality: 'HSR Layout',
+            city: 'Bengaluru',
+            area_code: '560102',
+            state: 'Karnataka',
+          },
+        },
+      ],
+      items: [],
+    },
+  ],
+};
+
+// Get the first provider's items array
+const getItems = (): BecknItem[] => {
+  const provider = mockCatalog['bpp/providers']?.[0];
+  return provider?.items ?? [];
+};
 
 // Middleware
 app.use(cors());
@@ -106,6 +142,65 @@ app.get('/api/search', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Search error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+// Catalog CRUD endpoints (POC - in-memory)
+app.get('/api/catalog', (_req: Request, res: Response) => {
+  res.json(mockCatalog);
+});
+
+app.post('/api/catalog/products', (req: Request, res: Response) => {
+  try {
+    const newItem: BecknItem = req.body;
+    if (!newItem.id) {
+      res.status(400).json({ error: 'Missing required field: id' });
+      return;
+    }
+
+    const items = getItems();
+    items.push(newItem);
+    res.json({ success: true, item: newItem });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+app.put('/api/catalog/products/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const items = getItems();
+    const index = items.findIndex((item) => item.id === id);
+
+    if (index === -1) {
+      res.status(404).json({ error: 'Product not found' });
+      return;
+    }
+
+    items[index] = { ...items[index], ...updates };
+    res.json({ success: true, item: items[index] });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const items = getItems();
+    const index = items.findIndex((item) => item.id === id);
+
+    if (index === -1) {
+      res.status(404).json({ error: 'Product not found' });
+      return;
+    }
+
+    items.splice(index, 1);
+    res.json({ success: true, message: 'Product deleted' });
+  } catch (error) {
     res.status(500).json({ error: String(error) });
   }
 });

@@ -438,7 +438,7 @@
       "id": "WEBSITE-002",
       "description": "Implement /api/search endpoint",
       "priority": 33,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
