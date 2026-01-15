@@ -172,7 +172,9 @@ app.post('/on_search', (req: Request, res: Response) => {
 // Search endpoint
 app.get('/api/search', async (req: Request, res: Response) => {
   try {
-    const { category, query, location, preferences } = req.query;
+    const { category, location, preferences } = req.query;
+    // Accept both 'query' and 'q' parameters for flexibility
+    const query = req.query.query || req.query.q;
 
     if (!category) {
       res.status(400).json({ error: 'Missing required parameter: category' });
