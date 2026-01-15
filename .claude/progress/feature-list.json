@@ -1014,7 +1014,7 @@
       "id": "SDK-SELLER-ORDERS-001",
       "description": "Create seller orders API endpoints",
       "priority": 61,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
       "dependencies": [
