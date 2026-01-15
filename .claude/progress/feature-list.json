@@ -703,7 +703,8 @@
         "Ed25519 signing for auth headers",
         "Request/response translation through shared utilities",
         "Unit tests for search method"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK1-002",
@@ -720,7 +721,8 @@
         "Product selection workflow",
         "Error handling and retry logic",
         "Unit tests for select method"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK1-003",
@@ -737,7 +739,8 @@
         "Order initialization workflow",
         "Session management",
         "Unit tests for init method"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK1-004",
@@ -754,7 +757,8 @@
         "Order confirmation workflow",
         "Transaction completion",
         "Unit tests for confirm method"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK1-005",
@@ -769,7 +773,8 @@
         "Replace mockCatalog with MockGateway instance",
         "Configure realistic behavior (0-2000ms delay, 10-50 items)",
         "Enable full webapp testing with realistic data"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK1-006",
@@ -787,7 +792,8 @@
         "Test all ONDC protocol methods",
         "Verify MockGateway integration",
         "Run full test suite successfully"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK2-001",
@@ -804,7 +810,8 @@
         "Send immediate status response",
         "Stream results as they arrive",
         "Timeout after 3 seconds with completion signal"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK2-002",
@@ -821,7 +828,8 @@
         "Return streaming results when requested",
         "Maintain backward compatibility",
         "Update MCP tool documentation"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK2-003",
@@ -838,7 +846,8 @@
         "5-second TTL for duplicate queries",
         "Request merging instead of rebroadcasting",
         "30% faster response for repeated searches"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK3-001",
@@ -855,8 +864,9 @@
         "Strip unnecessary protocol fields",
         "Remove duplicates by SKU",
         "Apply preference scoring",
-        "Reduce payload by 90% (50KB → 5KB)"
-      ]
+        "Reduce payload by 90% (50KB \u2192 5KB)"
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK3-002",
@@ -873,8 +883,9 @@
         "Real-time token counting for JSON responses",
         "Automatic truncation when approaching budget",
         "Cost calculator showing savings",
-        "$0.50 → $0.05 cost reduction"
-      ]
+        "$0.50 \u2192 $0.05 cost reduction"
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK4-001",
@@ -892,7 +903,8 @@
         "Price verification (search vs final price)",
         "Item display with all details",
         "Terms & conditions checkbox"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK4-002",
@@ -910,7 +922,8 @@
         "Request/response correlation IDs",
         "Signature verification logs",
         "Performance metrics storage"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK5-001",
@@ -928,7 +941,8 @@
         "Live streaming results display",
         "Token cost calculator",
         "API console playground"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK5-002",
@@ -946,7 +960,8 @@
         "Problem/solution sections",
         "Competitive comparison table",
         "Mock and production examples"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK6-001",
@@ -963,7 +978,8 @@
         "Create Dockerfile for each service",
         "Include gateway, mock, postgresql, redis",
         "Document deployment commands"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK6-002",
@@ -981,7 +997,8 @@
         "Success/failure rate tracking",
         "Token usage dashboard",
         "Popular queries analytics"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK7-001",
@@ -999,7 +1016,8 @@
         "Conversion rates by product",
         "Agent interaction analytics",
         "Performance vs competitors"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK7-002",
@@ -1017,7 +1035,8 @@
         "Keyword suggestions",
         "Competitor analysis",
         "AI-powered copy generation"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
     {
       "id": "WEEK8-001",
@@ -1035,7 +1054,8 @@
         "Interactive demo site functional",
         "5-minute quickstart guides",
         "Production deployment ready"
-      ]
+      ],
+      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     }
   ],
   "phases": {
