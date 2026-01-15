@@ -495,7 +495,7 @@
       "id": "WEBSITE-005",
       "description": "Create website/buyer Vite React app",
       "priority": 36,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
