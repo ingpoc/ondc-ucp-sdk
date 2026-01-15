@@ -4,6 +4,7 @@ import { ResultsPage } from './pages/ResultsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { AgentChatPage } from './pages/AgentChatPage';
 import { CartPage } from './pages/CartPage';
+import { CheckoutPage } from './pages/CheckoutPage';
 
 export function App() {
   return (
@@ -11,7 +12,7 @@ export function App() {
       <header style={{ marginBottom: '30px' }}>
         <h1>ONDC Buyer POC</h1>
         <nav>
-          <a href="/">Search</a> | <a href="/catalog">Catalog</a> | <a href="/cart">Cart</a> | <a href="/agent">Agent</a>
+          <a href="/">Search</a> | <a href="/catalog">Catalog</a> | <a href="/cart">Cart</a> | <a href="/checkout">Checkout</a> | <a href="/agent">Agent</a>
         </nav>
       </header>
       <main>
@@ -21,6 +22,7 @@ export function App() {
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/agent" element={<AgentChatPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
