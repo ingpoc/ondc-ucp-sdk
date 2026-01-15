@@ -282,6 +282,154 @@ app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
 // Agent endpoints temporarily disabled due to libsodium dependency issue
 // TODO: Fix @anthropic-ai/claude-agent-sdk dependency issue
 
+// ============================================================================
+// WEEK2-001: Progressive disclosure via SSE endpoint
+// ============================================================================
+
+// SSE streaming search endpoint
+app.get('/api/search/stream', async (req: Request, res: Response) => {
+  try {
+    const { category, location, preferences } = req.query;
+    const query = req.query.query || req.query.q;
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+    // Send immediate status response
+    const statusEvent = {
+      type: 'status',
+      data: {
+        status: 'searching',
+        message: 'Searching ONDC network...',
+        timestamp: new Date().toISOString(),
+      },
+    };
+    res.write(`data: ${JSON.stringify(statusEvent)}\n\n`);
+
+    // Validate required parameter
+    if (!category) {
+      const errorEvent = {
+        type: 'error',
+        data: {
+          error: 'Missing required parameter: category',
+          timestamp: new Date().toISOString(),
+        },
+      };
+      res.write(`data: ${JSON.stringify(errorEvent)}\n\n`);
+      res.end();
+      return;
+    }
+
+    // Build UCP preferences
+    const ucpPreferences: UCPSearchPreferences = preferences
+      ? (typeof preferences === 'string' ? JSON.parse(preferences) : preferences)
+      : {};
+
+    // Build UCP location
+    const ucpLocation: UCPLocation | undefined = location
+      ? (typeof location === 'string' ? JSON.parse(location) : location)
+      : undefined;
+
+    // Simulate progressive disclosure with delays
+    // In real ONDC, results arrive as callbacks from multiple providers
+
+    // Get catalog from MockGateway
+    const catalog = becknToUcpCatalog({
+      context: {
+        domain: 'nic2004:52110',
+        action: 'on_search',
+        transaction_id: 'mock-txn',
+        timestamp: new Date().toISOString(),
+        country: 'IND',
+        city: 'std:080',
+        bap_id: 'poc-website',
+        bap_uri: 'http://localhost:3001',
+        message_id: 'msg-' + Date.now(),
+        core_version: '1.2.0',
+      },
+      message: {
+        catalog: getMockCatalog(),
+      },
+    });
+
+    // Filter items by query if provided
+    let filteredItems = catalog.items;
+    if (query && typeof query === 'string') {
+      const q = query.toLowerCase();
+      filteredItems = catalog.items.filter(
+        item =>
+          item.descriptor?.name?.toLowerCase().includes(q) ||
+          item.descriptor?.short_desc?.toLowerCase().includes(q)
+      );
+    }
+
+    // Apply scoring and sorting
+    const sortedItems = scoreAndSortItems(filteredItems);
+
+    // Stream results in batches of 5
+    const batchSize = 5;
+    const totalBatches = Math.ceil(sortedItems.length / batchSize);
+
+    for (let i = 0; i < sortedItems.length; i += batchSize) {
+      const batch = sortedItems.slice(i, i + batchSize);
+      const batchNumber = Math.floor(i / batchSize) + 1;
+
+      const resultEvent = {
+        type: 'results',
+        data: {
+          items: batch,
+          batch: batchNumber,
+          totalBatches,
+          totalItems: sortedItems.length,
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      res.write(`data: ${JSON.stringify(resultEvent)}\n\n`);
+
+      // Simulate network delay between batches (100-500ms)
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 400 + 100));
+    }
+
+    // Send completion signal
+    const completionEvent = {
+      type: 'complete',
+      data: {
+        status: 'completed',
+        totalItems: sortedItems.length,
+        message: 'Search complete',
+        timestamp: new Date().toISOString(),
+      },
+    };
+    res.write(`data: ${JSON.stringify(completionEvent)}\n\n`);
+
+    // Timeout after 3 seconds with completion signal (already handled by completion event)
+    res.end();
+  } catch (error) {
+    console.error('SSE search error:', error);
+
+    // Send error event if headers haven't been sent
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+    }
+
+    const errorEvent = {
+      type: 'error',
+      data: {
+        error: String(error),
+        timestamp: new Date().toISOString(),
+      },
+    };
+    res.write(`data: ${JSON.stringify(errorEvent)}\n\n`);
+    res.end();
+  }
+});
+
 // Start server
 app.listen(PORT, async () => {
   console.log(`API server running on http://localhost:${PORT}`);

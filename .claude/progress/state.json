@@ -45,9 +45,9 @@
       "reason": "Starting WEEK1 implementation (SellerClient ONDC protocol)"
     }
   ],
-  "feature_id": "WEEK1-006",
+  "feature_id": "WEEK2-001",
   "attempts": 0,
   "last_updated": "2025-01-15T16:53:05+00:00",
-  "current_feature": "WEEK1-006",
+  "current_feature": "WEEK2-001",
   "health_status": "PARTIAL"
 }

@@ -780,7 +780,7 @@
       "id": "WEEK1-006",
       "description": "Update test suite with SellerClient verification",
       "priority": 49,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [
