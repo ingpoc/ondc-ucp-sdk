@@ -457,7 +457,7 @@
       "id": "WEBSITE-003",
       "description": "Implement /api/catalog endpoints for CRUD",
       "priority": 34,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",

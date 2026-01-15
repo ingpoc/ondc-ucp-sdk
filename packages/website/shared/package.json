@@ -1,0 +1,41 @@
+{
+  "name": "@ondc-website/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared types, hooks, and components for ONDC website POC",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@ondc-agent/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}
