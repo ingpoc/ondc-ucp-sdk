@@ -7,7 +7,11 @@ import type { UCPItem } from '@ondc-website/shared';
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, loading, error } = useApi<UCPItem>(`/api/catalog/products/${id}`);
+  const { data, loading, error, execute } = useApi<UCPItem>(`/api/catalog/products/${id}`);
+
+  useEffect(() => {
+    execute();
+  }, [execute]);
 
   if (loading) {
     return <div>Loading...</div>;

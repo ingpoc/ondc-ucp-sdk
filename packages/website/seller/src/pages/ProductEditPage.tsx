@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '@ondc-website/shared/hooks';
 import { ProductForm } from '../components';
@@ -10,9 +10,13 @@ export function ProductEditPage() {
   const navigate = useNavigate();
   const isNew = id === 'new';
 
-  const { data: existingProduct } = useApi<BecknItem>(
+  const { data: existingProduct, execute } = useApi<BecknItem>(
     isNew ? '/api/catalog' : `/api/catalog/products/${id}`
   );
+
+  useEffect(() => {
+    execute();
+  }, [execute]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

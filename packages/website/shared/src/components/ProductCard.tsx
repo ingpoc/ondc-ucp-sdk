@@ -6,6 +6,11 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, onClick }: ProductCardProps) {
+  // Handle both UCPItem (name) and BecknItem (descriptor.name) structures
+  const name = (product as any).descriptor?.name || product.name || 'Unknown';
+  const description = (product as any).descriptor?.short_desc || product.description || '';
+  const providerName = (product as any)._provider || product.provider?.name || 'Unknown Provider';
+
   return (
     <div
       className="product-card"
@@ -20,16 +25,16 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       {product.images?.[0] && (
         <img
           src={product.images[0].url}
-          alt={product.name}
+          alt={name}
           style={{ width: '100%', height: '200px', objectFit: 'cover' }}
         />
       )}
-      <h3>{product.name}</h3>
-      {product.description && <p>{product.description}</p>}
+      <h3>{name}</h3>
+      {description && <p>{description}</p>}
       <PriceDisplay price={product.price} />
       {product.rating && <RatingStars rating={product.rating.value} />}
       <p style={{ fontSize: '0.9em', color: '#666' }}>
-        Seller: {product.provider.name}
+        Seller: {providerName}
       </p>
     </div>
   );

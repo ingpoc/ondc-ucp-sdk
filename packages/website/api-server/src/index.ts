@@ -1,12 +1,48 @@
 import express, { type Express, type Request, type Response } from 'express';
 import cors from 'cors';
 // Direct SDK imports - no MCP (POC website, not part of SDK)
-import { SellerClient } from '@ondc-agent/seller-sdk';
-import { becknToUcpCatalog, scoreAndSortItems } from '@ondc-agent/shared';
+// Avoid importing from main @ondc-agent/shared to prevent libsodium dependency issues
 import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknItem, BecknCatalog } from '@ondc-agent/shared';
 
 // Temporarily disabled agent service due to libsodium dependency issue
 // import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
+
+// Local implementations of SDK functions to avoid libsodium dependency
+interface UCPCatalog {
+  items: Array<BecknItem & { _provider?: string }>;
+  totalCount?: number;
+}
+
+function becknToUcpCatalog(response: BecknOnSearchResponse): UCPCatalog {
+  const catalog = response.message?.catalog;
+  if (!catalog) {
+    return { items: [] };
+  }
+
+  const providers = catalog['bpp/providers'] ?? [];
+  const items: Array<BecknItem & { _provider?: string }> = [];
+
+  for (const provider of providers) {
+    const providerItems = provider.items ?? [];
+    for (const item of providerItems) {
+      items.push({
+        ...item,
+        _provider: provider.descriptor?.name,
+      });
+    }
+  }
+
+  return { items, totalCount: items.length };
+}
+
+function scoreAndSortItems(items: BecknItem[]) {
+  // Simple scoring: just return items sorted by price (low to high)
+  return [...items].sort((a, b) => {
+    const priceA = typeof a.price?.value === 'string' ? parseFloat(a.price.value) : 0;
+    const priceB = typeof b.price?.value === 'string' ? parseFloat(b.price.value) : 0;
+    return priceA - priceB;
+  });
+}
 
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
@@ -39,7 +75,47 @@ const mockCatalog: BecknCatalog = {
           },
         },
       ],
-      items: [],
+      items: [
+        {
+          id: 'prod-001',
+          descriptor: {
+            name: 'Fresh Organic Mango',
+            short_desc: 'Sweet and juicy organic mangoes from local farms',
+          },
+          price: {
+            currency: 'INR',
+            value: '150',
+          },
+          category_id: 'cat-1',
+          fulfillment_id: 'ful-1',
+        },
+        {
+          id: 'prod-002',
+          descriptor: {
+            name: 'Organic Apple',
+            short_desc: 'Crisp and sweet organic apples',
+          },
+          price: {
+            currency: 'INR',
+            value: '120',
+          },
+          category_id: 'cat-1',
+          fulfillment_id: 'ful-1',
+        },
+        {
+          id: 'prod-003',
+          descriptor: {
+            name: 'Test Banana',
+            short_desc: 'Yellow ripe bananas for testing',
+          },
+          price: {
+            currency: 'INR',
+            value: '50',
+          },
+          category_id: 'cat-1',
+          fulfillment_id: 'ful-1',
+        },
+      ],
     },
   ],
 };
@@ -79,18 +155,19 @@ app.post('/on_search', (req: Request, res: Response) => {
 });
 
 // Initialize seller client
-let sellerClient: SellerClient | null = null;
+// Disabled due to libsodium dependency issue
+// let sellerClient: SellerClient | null = null;
 
-app.post('/api/seller/init', async (req: Request, res: Response) => {
-  try {
-    const config = req.body;
-    sellerClient = new SellerClient(config);
-    console.log('Seller client initialized');
-    res.json({ success: true, message: 'Seller client initialized' });
-  } catch (error) {
-    res.status(500).json({ error: String(error) });
-  }
-});
+// app.post('/api/seller/init', async (req: Request, res: Response) => {
+//   try {
+//     const config = req.body;
+//     sellerClient = new SellerClient(config);
+//     console.log('Seller client initialized');
+//     res.json({ success: true, message: 'Seller client initialized' });
+//   } catch (error) {
+//     res.status(500).json({ error: String(error) });
+//   }
+// });
 
 // Search endpoint
 app.get('/api/search', async (req: Request, res: Response) => {
@@ -112,8 +189,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
       ? (typeof location === 'string' ? JSON.parse(location) : location)
       : undefined;
 
-    // TODO: Implement ONDC search via SellerClient
-    // For now, return empty catalog with structure
+    // Return products from mock catalog with search filtering
     const catalog = becknToUcpCatalog({
       context: {
         domain: 'nic2004:52110',
@@ -128,20 +204,27 @@ app.get('/api/search', async (req: Request, res: Response) => {
         core_version: '1.2.0',
       },
       message: {
-        catalog: {
-          'bpp/providers': [],
-        },
+        catalog: mockCatalog,
       },
     });
 
-    // Apply scoring and sorting if items exist
-    const sortedItems = catalog.items.length > 0
-      ? scoreAndSortItems(catalog.items, ucpPreferences, ucpLocation)
-      : catalog.items;
+    // Filter items by query if provided
+    let filteredItems = catalog.items;
+    if (query && typeof query === 'string') {
+      const q = query.toLowerCase();
+      filteredItems = catalog.items.filter(
+        item =>
+          item.descriptor?.name?.toLowerCase().includes(q) ||
+          item.descriptor?.short_desc?.toLowerCase().includes(q)
+      );
+    }
+
+    // Apply scoring and sorting
+    const sortedItems = scoreAndSortItems(filteredItems);
 
     res.json({
       items: sortedItems,
-      totalCount: catalog.totalCount ?? sortedItems.length,
+      totalCount: sortedItems.length,
     });
   } catch (error) {
     console.error('Search error:', error);

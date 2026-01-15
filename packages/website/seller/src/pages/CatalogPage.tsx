@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@ondc-website/shared/hooks';
 import { InventoryTable } from '../components';
@@ -7,6 +7,10 @@ import type { BecknCatalog, BecknItem } from '@ondc-website/shared';
 export function CatalogPage() {
   const navigate = useNavigate();
   const { data, loading, error, execute } = useApi<BecknCatalog>('/api/catalog');
+
+  useEffect(() => {
+    execute();
+  }, [execute]);
 
   const handleEdit = (item: BecknItem) => {
     navigate(`/catalog/${item.id}`);
