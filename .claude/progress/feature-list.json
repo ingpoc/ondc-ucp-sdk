@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "project": "ondc-agent-gateway",
   "description": "MCP-first gateway bridging AI agents with ONDC network",
-  "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
+  "plan_reference": "~/.claude/plans/happy-gliding-hellman.md",
   "created": "2025-01-14",
-  "updated": "2025-01-15",
+  "updated": "2026-01-15",
   "features": [
     {
       "id": "INIT-001",
@@ -687,6 +687,354 @@
         "Document what's better direct SDK",
         "Finalize SDK vs Skill boundaries",
         "Create decision matrix"
+      ]
+    },
+    {
+      "id": "WEEK1-001",
+      "description": "Implement SellerClient search method with ONDC protocol",
+      "priority": 44,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "search() method implemented in packages/seller-sdk/src/client.ts",
+        "HTTP client with exponential backoff",
+        "Ed25519 signing for auth headers",
+        "Request/response translation through shared utilities",
+        "Unit tests for search method"
+      ]
+    },
+    {
+      "id": "WEEK1-002",
+      "description": "Implement SellerClient select method with ONDC protocol",
+      "priority": 45,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [
+        "WEEK1-001"
+      ],
+      "acceptance_criteria": [
+        "select() method implemented in packages/seller-sdk/src/client.ts",
+        "Product selection workflow",
+        "Error handling and retry logic",
+        "Unit tests for select method"
+      ]
+    },
+    {
+      "id": "WEEK1-003",
+      "description": "Implement SellerClient init method with ONDC protocol",
+      "priority": 46,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [
+        "WEEK1-002"
+      ],
+      "acceptance_criteria": [
+        "init() method implemented in packages/seller-sdk/src/client.ts",
+        "Order initialization workflow",
+        "Session management",
+        "Unit tests for init method"
+      ]
+    },
+    {
+      "id": "WEEK1-004",
+      "description": "Implement SellerClient confirm method with ONDC protocol",
+      "priority": 47,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [
+        "WEEK1-003"
+      ],
+      "acceptance_criteria": [
+        "confirm() method implemented in packages/seller-sdk/src/client.ts",
+        "Order confirmation workflow",
+        "Transaction completion",
+        "Unit tests for confirm method"
+      ]
+    },
+    {
+      "id": "WEEK1-005",
+      "description": "Wire MockGateway to api-server endpoint",
+      "priority": 48,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Connect packages/website/api-server/src/index.ts to MockGateway",
+        "Replace mockCatalog with MockGateway instance",
+        "Configure realistic behavior (0-2000ms delay, 10-50 items)",
+        "Enable full webapp testing with realistic data"
+      ]
+    },
+    {
+      "id": "WEEK1-006",
+      "description": "Update test suite with SellerClient verification",
+      "priority": 49,
+      "status": "pending",
+      "tier": "mvp",
+      "phase": "week1",
+      "dependencies": [
+        "WEEK1-004",
+        "WEEK1-005"
+      ],
+      "acceptance_criteria": [
+        "Add SellerClient tests to .claude/scripts/run-tests.sh",
+        "Test all ONDC protocol methods",
+        "Verify MockGateway integration",
+        "Run full test suite successfully"
+      ]
+    },
+    {
+      "id": "WEEK2-001",
+      "description": "Implement progressive disclosure via SSE endpoint",
+      "priority": 50,
+      "status": "pending",
+      "tier": "core",
+      "phase": "week2",
+      "dependencies": [
+        "WEEK1-005"
+      ],
+      "acceptance_criteria": [
+        "Add /api/search/stream endpoint to packages/gateway/src/mcp/index.ts",
+        "Send immediate status response",
+        "Stream results as they arrive",
+        "Timeout after 3 seconds with completion signal"
+      ]
+    },
+    {
+      "id": "WEEK2-002",
+      "description": "Enhance ondc_search MCP tool with streaming support",
+      "priority": 51,
+      "status": "pending",
+      "tier": "core",
+      "phase": "week2",
+      "dependencies": [
+        "WEEK2-001"
+      ],
+      "acceptance_criteria": [
+        "Update MCP tool to support stream parameter",
+        "Return streaming results when requested",
+        "Maintain backward compatibility",
+        "Update MCP tool documentation"
+      ]
+    },
+    {
+      "id": "WEEK2-003",
+      "description": "Implement request deduplication cache",
+      "priority": 52,
+      "status": "pending",
+      "tier": "core",
+      "phase": "week2",
+      "dependencies": [
+        "WEEK2-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/gateway/src/state/searchCache.ts",
+        "5-second TTL for duplicate queries",
+        "Request merging instead of rebroadcasting",
+        "30% faster response for repeated searches"
+      ]
+    },
+    {
+      "id": "WEEK3-001",
+      "description": "Implement payload reducer with 90% compression",
+      "priority": 53,
+      "status": "pending",
+      "tier": "core",
+      "phase": "week3",
+      "dependencies": [
+        "WEEK2-002"
+      ],
+      "acceptance_criteria": [
+        "Create packages/shared/src/compress/payloadReducer.ts",
+        "Strip unnecessary protocol fields",
+        "Remove duplicates by SKU",
+        "Apply preference scoring",
+        "Reduce payload by 90% (50KB → 5KB)"
+      ]
+    },
+    {
+      "id": "WEEK3-002",
+      "description": "Add token counter & budget enforcer",
+      "priority": 54,
+      "status": "pending",
+      "tier": "core",
+      "phase": "week3",
+      "dependencies": [
+        "WEEK3-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/shared/src/compress/tokenCounter.ts",
+        "Real-time token counting for JSON responses",
+        "Automatic truncation when approaching budget",
+        "Cost calculator showing savings",
+        "$0.50 → $0.05 cost reduction"
+      ]
+    },
+    {
+      "id": "WEEK4-001",
+      "description": "Create order confirmation UI for buyer webapp",
+      "priority": 55,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week4",
+      "dependencies": [
+        "WEEK3-002"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/pages/OrderConfirmPage.tsx",
+        "Human-in-loop confirmation before purchase",
+        "Price verification (search vs final price)",
+        "Item display with all details",
+        "Terms & conditions checkbox"
+      ]
+    },
+    {
+      "id": "WEEK4-002",
+      "description": "Implement audit logging system",
+      "priority": 56,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week4",
+      "dependencies": [
+        "WEEK4-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/gateway/src/logging/auditLog.ts",
+        "Immutable trail of all transactions",
+        "Request/response correlation IDs",
+        "Signature verification logs",
+        "Performance metrics storage"
+      ]
+    },
+    {
+      "id": "WEEK5-001",
+      "description": "Build interactive demo website",
+      "priority": 57,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week5",
+      "dependencies": [
+        "WEEK4-002"
+      ],
+      "acceptance_criteria": [
+        "Create new packages/demo package",
+        "Web-based query tester interface",
+        "Live streaming results display",
+        "Token cost calculator",
+        "API console playground"
+      ]
+    },
+    {
+      "id": "WEEK5-002",
+      "description": "Update root README with quickstart guide",
+      "priority": 58,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week5",
+      "dependencies": [
+        "WEEK5-001"
+      ],
+      "acceptance_criteria": [
+        "Update /README.md",
+        "5-minute integration example",
+        "Problem/solution sections",
+        "Competitive comparison table",
+        "Mock and production examples"
+      ]
+    },
+    {
+      "id": "WEEK6-001",
+      "description": "Create Docker self-hosting setup",
+      "priority": 59,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week6",
+      "dependencies": [
+        "WEEK5-002"
+      ],
+      "acceptance_criteria": [
+        "Create docker-compose.yml",
+        "Create Dockerfile for each service",
+        "Include gateway, mock, postgresql, redis",
+        "Document deployment commands"
+      ]
+    },
+    {
+      "id": "WEEK6-002",
+      "description": "Implement monitoring & analytics",
+      "priority": 60,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week6",
+      "dependencies": [
+        "WEEK6-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/monitoring/ directory",
+        "Search latency metrics collection",
+        "Success/failure rate tracking",
+        "Token usage dashboard",
+        "Popular queries analytics"
+      ]
+    },
+    {
+      "id": "WEEK7-001",
+      "description": "Create seller performance dashboard",
+      "priority": 61,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week7",
+      "dependencies": [
+        "WEEK6-002"
+      ],
+      "acceptance_criteria": [
+        "Update packages/website/seller/src/pages/DashboardPage.tsx",
+        "Search visibility ranking display",
+        "Conversion rates by product",
+        "Agent interaction analytics",
+        "Performance vs competitors"
+      ]
+    },
+    {
+      "id": "WEEK7-002",
+      "description": "Implement SEO optimization tools",
+      "priority": 62,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week7",
+      "dependencies": [
+        "WEEK7-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/seller-sdk/src/seo/ directory",
+        "Product title/description optimization",
+        "Keyword suggestions",
+        "Competitor analysis",
+        "AI-powered copy generation"
+      ]
+    },
+    {
+      "id": "WEEK8-001",
+      "description": "Finalize v1.0 production release",
+      "priority": 63,
+      "status": "pending",
+      "tier": "full",
+      "phase": "week8",
+      "dependencies": [
+        "WEEK7-002"
+      ],
+      "acceptance_criteria": [
+        "Complete all Phase 1-2 features",
+        "Comprehensive documentation",
+        "Interactive demo site functional",
+        "5-minute quickstart guides",
+        "Production deployment ready"
       ]
     }
   ],
