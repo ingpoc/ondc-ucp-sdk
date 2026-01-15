@@ -26,14 +26,108 @@ export interface ScoringContext {
 
 /**
  * Default preference weights when not specified
+ * These sum to 1.0 (excluding verifiedBonus which is additive)
  */
 const DEFAULT_WEIGHTS: Required<Omit<UCPSearchPreferences, 'verifiedBonus'>> & { verifiedBonus: number } = {
   priceWeight: 0.3,
   distanceWeight: 0.2,
-  ratingWeight: 0.3,
-  deliveryWeight: 0.2,
+  ratingWeight: 0.25,
+  deliveryWeight: 0.25,
   verifiedBonus: 0.1,
 };
+
+/**
+ * Weight keys for normalization
+ */
+type WeightKey = 'priceWeight' | 'distanceWeight' | 'ratingWeight' | 'deliveryWeight';
+const WEIGHT_KEYS: WeightKey[] = ['priceWeight', 'distanceWeight', 'ratingWeight', 'deliveryWeight'];
+
+/**
+ * Normalized weights that sum to 1.0
+ */
+export interface NormalizedWeights {
+  priceWeight: number;
+  distanceWeight: number;
+  ratingWeight: number;
+  deliveryWeight: number;
+  verifiedBonus: number;
+}
+
+/**
+ * Normalize user-provided weights to sum to 1.0
+ *
+ * - If all weights provided and sum > 0: scale to sum to 1.0
+ * - If partial weights provided: fill remaining weights evenly
+ * - If no weights provided: use default weights
+ *
+ * @param userWeights - User-provided preference weights (can be partial)
+ * @returns Normalized weights that sum to 1.0
+ *
+ * @example
+ * ```ts
+ * // Partial weights - fills rest evenly
+ * normalizeWeights({ priceWeight: 0.6 })
+ * // Returns { priceWeight: 0.6, distanceWeight: 0.133, ratingWeight: 0.133, deliveryWeight: 0.133, verifiedBonus: 0.1 }
+ *
+ * // All weights - scales to 1.0
+ * normalizeWeights({ priceWeight: 0.4, distanceWeight: 0.2, ratingWeight: 0.3, deliveryWeight: 0.3 })
+ * // Returns { priceWeight: 0.333, distanceWeight: 0.167, ratingWeight: 0.25, deliveryWeight: 0.25, verifiedBonus: 0.1 }
+ * ```
+ */
+export function normalizeWeights(userWeights: UCPSearchPreferences = {}): NormalizedWeights {
+  // Count how many weights are provided and their sum
+  const providedWeights: Partial<Record<WeightKey, number>> = {};
+  let providedSum = 0;
+  let providedCount = 0;
+
+  for (const key of WEIGHT_KEYS) {
+    const value = userWeights[key];
+    if (value !== undefined && value >= 0) {
+      providedWeights[key] = value;
+      providedSum += value;
+      providedCount++;
+    }
+  }
+
+  // Get verified bonus (not part of normalization)
+  const verifiedBonus = userWeights.verifiedBonus ?? DEFAULT_WEIGHTS.verifiedBonus;
+
+  // No weights provided - use defaults but preserve custom verifiedBonus
+  if (providedCount === 0) {
+    return { ...DEFAULT_WEIGHTS, verifiedBonus };
+  }
+
+  // Calculate remaining weight to distribute
+  const remainingCount = WEIGHT_KEYS.length - providedCount;
+  const remainingWeight = Math.max(0, 1 - providedSum);
+  const evenShare = remainingCount > 0 ? remainingWeight / remainingCount : 0;
+
+  // Build result with provided weights and even distribution for missing
+  const result: NormalizedWeights = {
+    priceWeight: 0,
+    distanceWeight: 0,
+    ratingWeight: 0,
+    deliveryWeight: 0,
+    verifiedBonus,
+  };
+
+  for (const key of WEIGHT_KEYS) {
+    if (providedWeights[key] !== undefined) {
+      result[key] = providedWeights[key];
+    } else {
+      result[key] = evenShare;
+    }
+  }
+
+  // If all weights provided but don't sum to 1.0, normalize them
+  if (providedCount === WEIGHT_KEYS.length && providedSum > 0 && Math.abs(providedSum - 1) > 0.001) {
+    for (const key of WEIGHT_KEYS) {
+      result[key] = (providedWeights[key] ?? 0) / providedSum;
+    }
+  }
+
+  return result;
+}
 
 /**
  * Parse price value from UCPPrice
@@ -223,14 +317,8 @@ export function scoreItem(
   preferences: UCPSearchPreferences = {},
   context: ScoringContext = {}
 ): number {
-  // Get weights with defaults
-  const weights = {
-    price: preferences.priceWeight ?? DEFAULT_WEIGHTS.priceWeight,
-    distance: preferences.distanceWeight ?? DEFAULT_WEIGHTS.distanceWeight,
-    rating: preferences.ratingWeight ?? DEFAULT_WEIGHTS.ratingWeight,
-    delivery: preferences.deliveryWeight ?? DEFAULT_WEIGHTS.deliveryWeight,
-    verifiedBonus: preferences.verifiedBonus ?? DEFAULT_WEIGHTS.verifiedBonus,
-  };
+  // Normalize weights to sum to 1.0
+  const weights = normalizeWeights(preferences);
 
   // Calculate individual scores
   const priceScore = calculatePriceScore(item, context);
@@ -238,22 +326,16 @@ export function scoreItem(
   const ratingScore = calculateRatingScore(item);
   const deliveryScore = calculateDeliveryScore(item, context);
 
-  // Calculate weighted sum
-  const totalWeight = weights.price + weights.distance + weights.rating + weights.delivery;
-
-  let score = 0;
-  if (totalWeight > 0) {
-    score = (
-      weights.price * priceScore +
-      weights.distance * distanceScore +
-      weights.rating * ratingScore +
-      weights.delivery * deliveryScore
-    ) / totalWeight;
-  }
+  // Calculate weighted sum (weights are already normalized to sum to 1.0)
+  const score =
+    weights.priceWeight * priceScore +
+    weights.distanceWeight * distanceScore +
+    weights.ratingWeight * ratingScore +
+    weights.deliveryWeight * deliveryScore;
 
   // Add verified bonus
   if (item.provider.verified && weights.verifiedBonus > 0) {
-    score = Math.min(1, score + weights.verifiedBonus);
+    return Math.min(1, score + weights.verifiedBonus);
   }
 
   return score;

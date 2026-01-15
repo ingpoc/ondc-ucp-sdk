@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { scoreItem, buildScoringContext, scoreAndSortItems } from './preferences';
-import type { ScoringContext } from './preferences';
+import { scoreItem, buildScoringContext, scoreAndSortItems, normalizeWeights } from './preferences';
+import type { ScoringContext, NormalizedWeights } from './preferences';
 import type { UCPItem, UCPSearchPreferences } from '../types/ucp';
 
 // Helper to create test items
@@ -342,5 +342,202 @@ describe('scoreAndSortItems', () => {
 
     expect(sorted[0]?.id).toBe('close');
     expect(sorted[1]?.id).toBe('far');
+  });
+});
+
+describe('normalizeWeights', () => {
+  /**
+   * Helper to calculate sum of core weights (excluding verifiedBonus)
+   */
+  function sumCoreWeights(weights: NormalizedWeights): number {
+    return weights.priceWeight + weights.distanceWeight + weights.ratingWeight + weights.deliveryWeight;
+  }
+
+  describe('default weights', () => {
+    it('should return default weights when no input provided', () => {
+      const weights = normalizeWeights();
+
+      expect(weights.priceWeight).toBe(0.3);
+      expect(weights.distanceWeight).toBe(0.2);
+      expect(weights.ratingWeight).toBe(0.25);
+      expect(weights.deliveryWeight).toBe(0.25);
+      expect(weights.verifiedBonus).toBe(0.1);
+    });
+
+    it('should return default weights for empty object', () => {
+      const weights = normalizeWeights({});
+
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+  });
+
+  describe('partial weights', () => {
+    it('should fill remaining weights evenly when one weight provided', () => {
+      const weights = normalizeWeights({ priceWeight: 0.6 });
+
+      expect(weights.priceWeight).toBe(0.6);
+      // Remaining 0.4 split evenly among 3 weights = 0.133...
+      expect(weights.distanceWeight).toBeCloseTo(0.133, 2);
+      expect(weights.ratingWeight).toBeCloseTo(0.133, 2);
+      expect(weights.deliveryWeight).toBeCloseTo(0.133, 2);
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+
+    it('should fill remaining weights evenly when two weights provided', () => {
+      const weights = normalizeWeights({ priceWeight: 0.4, ratingWeight: 0.4 });
+
+      expect(weights.priceWeight).toBe(0.4);
+      expect(weights.ratingWeight).toBe(0.4);
+      // Remaining 0.2 split evenly among 2 weights = 0.1
+      expect(weights.distanceWeight).toBeCloseTo(0.1, 5);
+      expect(weights.deliveryWeight).toBeCloseTo(0.1, 5);
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+
+    it('should fill remaining weights evenly when three weights provided', () => {
+      const weights = normalizeWeights({
+        priceWeight: 0.3,
+        distanceWeight: 0.3,
+        ratingWeight: 0.3,
+      });
+
+      expect(weights.priceWeight).toBe(0.3);
+      expect(weights.distanceWeight).toBe(0.3);
+      expect(weights.ratingWeight).toBe(0.3);
+      expect(weights.deliveryWeight).toBeCloseTo(0.1, 5); // Remaining 0.1
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+
+    it('should handle weights that exceed 1.0 by giving zero to remaining', () => {
+      const weights = normalizeWeights({ priceWeight: 0.8, ratingWeight: 0.5 });
+
+      // Sum of provided is 1.3, remaining is 0 (clamped)
+      expect(weights.priceWeight).toBe(0.8);
+      expect(weights.ratingWeight).toBe(0.5);
+      expect(weights.distanceWeight).toBe(0);
+      expect(weights.deliveryWeight).toBe(0);
+    });
+  });
+
+  describe('all weights provided', () => {
+    it('should scale weights to sum to 1.0 when all provided but not normalized', () => {
+      const weights = normalizeWeights({
+        priceWeight: 2,
+        distanceWeight: 1,
+        ratingWeight: 1,
+        deliveryWeight: 2,
+      });
+
+      // Total is 6, each scaled by 1/6
+      expect(weights.priceWeight).toBeCloseTo(2 / 6, 5);
+      expect(weights.distanceWeight).toBeCloseTo(1 / 6, 5);
+      expect(weights.ratingWeight).toBeCloseTo(1 / 6, 5);
+      expect(weights.deliveryWeight).toBeCloseTo(2 / 6, 5);
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+
+    it('should keep weights when they already sum to 1.0', () => {
+      const weights = normalizeWeights({
+        priceWeight: 0.25,
+        distanceWeight: 0.25,
+        ratingWeight: 0.25,
+        deliveryWeight: 0.25,
+      });
+
+      expect(weights.priceWeight).toBe(0.25);
+      expect(weights.distanceWeight).toBe(0.25);
+      expect(weights.ratingWeight).toBe(0.25);
+      expect(weights.deliveryWeight).toBe(0.25);
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+    });
+
+    it('should normalize weights that sum to more than 1.0', () => {
+      const weights = normalizeWeights({
+        priceWeight: 0.4,
+        distanceWeight: 0.3,
+        ratingWeight: 0.3,
+        deliveryWeight: 0.4,
+      });
+
+      // Total is 1.4, should normalize
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+      expect(weights.priceWeight).toBeCloseTo(0.4 / 1.4, 5);
+    });
+  });
+
+  describe('verifiedBonus handling', () => {
+    it('should preserve custom verifiedBonus', () => {
+      const weights = normalizeWeights({ verifiedBonus: 0.2 });
+
+      expect(weights.verifiedBonus).toBe(0.2);
+    });
+
+    it('should use default verifiedBonus when not provided', () => {
+      const weights = normalizeWeights({ priceWeight: 0.5 });
+
+      expect(weights.verifiedBonus).toBe(0.1);
+    });
+
+    it('should not include verifiedBonus in weight normalization', () => {
+      const weights = normalizeWeights({
+        priceWeight: 0.25,
+        distanceWeight: 0.25,
+        ratingWeight: 0.25,
+        deliveryWeight: 0.25,
+        verifiedBonus: 0.5,
+      });
+
+      // Core weights should still sum to 1.0
+      expect(sumCoreWeights(weights)).toBeCloseTo(1.0, 5);
+      // Verified bonus is separate
+      expect(weights.verifiedBonus).toBe(0.5);
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle zero weights', () => {
+      const weights = normalizeWeights({
+        priceWeight: 0,
+        distanceWeight: 0,
+        ratingWeight: 0,
+        deliveryWeight: 0,
+      });
+
+      // All zeros provided - can't normalize, returns as-is
+      expect(weights.priceWeight).toBe(0);
+      expect(weights.distanceWeight).toBe(0);
+      expect(weights.ratingWeight).toBe(0);
+      expect(weights.deliveryWeight).toBe(0);
+    });
+
+    it('should handle single non-zero weight among zeros', () => {
+      const weights = normalizeWeights({
+        priceWeight: 1,
+        distanceWeight: 0,
+        ratingWeight: 0,
+        deliveryWeight: 0,
+      });
+
+      // All weights provided, normalize to sum to 1
+      expect(weights.priceWeight).toBe(1);
+      expect(weights.distanceWeight).toBe(0);
+      expect(weights.ratingWeight).toBe(0);
+      expect(weights.deliveryWeight).toBe(0);
+      expect(sumCoreWeights(weights)).toBe(1);
+    });
+
+    it('should handle negative weights by ignoring them', () => {
+      const weights = normalizeWeights({
+        priceWeight: -0.5,
+        distanceWeight: 0.6,
+      });
+
+      // Negative weight is ignored, only distanceWeight is provided
+      expect(weights.distanceWeight).toBe(0.6);
+      // Remaining 0.4 split among 3 remaining weights
+      expect(weights.priceWeight).toBeCloseTo(0.133, 2);
+      expect(weights.ratingWeight).toBeCloseTo(0.133, 2);
+      expect(weights.deliveryWeight).toBeCloseTo(0.133, 2);
+    });
   });
 });
