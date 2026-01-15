@@ -853,7 +853,7 @@
       "id": "SDK-BUYER-CART-001",
       "description": "Create cart API endpoints for UCPSession management",
       "priority": 53,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
