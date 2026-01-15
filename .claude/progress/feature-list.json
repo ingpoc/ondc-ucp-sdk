@@ -914,7 +914,7 @@
       "id": "SDK-BUYER-CART-004",
       "description": "Create buyer checkout page UI",
       "priority": 56,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
@@ -934,7 +934,7 @@
       "id": "SDK-BUYER-ORDERS-001",
       "description": "Create buyer orders API endpoints",
       "priority": 57,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
@@ -955,7 +955,7 @@
       "id": "SDK-BUYER-ORDERS-002",
       "description": "Create buyer orders page UI",
       "priority": 58,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
