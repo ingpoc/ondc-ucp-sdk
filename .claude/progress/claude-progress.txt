@@ -15,3 +15,6 @@ Implemented TYPES-002 (UCP protocol types): UCPSearchQuery, UCPCatalog, UCPSessi
 
 === Session 2026-01-15T02:02:00+0530 ===
 Fixed all TypeScript type errors across packages/shared and packages/gateway. Updated UCPPrice, UCPLocation, and UCPSearchQuery types to match translator usage. Added required BecknContext fields to test fixtures. Next: Continue with HTTP-002 (retry logic with exponential backoff)
+
+=== Session 2026-01-15T04:26:05+0000 ===
+Implemented MCP server features: MCP-001 (server with stdio transport), MCP-002 (ondc_search tool), PREF-001 (preference scoring algorithm). All tests passing (285 total). Next: PREF-002 (weight normalization).
