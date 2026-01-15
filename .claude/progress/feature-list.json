@@ -894,7 +894,7 @@
       "id": "SDK-BUYER-CART-003",
       "description": "Create checkout API endpoint",
       "priority": 55,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
