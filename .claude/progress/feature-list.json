@@ -974,7 +974,7 @@
       "id": "SDK-BUYER-ORDERS-003",
       "description": "Create buyer order detail page UI",
       "priority": 59,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
