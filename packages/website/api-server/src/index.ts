@@ -10,6 +10,7 @@ import { MockGateway, type MockGatewayConfig } from '@ondc-agent/gateway';
 // Import StateStore and session types for cart management
 import { StateStore } from '@ondc-agent/gateway';
 import type { UCPSession, UCPSessionItem, UCPSessionStatus, UCPQuote } from '@ondc-agent/shared';
+import type { UCPOrder, UCPOrderStatus } from '@ondc-agent/shared';
 
 // Temporarily disabled agent service due to libsodium dependency issue
 // import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
@@ -71,6 +72,9 @@ let mockGatewayPort: number | null = null;
 
 // Create StateStore for cart sessions (TTL: 30 minutes)
 const cartStore = new StateStore({ ttl: 30 * 60 * 1000 });
+
+// Create StateStore for orders (TTL: 24 hours)
+const ordersStore = new StateStore({ ttl: 24 * 60 * 60 * 1000 });
 
 // Get catalog from MockGateway (updated dynamically)
 const getMockCatalog = (): BecknCatalog => {
@@ -723,6 +727,303 @@ app.post('/api/checkout', (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Checkout error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+// ============================================================================
+// SDK-BUYER-ORDERS-001: Orders API endpoints
+// ============================================================================
+
+/**
+ * Helper: Convert UCPSession to UCPOrder
+ */
+function sessionToOrder(session: UCPSession, paymentMethod?: string): UCPOrder {
+  const now = new Date().toISOString();
+  const currency = session.items[0]?.item.price?.currency || 'INR';
+
+  // Get first item for provider reference (using custom _provider property)
+  const firstItem = session.items[0]?.item as any;
+  const providerName = firstItem?._provider || 'Mock Provider';
+
+  return {
+    id: `order-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    status: 'created',
+    provider: {
+      id: 'provider-1',
+      name: providerName,
+    },
+    items: session.items.map((sessionItem) => {
+      const item = sessionItem.item as any;
+      return {
+        id: sessionItem.item.id,
+        name: item.descriptor?.name || item.name || sessionItem.item.id,
+        quantity: sessionItem.quantity,
+        price: {
+          value: sessionItem.item.price?.value || '0',
+          currency: sessionItem.item.price?.currency || 'INR',
+        },
+      };
+    }),
+    buyer: session.buyer,
+    deliveryAddress: session.deliveryAddress || {
+      line1: '',
+      city: '',
+      postalCode: '',
+      country: 'IND',
+    },
+    fulfillment: {
+      type: 'delivery',
+      status: 'pending',
+      deliveryLocation: session.deliveryAddress,
+      estimatedTime: {
+        start: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      },
+    },
+    quote: session.quote || {
+      total: { value: '0', currency },
+      subtotal: { value: '0', currency },
+    },
+    payment: {
+      type: (paymentMethod as any) || 'upi',
+      status: 'pending',
+      amount: session.quote?.total || { value: '0', currency },
+    },
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * GET /api/orders - List buyer's orders
+ */
+app.get('/api/orders', (req: Request, res: Response) => {
+  try {
+    const { status, limit = '50' } = req.query;
+
+    // Get all orders from store using keys()
+    const orderKeys = ordersStore.keys();
+    const allOrders = orderKeys
+      .map((key) => ordersStore.get(key))
+      .filter((entry) => entry?.data !== undefined)
+      .map((entry) => entry!.data as UCPOrder);
+
+    let orders = allOrders.sort((a: UCPOrder, b: UCPOrder) =>
+      b.createdAt.localeCompare(a.createdAt)
+    );
+
+    // Filter by status if provided
+    if (status && typeof status === 'string') {
+      orders = orders.filter((order) => order.status === status);
+    }
+
+    // Apply limit
+    const parsedLimit = parseInt(limit as string, 10);
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
+      orders = orders.slice(0, parsedLimit);
+    }
+
+    res.json({
+      success: true,
+      orders,
+      count: orders.length,
+    });
+  } catch (error) {
+    console.error('List orders error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * GET /api/orders/:id - Get order details
+ */
+app.get('/api/orders/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Get order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/orders/:id/confirm - Confirm order
+ */
+app.post('/api/orders/:id/confirm', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { paymentMethod } = req.body;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Validate order status
+    if (order.status !== 'created') {
+      res.status(400).json({ error: `Order cannot be confirmed. Current status: ${order.status}` });
+      return;
+    }
+
+    // Update order status and payment
+    order.status = 'accepted';
+    order.payment.status = 'completed';
+    order.payment.type = paymentMethod || order.payment.type;
+    order.payment.completedAt = new Date().toISOString();
+    order.fulfillment.status = 'pending';
+    order.updatedAt = new Date().toISOString();
+
+    ordersStore.set(id, { type: 'order', data: order });
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Confirm order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/orders/:id/cancel - Cancel order
+ */
+app.post('/api/orders/:id/cancel', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Validate order can be cancelled
+    const cancellableStatuses: UCPOrderStatus[] = ['created', 'accepted', 'in_progress'];
+    if (!cancellableStatuses.includes(order.status)) {
+      res.status(400).json({ error: `Order cannot be cancelled. Current status: ${order.status}` });
+      return;
+    }
+
+    // Update order status
+    order.status = 'cancelled';
+    order.cancellation = {
+      cancelledBy: 'buyer',
+      reason,
+      cancelledAt: new Date().toISOString(),
+    };
+    order.updatedAt = new Date().toISOString();
+
+    ordersStore.set(id, { type: 'order', data: order });
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * GET /api/orders/:id/track - Track order
+ */
+app.get('/api/orders/:id/track', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Simulate tracking information
+    const tracking = {
+      orderId: order.id,
+      status: order.status,
+      fulfillmentStatus: order.fulfillment.status,
+      estimatedDelivery: order.fulfillment.estimatedTime,
+      currentLocation: order.fulfillment.status === 'in_transit'
+        ? { gps: '12.9716,77.5946', timestamp: new Date().toISOString() }
+        : undefined,
+      trackingId: order.fulfillment.tracking?.id || `TRACK-${order.id.substring(5)}`,
+      agent: order.fulfillment.agent,
+      updatedAt: order.updatedAt,
+    };
+
+    res.json({
+      success: true,
+      tracking,
+    });
+  } catch (error) {
+    console.error('Track order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/orders/create - Create order from checkout session
+ * (Helper endpoint to convert cart session to order)
+ */
+app.post('/api/orders/create', (req: Request, res: Response) => {
+  try {
+    const { sessionId, paymentMethod } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ error: 'Missing required field: sessionId' });
+      return;
+    }
+
+    // Get session from cart store
+    const sessionEntry = cartStore.get(sessionId);
+    if (!sessionEntry?.data) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+
+    const session = sessionEntry.data as UCPSession;
+
+    // Validate session has quote
+    if (!session.quote) {
+      res.status(400).json({ error: 'Session has no quote. Please complete checkout first.' });
+      return;
+    }
+
+    // Convert session to order
+    const order = sessionToOrder(session, paymentMethod);
+
+    // Store order
+    ordersStore.set(order.id, { type: 'order', data: order });
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
     res.status(500).json({ error: String(error) });
   }
 });
