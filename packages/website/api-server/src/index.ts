@@ -5,6 +5,9 @@ import { SellerClient } from '@ondc-agent/seller-sdk';
 import { becknToUcpCatalog, scoreAndSortItems } from '@ondc-agent/shared';
 import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknItem, BecknCatalog } from '@ondc-agent/shared';
 
+// Temporarily disabled agent service due to libsodium dependency issue
+// import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
+
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
@@ -204,6 +207,9 @@ app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
     res.status(500).json({ error: String(error) });
   }
 });
+
+// Agent endpoints temporarily disabled due to libsodium dependency issue
+// TODO: Fix @anthropic-ai/claude-agent-sdk dependency issue
 
 // Start server
 app.listen(PORT, () => {

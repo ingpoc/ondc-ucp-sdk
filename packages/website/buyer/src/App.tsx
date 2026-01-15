@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { SearchPage } from './pages/SearchPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { AgentChatPage } from './pages/AgentChatPage';
 
 export function App() {
   return (
@@ -9,7 +10,7 @@ export function App() {
       <header style={{ marginBottom: '30px' }}>
         <h1>ONDC Buyer POC</h1>
         <nav>
-          <a href="/">Search</a> | <a href="/catalog">Catalog</a>
+          <a href="/">Search</a> | <a href="/catalog">Catalog</a> | <a href="/agent">Agent</a>
         </nav>
       </header>
       <main>
@@ -18,6 +19,7 @@ export function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/agent" element={<AgentChatPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

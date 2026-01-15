@@ -1,0 +1,32 @@
+{
+  "name": "@ondc-agent/seller-skill",
+  "version": "1.0.0",
+  "description": "AI agent workflows for ONDC seller operations - product management, catalog optimization, and pricing strategies",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "seller-add-product": "./scripts/add_product.sh",
+    "seller-edit-product": "./scripts/edit_product.sh",
+    "seller-preview-search": "./scripts/preview_search.sh",
+    "seller-optimize-listing": "./scripts/optimize_listing.sh"
+  },
+  "scripts": {
+    "validate": "bash scripts/validate_skill.sh",
+    "test:add": "bash scripts/add_product.sh test-product-123",
+    "test:edit": "bash scripts/edit_product.sh test-product-123",
+    "test:preview": "bash scripts/preview_search.sh test-product-123 '{}'",
+    "test:optimize": "bash scripts/optimize_listing.sh test-product-123"
+  },
+  "keywords": [
+    "ondc",
+    "seller",
+    "agent",
+    "workflow",
+    "catalog",
+    "pricing",
+    "optimization",
+    "ucp"
+  ],
+  "author": "ONDC Agent SDK",
+  "license": "MIT"
+}
