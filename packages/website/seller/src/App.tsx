@@ -4,6 +4,7 @@ import { CatalogPage } from './pages/CatalogPage';
 import { ProductEditPage } from './pages/ProductEditPage';
 import { AgentChatPage } from './pages/AgentChatPage';
 import { OrdersPage } from './pages/OrdersPage';
+import { OrderDetailPage } from './pages/OrderDetailPage';
 
 export function App() {
   return (
@@ -22,6 +23,7 @@ export function App() {
           <Route path="/catalog/new" element={<ProductEditPage />} />
           <Route path="/catalog/:id" element={<ProductEditPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/agent" element={<AgentChatPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
