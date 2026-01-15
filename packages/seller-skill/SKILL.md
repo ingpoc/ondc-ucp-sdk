@@ -1,7 +1,8 @@
 ---
 name: seller-skill
 description: Use when implementing AI agent workflows for ONDC seller operations: adding products, editing inventory, previewing buyer view, optimizing listings. Load for any seller agent task involving catalog management, product optimization, or search visibility.
-keywords: ondc, seller, catalog, inventory, product, optimize, preview, agent, workflow
+metadata:
+  keywords: ondc, seller, catalog, inventory, product, optimize, preview, agent, workflow
 ---
 
 # Seller Skill

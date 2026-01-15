@@ -1,7 +1,8 @@
 ---
 name: buyer-skill
 description: Use when implementing AI agent workflows for ONDC buyer operations: product search, filtering, comparison, and selection decisions. Load for any buyer agent task involving search queries, preference-based filtering, or product comparison logic.
-keywords: ondc, buyer, search, filter, compare, agent, workflow, preferences, ucp
+metadata:
+  keywords: ondc, buyer, search, filter, compare, agent, workflow, preferences, ucp
 ---
 
 # Buyer Skill
