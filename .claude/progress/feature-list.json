@@ -693,7 +693,7 @@
       "id": "WEEK1-001",
       "description": "Implement SellerClient search method with ONDC protocol",
       "priority": 44,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [],
@@ -864,7 +864,7 @@
         "Strip unnecessary protocol fields",
         "Remove duplicates by SKU",
         "Apply preference scoring",
-        "Reduce payload by 90% (50KB \u2192 5KB)"
+        "Reduce payload by 90% (50KB → 5KB)"
       ],
       "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },
@@ -883,7 +883,7 @@
         "Real-time token counting for JSON responses",
         "Automatic truncation when approaching budget",
         "Cost calculator showing savings",
-        "$0.50 \u2192 $0.05 cost reduction"
+        "$0.50 → $0.05 cost reduction"
       ],
       "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
     },

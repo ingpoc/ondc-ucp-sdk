@@ -8,6 +8,8 @@ import type {
   BecknContext,
   BecknSearchRequest,
   BecknOnSearchResponse,
+  BecknSelectRequest,
+  BecknOnSelectResponse,
 } from '@ondc-agent/shared';
 import { ucpToBecknIntent } from '@ondc-agent/shared';
 import type { UCPSearchQuery } from '@ondc-agent/shared';
@@ -42,6 +44,32 @@ export interface SearchResult {
   context: BecknContext;
   /** ONDC catalog data */
   catalog: unknown;
+}
+
+/**
+ * Parameters for select operation
+ */
+export interface SelectParams {
+  /** Provider ID from search results */
+  providerId: string;
+  /** Items to select with quantities */
+  items: Array<{
+    id: string;
+    quantity?: number;
+    fulfillmentId?: string;
+  }>;
+  /** Fulfillment ID for delivery location */
+  fulfillmentId?: string;
+}
+
+/**
+ * Select result with order quote
+ */
+export interface SelectResult {
+  /** Beckn context from response */
+  context: BecknContext;
+  /** Order with quote details */
+  order: unknown;
 }
 
 /**
@@ -148,6 +176,59 @@ export class SellerClient {
     return {
       context: response.context,
       catalog: response.message?.catalog,
+    };
+  }
+
+  /**
+   * Select items from search results for order initialization
+   *
+   * @param params - Select parameters with provider and items
+   * @returns Promise resolving to select result with order quote
+   *
+   * @example
+   * ```ts
+   * const result = await client.select({
+   *   providerId: 'provider-123',
+   *   items: [
+   *     { id: 'item-1', quantity: 2 },
+   *     { id: 'item-2', quantity: 1 }
+   *   ]
+   * });
+   * ```
+   */
+  async select(params: SelectParams): Promise<SelectResult> {
+    // Build Beckn context for select
+    const context = this.buildContext('select');
+
+    // Build order items
+    const orderItems = params.items.map((item) => ({
+      id: item.id,
+      quantity: item.quantity ? { count: item.quantity } : undefined,
+      fulfillment_id: item.fulfillmentId,
+    }));
+
+    // Build select request
+    const selectRequest: BecknSelectRequest = {
+      context,
+      message: {
+        order: {
+          provider: {
+            id: params.providerId,
+          },
+          items: orderItems,
+          fulfillments: params.fulfillmentId
+            ? [{ id: params.fulfillmentId }]
+            : undefined,
+        },
+      },
+    };
+
+    // Send request to ONDC gateway
+    const response = await this.client.post<BecknOnSelectResponse>('/select', selectRequest);
+
+    return {
+      context: response.context,
+      order: response.message?.order,
     };
   }
 

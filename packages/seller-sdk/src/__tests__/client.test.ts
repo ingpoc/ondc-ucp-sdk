@@ -12,36 +12,76 @@ vi.mock('@ondc-agent/shared', async () => {
   return {
     ...actual,
     ONDCClient: vi.fn().mockImplementation(() => ({
-      post: vi.fn().mockResolvedValue({
-        context: {
-          domain: 'ONDC:RET10',
-          action: 'on_search',
-          country: 'IND',
-          city: 'std:080',
-          bap_id: 'test-seller.com',
-          bap_uri: 'https://test-seller.com',
-          transaction_id: 'txn-123',
-          message_id: 'msg-456',
-          timestamp: '2025-01-15T10:00:00.000Z',
-        },
-        message: {
-          catalog: {
-            'bpp/descriptor': { name: 'Test Store' },
-            'bpp/providers': [
-              {
-                id: 'provider-1',
-                descriptor: { name: 'Provider One' },
-                items: [
+      post: vi.fn().mockImplementation((path: string) => {
+        if (path === '/search') {
+          return Promise.resolve({
+            context: {
+              domain: 'ONDC:RET10',
+              action: 'on_search',
+              country: 'IND',
+              city: 'std:080',
+              bap_id: 'test-seller.com',
+              bap_uri: 'https://test-seller.com',
+              transaction_id: 'txn-123',
+              message_id: 'msg-456',
+              timestamp: '2025-01-15T10:00:00.000Z',
+            },
+            message: {
+              catalog: {
+                'bpp/descriptor': { name: 'Test Store' },
+                'bpp/providers': [
                   {
-                    id: 'item-1',
-                    descriptor: { name: 'Test Item' },
-                    price: { currency: 'INR', value: '999.00' },
+                    id: 'provider-1',
+                    descriptor: { name: 'Provider One' },
+                    items: [
+                      {
+                        id: 'item-1',
+                        descriptor: { name: 'Test Item' },
+                        price: { currency: 'INR', value: '999.00' },
+                      },
+                    ],
                   },
                 ],
               },
-            ],
-          },
-        },
+            },
+          });
+        }
+        if (path === '/select') {
+          return Promise.resolve({
+            context: {
+              domain: 'ONDC:RET10',
+              action: 'on_select',
+              country: 'IND',
+              city: 'std:080',
+              bap_id: 'test-seller.com',
+              bap_uri: 'https://test-seller.com',
+              transaction_id: 'txn-124',
+              message_id: 'msg-457',
+              timestamp: '2025-01-15T10:01:00.000Z',
+            },
+            message: {
+              order: {
+                provider: { id: 'provider-1' },
+                items: [
+                  { id: 'item-1', quantity: { count: 2 } },
+                ],
+                quote: {
+                  price: { currency: 'INR', value: '1998.00' },
+                  breakup: [
+                    {
+                      item: { id: 'item-1' },
+                      price: { currency: 'INR', value: '999.00' },
+                    },
+                  ],
+                },
+              },
+            },
+          });
+        }
+        if (path === '/request') {
+          return Promise.resolve({});
+        }
+        return Promise.reject(new Error('Unknown path'));
       }),
     })),
   };
@@ -163,6 +203,61 @@ describe('SellerClient', () => {
       });
 
       expect(result.catalog).toBeDefined();
+    });
+  });
+
+  describe('select', () => {
+    it('should select single item', async () => {
+      const result = await client.select({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 1 }],
+      });
+
+      expect(result.context).toBeDefined();
+      expect(result.context.action).toBe('on_select');
+      expect(result.order).toBeDefined();
+    });
+
+    it('should select multiple items with quantities', async () => {
+      const result = await client.select({
+        providerId: 'provider-1',
+        items: [
+          { id: 'item-1', quantity: 2 },
+          { id: 'item-2', quantity: 1 },
+        ],
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should select with fulfillment ID', async () => {
+      const result = await client.select({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 1 }],
+        fulfillmentId: 'fulfillment-1',
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should select item without quantity', async () => {
+      const result = await client.select({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1' }],
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should select with item-level fulfillment ID', async () => {
+      const result = await client.select({
+        providerId: 'provider-1',
+        items: [
+          { id: 'item-1', quantity: 1, fulfillmentId: 'fulfillment-1' },
+        ],
+      });
+
+      expect(result.order).toBeDefined();
     });
   });
 
