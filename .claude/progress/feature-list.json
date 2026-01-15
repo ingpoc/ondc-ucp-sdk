@@ -817,7 +817,7 @@
       "id": "WEEK2-002",
       "description": "Enhance ondc_search MCP tool with streaming support",
       "priority": 51,
-      "status": "pending",
+      "status": "implemented",
       "tier": "core",
       "phase": "week2",
       "dependencies": [
