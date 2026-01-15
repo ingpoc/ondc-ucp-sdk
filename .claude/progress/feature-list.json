@@ -873,7 +873,7 @@
       "id": "SDK-BUYER-CART-002",
       "description": "Create buyer cart page UI",
       "priority": 54,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
       "dependencies": [
