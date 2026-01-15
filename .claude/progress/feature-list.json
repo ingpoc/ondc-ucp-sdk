@@ -16,7 +16,10 @@
       "phase": "foundation",
       "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
       "dependencies": [],
-      "acceptance_criteria": ["pnpm-workspace.yaml configured", "3 packages defined"]
+      "acceptance_criteria": [
+        "pnpm-workspace.yaml configured",
+        "3 packages defined"
+      ]
     },
     {
       "id": "INIT-002",
@@ -25,8 +28,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["INIT-001"],
-      "acceptance_criteria": ["All packages have build scripts"]
+      "dependencies": [
+        "INIT-001"
+      ],
+      "acceptance_criteria": [
+        "All packages have build scripts"
+      ]
     },
     {
       "id": "INIT-003",
@@ -35,8 +42,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["INIT-002"],
-      "acceptance_criteria": ["tsup.config.ts in each package"]
+      "dependencies": [
+        "INIT-002"
+      ],
+      "acceptance_criteria": [
+        "tsup.config.ts in each package"
+      ]
     },
     {
       "id": "INIT-004",
@@ -45,8 +56,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["INIT-003"],
-      "acceptance_criteria": ["vitest.config.ts at root"]
+      "dependencies": [
+        "INIT-003"
+      ],
+      "acceptance_criteria": [
+        "vitest.config.ts at root"
+      ]
     },
     {
       "id": "TYPES-001",
@@ -55,8 +70,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["INIT-004"],
-      "acceptance_criteria": ["BecknMessage interface defined"]
+      "dependencies": [
+        "INIT-004"
+      ],
+      "acceptance_criteria": [
+        "BecknMessage interface defined"
+      ]
     },
     {
       "id": "TYPES-002",
@@ -65,8 +84,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["TYPES-001"],
-      "acceptance_criteria": ["UCPSearchQuery, UCPCatalog defined"]
+      "dependencies": [
+        "TYPES-001"
+      ],
+      "acceptance_criteria": [
+        "UCPSearchQuery, UCPCatalog defined"
+      ]
     },
     {
       "id": "TYPES-003",
@@ -75,8 +98,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["TYPES-002"],
-      "acceptance_criteria": ["MCPTool schema defined"]
+      "dependencies": [
+        "TYPES-002"
+      ],
+      "acceptance_criteria": [
+        "MCPTool schema defined"
+      ]
     },
     {
       "id": "TYPES-004",
@@ -85,8 +112,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["TYPES-003"],
-      "acceptance_criteria": ["BecknMessageSchema, UCPSearchQuerySchema"]
+      "dependencies": [
+        "TYPES-003"
+      ],
+      "acceptance_criteria": [
+        "BecknMessageSchema, UCPSearchQuerySchema"
+      ]
     },
     {
       "id": "CRYPTO-001",
@@ -95,8 +126,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["TYPES-004"],
-      "acceptance_criteria": ["generateKeyPair() function"]
+      "dependencies": [
+        "TYPES-004"
+      ],
+      "acceptance_criteria": [
+        "generateKeyPair() function"
+      ]
     },
     {
       "id": "CRYPTO-002",
@@ -105,8 +140,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["CRYPTO-001"],
-      "acceptance_criteria": ["signMessage(), verifySignature()"]
+      "dependencies": [
+        "CRYPTO-001"
+      ],
+      "acceptance_criteria": [
+        "signMessage(), verifySignature()"
+      ]
     },
     {
       "id": "CRYPTO-003",
@@ -115,8 +154,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["CRYPTO-002"],
-      "acceptance_criteria": ["buildAuthHeader() function"]
+      "dependencies": [
+        "CRYPTO-002"
+      ],
+      "acceptance_criteria": [
+        "buildAuthHeader() function"
+      ]
     },
     {
       "id": "CONFIG-001",
@@ -125,8 +168,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["TYPES-004"],
-      "acceptance_criteria": ["GatewayConfigSchema"]
+      "dependencies": [
+        "TYPES-004"
+      ],
+      "acceptance_criteria": [
+        "GatewayConfigSchema"
+      ]
     },
     {
       "id": "CONFIG-002",
@@ -135,8 +182,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["CONFIG-001"],
-      "acceptance_criteria": ["loadConfig() function"]
+      "dependencies": [
+        "CONFIG-001"
+      ],
+      "acceptance_criteria": [
+        "loadConfig() function"
+      ]
     },
     {
       "id": "CI-001",
@@ -145,8 +196,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": ["CONFIG-002"],
-      "acceptance_criteria": [".github/workflows/ci.yml"]
+      "dependencies": [
+        "CONFIG-002"
+      ],
+      "acceptance_criteria": [
+        ".github/workflows/ci.yml"
+      ]
     },
     {
       "id": "TRANSLATE-001",
@@ -155,8 +210,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["TYPES-004"],
-      "acceptance_criteria": ["becknToUcpCatalog() function"]
+      "dependencies": [
+        "TYPES-004"
+      ],
+      "acceptance_criteria": [
+        "becknToUcpCatalog() function"
+      ]
     },
     {
       "id": "TRANSLATE-002",
@@ -165,8 +224,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["TRANSLATE-001"],
-      "acceptance_criteria": ["normalizePrice(), normalizeRating()"]
+      "dependencies": [
+        "TRANSLATE-001"
+      ],
+      "acceptance_criteria": [
+        "normalizePrice(), normalizeRating()"
+      ]
     },
     {
       "id": "TRANSLATE-003",
@@ -175,8 +238,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["TRANSLATE-002"],
-      "acceptance_criteria": ["ucpToBecknIntent() function"]
+      "dependencies": [
+        "TRANSLATE-002"
+      ],
+      "acceptance_criteria": [
+        "ucpToBecknIntent() function"
+      ]
     },
     {
       "id": "HTTP-001",
@@ -185,8 +252,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["CONFIG-002"],
-      "acceptance_criteria": ["ONDCClient class with post()"]
+      "dependencies": [
+        "CONFIG-002"
+      ],
+      "acceptance_criteria": [
+        "ONDCClient class with post()"
+      ]
     },
     {
       "id": "HTTP-002",
@@ -195,8 +266,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["HTTP-001"],
-      "acceptance_criteria": ["Retry on 5xx, max 3 retries"]
+      "dependencies": [
+        "HTTP-001"
+      ],
+      "acceptance_criteria": [
+        "Retry on 5xx, max 3 retries"
+      ]
     },
     {
       "id": "WEBHOOK-001",
@@ -205,8 +280,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["HTTP-002"],
-      "acceptance_criteria": ["POST /on_search, /on_select endpoints"]
+      "dependencies": [
+        "HTTP-002"
+      ],
+      "acceptance_criteria": [
+        "POST /on_search, /on_select endpoints"
+      ]
     },
     {
       "id": "WEBHOOK-002",
@@ -215,8 +294,13 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["WEBHOOK-001", "CRYPTO-003"],
-      "acceptance_criteria": ["Verify Authorization header"]
+      "dependencies": [
+        "WEBHOOK-001",
+        "CRYPTO-003"
+      ],
+      "acceptance_criteria": [
+        "Verify Authorization header"
+      ]
     },
     {
       "id": "WEBHOOK-003",
@@ -225,8 +309,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["WEBHOOK-002"],
-      "acceptance_criteria": ["Extract and match transaction_id"]
+      "dependencies": [
+        "WEBHOOK-002"
+      ],
+      "acceptance_criteria": [
+        "Extract and match transaction_id"
+      ]
     },
     {
       "id": "STATE-001",
@@ -235,8 +323,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["WEBHOOK-003"],
-      "acceptance_criteria": ["StateStore class with Map"]
+      "dependencies": [
+        "WEBHOOK-003"
+      ],
+      "acceptance_criteria": [
+        "StateStore class with Map"
+      ]
     },
     {
       "id": "STATE-002",
@@ -245,8 +337,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": ["STATE-001"],
-      "acceptance_criteria": ["waitForCallback() function"]
+      "dependencies": [
+        "STATE-001"
+      ],
+      "acceptance_criteria": [
+        "waitForCallback() function"
+      ]
     },
     {
       "id": "MCP-001",
@@ -255,8 +351,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": ["STATE-002"],
-      "acceptance_criteria": ["McpServer with stdio transport"]
+      "dependencies": [
+        "STATE-002"
+      ],
+      "acceptance_criteria": [
+        "McpServer with stdio transport"
+      ]
     },
     {
       "id": "MCP-002",
@@ -265,8 +365,13 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": ["MCP-001", "TRANSLATE-003"],
-      "acceptance_criteria": ["ondc_search tool registered"]
+      "dependencies": [
+        "MCP-001",
+        "TRANSLATE-003"
+      ],
+      "acceptance_criteria": [
+        "ondc_search tool registered"
+      ]
     },
     {
       "id": "PREF-001",
@@ -275,8 +380,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": ["MCP-002"],
-      "acceptance_criteria": ["scoreItem() function"]
+      "dependencies": [
+        "MCP-002"
+      ],
+      "acceptance_criteria": [
+        "scoreItem() function"
+      ]
     },
     {
       "id": "PREF-002",
@@ -285,8 +394,12 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": ["PREF-001"],
-      "acceptance_criteria": ["normalizeWeights() function"]
+      "dependencies": [
+        "PREF-001"
+      ],
+      "acceptance_criteria": [
+        "normalizeWeights() function"
+      ]
     },
     {
       "id": "MOCK-001",
@@ -295,19 +408,25 @@
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": ["PREF-002"],
-      "acceptance_criteria": ["Express server with /search endpoint"]
+      "dependencies": [
+        "PREF-002"
+      ],
+      "acceptance_criteria": [
+        "Express server with /search endpoint"
+      ]
     },
     {
       "id": "WEBSITE-001",
       "description": "Create website/api-server package structure",
       "priority": 32,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["MOCK-001"],
+      "dependencies": [
+        "MOCK-001"
+      ],
       "acceptance_criteria": [
         "website/api-server/package.json created",
         "Express server setup",
@@ -324,7 +443,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-001"],
+      "dependencies": [
+        "WEBSITE-001"
+      ],
       "acceptance_criteria": [
         "GET /api/search accepts query params",
         "Calls becknToUcpCatalog() from SDK",
@@ -341,7 +462,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-001"],
+      "dependencies": [
+        "WEBSITE-001"
+      ],
       "acceptance_criteria": [
         "GET /api/catalog returns MockGateway data",
         "POST /api/catalog/products adds product",
@@ -377,7 +500,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-004"],
+      "dependencies": [
+        "WEBSITE-004"
+      ],
       "acceptance_criteria": [
         "Vite + React + TypeScript setup",
         "React Router configured",
@@ -395,7 +520,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-005"],
+      "dependencies": [
+        "WEBSITE-005"
+      ],
       "acceptance_criteria": [
         "SearchBar component",
         "FilterSidebar component",
@@ -413,7 +540,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-004"],
+      "dependencies": [
+        "WEBSITE-004"
+      ],
       "acceptance_criteria": [
         "Vite + React + TypeScript setup",
         "React Router configured",
@@ -431,7 +560,9 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-007"],
+      "dependencies": [
+        "WEBSITE-007"
+      ],
       "acceptance_criteria": [
         "ProductForm component",
         "InventoryTable component",
@@ -448,7 +579,10 @@
       "phase": "website-phase1",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": ["WEBSITE-006", "WEBSITE-008"],
+      "dependencies": [
+        "WEBSITE-006",
+        "WEBSITE-008"
+      ],
       "acceptance_criteria": [
         "Buyer can search and see results",
         "Seller can add/edit products",
@@ -465,7 +599,9 @@
       "phase": "website-phase2",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": ["WEBSITE-009"],
+      "dependencies": [
+        "WEBSITE-009"
+      ],
       "acceptance_criteria": [
         "packages/buyer-skill/skill.md created",
         "Defines buyer search workflow",
@@ -483,7 +619,9 @@
       "phase": "website-phase2",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": ["WEBSITE-009"],
+      "dependencies": [
+        "WEBSITE-009"
+      ],
       "acceptance_criteria": [
         "packages/seller-skill/skill.md created",
         "Defines add product workflow",
@@ -501,7 +639,10 @@
       "phase": "website-phase2",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": ["AGENT-001", "AGENT-002"],
+      "dependencies": [
+        "AGENT-001",
+        "AGENT-002"
+      ],
       "acceptance_criteria": [
         "Add @anthropic-ai/claude-agent-sdk dependency",
         "POST /api/agent/buyer endpoint",
@@ -519,7 +660,9 @@
       "phase": "website-phase2",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": ["AGENT-003"],
+      "dependencies": [
+        "AGENT-003"
+      ],
       "acceptance_criteria": [
         "AgentChat component in shared",
         "Streaming message handling",
@@ -536,7 +679,9 @@
       "phase": "website-phase2",
       "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
       "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": ["AGENT-004"],
+      "dependencies": [
+        "AGENT-004"
+      ],
       "acceptance_criteria": [
         "Document what's easier with agent",
         "Document what's better direct SDK",

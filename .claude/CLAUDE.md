@@ -42,3 +42,8 @@ ondc-ucp-sdk project
 
 **token-efficient**: `execute_code`, `process_csv`, `process_logs`
 **context-graph**: `context_store_trace`, `context_query_traces`
+
+## Logging to Context Graph
+
+Any gap found in sdk implementation should be logged in context-graph.
+What solution was used to bridge the gap in sdk implementation should also be logged in context-graph
