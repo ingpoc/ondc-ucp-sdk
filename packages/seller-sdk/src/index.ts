@@ -8,6 +8,8 @@ export type {
   SelectResult,
   InitParams,
   InitResult,
+  ConfirmParams,
+  ConfirmResult,
   BillingInfo,
   PaymentInfo,
 } from './client';

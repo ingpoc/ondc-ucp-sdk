@@ -113,6 +113,40 @@ vi.mock('@ondc-agent/shared', async () => {
             },
           });
         }
+        if (path === '/confirm') {
+          return Promise.resolve({
+            context: {
+              domain: 'ONDC:RET10',
+              action: 'on_confirm',
+              country: 'IND',
+              city: 'std:080',
+              bap_id: 'test-seller.com',
+              bap_uri: 'https://test-seller.com',
+              transaction_id: 'txn-126',
+              message_id: 'msg-459',
+              timestamp: '2025-01-15T10:03:00.000Z',
+            },
+            message: {
+              order: {
+                id: 'order-abc-123',
+                state: 'Created',
+                provider: { id: 'provider-1' },
+                items: [
+                  { id: 'item-1', quantity: { count: 2 } },
+                ],
+                billing: {
+                  name: 'John Doe',
+                  phone: '+919876543210',
+                  email: 'john@example.com',
+                },
+                payment: {
+                  type: 'ON-FULFILLMENT',
+                  status: 'NOT-PAID',
+                },
+              },
+            },
+          });
+        }
         return Promise.reject(new Error('Unknown path'));
       }),
     })),
@@ -375,6 +409,84 @@ describe('SellerClient', () => {
           name: 'Multi Item User',
           phone: '+919876543214',
           email: 'multi@example.com',
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+  });
+
+  describe('confirm', () => {
+    it('should confirm order with order ID', async () => {
+      const result = await client.confirm({
+        providerId: 'provider-1',
+        orderId: 'order-abc-123',
+        items: [{ id: 'item-1', quantity: 2 }],
+        billing: {
+          name: 'John Doe',
+          phone: '+919876543210',
+          email: 'john@example.com',
+        },
+      });
+
+      expect(result.context).toBeDefined();
+      expect(result.context.action).toBe('on_confirm');
+      expect(result.order).toBeDefined();
+    });
+
+    it('should confirm order with payment details', async () => {
+      const result = await client.confirm({
+        providerId: 'provider-1',
+        orderId: 'order-xyz-789',
+        items: [{ id: 'item-1', quantity: 1 }],
+        billing: {
+          name: 'Jane Doe',
+          phone: '+919876543211',
+          email: 'jane@example.com',
+        },
+        payment: {
+          type: 'ON-FULFILLMENT',
+          status: 'NOT-PAID',
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should confirm order with billing address', async () => {
+      const result = await client.confirm({
+        providerId: 'provider-1',
+        orderId: 'order-def-456',
+        items: [{ id: 'item-1', quantity: 1 }],
+        billing: {
+          name: 'Test User',
+          phone: '+919876543212',
+          email: 'test@example.com',
+          address: {
+            street: '456 Oak Ave',
+            city: 'Mumbai',
+            state: 'MH',
+            postalCode: '400001',
+            country: 'IND',
+          },
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should confirm order with multiple items', async () => {
+      const result = await client.confirm({
+        providerId: 'provider-1',
+        orderId: 'order-multi-123',
+        items: [
+          { id: 'item-1', quantity: 3 },
+          { id: 'item-2', quantity: 1 },
+        ],
+        billing: {
+          name: 'Multi Item Buyer',
+          phone: '+919876543215',
+          email: 'buyer@example.com',
         },
       });
 

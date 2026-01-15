@@ -728,7 +728,7 @@
       "id": "WEEK1-003",
       "description": "Implement SellerClient init method with ONDC protocol",
       "priority": 46,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [

@@ -12,6 +12,8 @@ import type {
   BecknOnSelectResponse,
   BecknInitRequest,
   BecknOnInitResponse,
+  BecknConfirmRequest,
+  BecknOnConfirmResponse,
 } from '@ondc-agent/shared';
 import { ucpToBecknIntent } from '@ondc-agent/shared';
 import type { UCPSearchQuery } from '@ondc-agent/shared';
@@ -137,6 +139,38 @@ export interface InitResult {
   /** Beckn context from response */
   context: BecknContext;
   /** Initialized order details */
+  order: unknown;
+}
+
+/**
+ * Parameters for confirm operation
+ */
+export interface ConfirmParams {
+  /** Provider ID from init response */
+  providerId: string;
+  /** Order ID from init response */
+  orderId: string;
+  /** Items to confirm with quantities */
+  items: Array<{
+    id: string;
+    quantity?: number;
+    fulfillmentId?: string;
+  }>;
+  /** Billing information */
+  billing: BillingInfo;
+  /** Payment information */
+  payment?: PaymentInfo;
+  /** Fulfillment ID */
+  fulfillmentId?: string;
+}
+
+/**
+ * Confirm result with confirmed order
+ */
+export interface ConfirmResult {
+  /** Beckn context from response */
+  context: BecknContext;
+  /** Confirmed order details with order ID */
   order: unknown;
 }
 
@@ -378,6 +412,93 @@ export class SellerClient {
 
     // Send request to ONDC gateway
     const response = await this.client.post<BecknOnInitResponse>('/init', initRequest);
+
+    return {
+      context: response.context,
+      order: response.message?.order,
+    };
+  }
+
+  /**
+   * Confirm order to complete transaction
+   *
+   * @param params - Confirm parameters with order ID
+   * @returns Promise resolving to confirm result with confirmed order
+   *
+   * @example
+   * ```ts
+   * const result = await client.confirm({
+   *   providerId: 'provider-123',
+   *   orderId: 'order-abc-123',
+   *   items: [
+   *     { id: 'item-1', quantity: 2 }
+   *   ],
+   *   billing: {
+   *     name: 'John Doe',
+   *     phone: '+919876543210',
+   *     email: 'john@example.com'
+   *   },
+   *   payment: {
+   *     type: 'ON-FULFILLMENT',
+   *     status: 'NOT-PAID'
+   *   }
+   * });
+   * ```
+   */
+  async confirm(params: ConfirmParams): Promise<ConfirmResult> {
+    // Build Beckn context for confirm
+    const context = this.buildContext('confirm');
+
+    // Build order items
+    const orderItems = params.items.map((item) => ({
+      id: item.id,
+      quantity: item.quantity ? { count: item.quantity } : undefined,
+      fulfillment_id: item.fulfillmentId,
+    }));
+
+    // Build billing object
+    const billing = {
+      name: params.billing.name,
+      phone: params.billing.phone,
+      email: params.billing.email,
+      taxId: params.billing.taxId,
+      address: params.billing.address
+        ? {
+            street: params.billing.address.street,
+            city: params.billing.address.city,
+            state: params.billing.address.state,
+            area_code: params.billing.address.postalCode,
+            country: params.billing.address.country,
+          }
+        : undefined,
+    };
+
+    // Build confirm request
+    const confirmRequest: BecknConfirmRequest = {
+      context,
+      message: {
+        order: {
+          id: params.orderId,
+          provider: {
+            id: params.providerId,
+          },
+          items: orderItems,
+          billing,
+          payment: params.payment
+            ? {
+                type: params.payment.type,
+                status: params.payment.status,
+              }
+            : undefined,
+          fulfillments: params.fulfillmentId
+            ? [{ id: params.fulfillmentId }]
+            : undefined,
+        },
+      },
+    };
+
+    // Send request to ONDC gateway
+    const response = await this.client.post<BecknOnConfirmResponse>('/confirm', confirmRequest);
 
     return {
       context: response.context,
