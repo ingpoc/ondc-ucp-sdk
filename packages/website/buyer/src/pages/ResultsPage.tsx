@@ -29,7 +29,7 @@ export function ResultsPage() {
 
   useEffect(() => {
     execute();
-  }, [execute, filters]);
+  }, [execute, filters, query, category]);
 
   if (loading) {
     return <div>Loading...</div>;

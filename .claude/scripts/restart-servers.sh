@@ -10,6 +10,13 @@
 
 echo "=== Restarting ONDC Servers ==="
 
+# Clear Vite cache (solves stale cache issues)
+echo "Clearing Vite cache..."
+rm -rf /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/seller/.vite
+rm -rf /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/buyer/.vite
+rm -rf /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/seller/node_modules/.vite
+rm -rf /Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/packages/website/buyer/node_modules/.vite
+
 # Kill existing processes
 echo "Stopping servers..."
 pkill -f "node.*api-server" || true

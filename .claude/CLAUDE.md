@@ -1,49 +1,45 @@
 ---
 name: local
-description: Quick reference for ondc-ucp-sdk
-keywords: quick-ref, commands, state
+description: Quick reference - ONDC monorepo dev servers and scripts
+keywords: quick-ref, scripts, monorepo, vite
 ---
 
 # Quick Reference
 
-## Purpose
-
-ondc-ucp-sdk project
-
-## Commands
+## Dev Servers & Commands
 
 | Task | Command |
 |------|---------|
-| Check state | `~/.claude/skills/orchestrator/scripts/check-state.sh` |
-| Run tests | `~/.claude/skills/testing/scripts/run-unit-tests.sh` |
-| Health check | `~/.claude/skills/implementation/scripts/health-check.sh` |
-| Session entry | `~/.claude/skills/orchestrator/scripts/session-entry.sh` |
+| Start servers | `pnpm dev` (all 3 ports) |
+| Run tests | `.claude/scripts/run-tests.sh` |
+| Health check | `.claude/scripts/health-check.sh` |
+| Restart servers | `.claude/scripts/restart-servers.sh` |
+| Check state | `.claude/scripts/check-state.sh` |
+| Commit | `.claude/scripts/feature-commit.sh feat SCOPE "msg"` |
 
+## State Machine
 
-## State → Skill
+| State | Next | Trigger |
+|-------|------|---------|
+| START | INIT | Project setup complete |
+| INIT | IMPLEMENT | Features defined |
+| IMPLEMENT | TEST | Code implemented |
+| TEST | COMPLETE | All tests pass |
 
-| State | Skill |
-|-------|-------|
-| INIT | initialization/ |
-| IMPLEMENT | implementation/ |
-| TEST | testing/ |
-| COMPLETE | context-graph/ |
-
-## Config
+## Key Paths
 
 | File | Purpose |
 |------|---------|
-| `.claude/config/project.json` | Project settings |
+| `.claude/config/project.json` | Project config (pnpm, ports) |
 | `.claude/progress/state.json` | Current state |
-| `.claude/progress/feature-list.json` | Features |
-| `.mcp.json` | MCP servers |
+| `.claude/progress/feature-list.json` | Features to implement |
 
 ## MCP Tools
 
-**token-efficient**: `execute_code`, `process_csv`, `process_logs`
-**context-graph**: `context_store_trace`, `context_query_traces`
-
-## Logging to Context Graph
-
-Any gap found in sdk implementation should be logged in context-graph.
-What solution was used to bridge the gap in sdk implementation should also be logged in context-graph
+| Tool | Use For |
+|------|---------|
+| `execute_code` | Sandbox Python/Bash/Node (98% savings) |
+| `process_csv` | CSV processing (99% savings) |
+| `process_logs` | Log analysis (95% savings) |
+| `context_store_trace` | Store decisions |
+| `context_query_traces` | Find similar decisions |

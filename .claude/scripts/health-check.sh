@@ -96,6 +96,34 @@ if [ -f "package.json" ] && [ -d "node_modules" ]; then
 fi
 
 # ============================================================================
+# Check development servers (if running)
+# ============================================================================
+
+echo ""
+echo "Checking development servers..."
+
+# Check API server (port 3001)
+if curl -s http://localhost:3001/health >/dev/null 2>&1; then
+  echo "✓ API server (3001)"
+else
+  echo "⚠ API server (3001) not responding (run: pnpm dev)"
+fi
+
+# Check Buyer webapp (port 3000)
+if curl -s http://localhost:3000 >/dev/null 2>&1; then
+  echo "✓ Buyer webapp (3000)"
+else
+  echo "⚠ Buyer webapp (3000) not responding (run: pnpm dev)"
+fi
+
+# Check Seller webapp (port 3002)
+if curl -s http://localhost:3002 >/dev/null 2>&1; then
+  echo "✓ Seller webapp (3002)"
+else
+  echo "⚠ Seller webapp (3002) not responding (run: pnpm dev)"
+fi
+
+# ============================================================================
 # Final result
 # ============================================================================
 

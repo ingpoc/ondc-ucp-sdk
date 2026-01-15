@@ -6,10 +6,15 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, onClick }: ProductCardProps) {
+  if (!product) {
+    return <div>Product data unavailable</div>;
+  }
+
   // Handle both UCPItem (name) and BecknItem (descriptor.name) structures
-  const name = (product as any).descriptor?.name || product.name || 'Unknown';
-  const description = (product as any).descriptor?.short_desc || product.description || '';
-  const providerName = (product as any)._provider || product.provider?.name || 'Unknown Provider';
+  const descriptor = (product as any).descriptor;
+  const name = descriptor?.name || (product as any).name || 'Unknown';
+  const description = descriptor?.short_desc || (product as any).description || '';
+  const providerName = (product as any)._provider || (product as any).provider?.name || 'Unknown Provider';
 
   return (
     <div
@@ -31,8 +36,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       )}
       <h3>{name}</h3>
       {description && <p>{description}</p>}
-      <PriceDisplay price={product.price} />
-      {product.rating && <RatingStars rating={product.rating.value} />}
+      <PriceDisplay price={(product as any).price} />
+      {(product as any).rating && <RatingStars rating={(product as any).rating.value} />}
       <p style={{ fontSize: '0.9em', color: '#666' }}>
         Seller: {providerName}
       </p>
