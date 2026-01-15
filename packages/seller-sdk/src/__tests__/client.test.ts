@@ -81,6 +81,38 @@ vi.mock('@ondc-agent/shared', async () => {
         if (path === '/request') {
           return Promise.resolve({});
         }
+        if (path === '/init') {
+          return Promise.resolve({
+            context: {
+              domain: 'ONDC:RET10',
+              action: 'on_init',
+              country: 'IND',
+              city: 'std:080',
+              bap_id: 'test-seller.com',
+              bap_uri: 'https://test-seller.com',
+              transaction_id: 'txn-125',
+              message_id: 'msg-458',
+              timestamp: '2025-01-15T10:02:00.000Z',
+            },
+            message: {
+              order: {
+                provider: { id: 'provider-1' },
+                items: [
+                  { id: 'item-1', quantity: { count: 2 } },
+                ],
+                billing: {
+                  name: 'John Doe',
+                  phone: '+919876543210',
+                  email: 'john@example.com',
+                },
+                payment: {
+                  type: 'ON-FULFILLMENT',
+                  status: 'NOT-PAID',
+                },
+              },
+            },
+          });
+        }
         return Promise.reject(new Error('Unknown path'));
       }),
     })),
@@ -255,6 +287,95 @@ describe('SellerClient', () => {
         items: [
           { id: 'item-1', quantity: 1, fulfillmentId: 'fulfillment-1' },
         ],
+      });
+
+      expect(result.order).toBeDefined();
+    });
+  });
+
+  describe('init', () => {
+    it('should init order with billing info', async () => {
+      const result = await client.init({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 2 }],
+        billing: {
+          name: 'John Doe',
+          phone: '+919876543210',
+          email: 'john@example.com',
+        },
+      });
+
+      expect(result.context).toBeDefined();
+      expect(result.context.action).toBe('on_init');
+      expect(result.order).toBeDefined();
+    });
+
+    it('should init order with payment details', async () => {
+      const result = await client.init({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 1 }],
+        billing: {
+          name: 'Jane Doe',
+          phone: '+919876543211',
+          email: 'jane@example.com',
+        },
+        payment: {
+          type: 'ON-FULFILLMENT',
+          status: 'NOT-PAID',
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should init order with billing address', async () => {
+      const result = await client.init({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 1 }],
+        billing: {
+          name: 'Test User',
+          phone: '+919876543212',
+          email: 'test@example.com',
+          address: {
+            street: '123 Main St',
+            city: 'Bangalore',
+            state: 'KA',
+            postalCode: '560001',
+            country: 'IND',
+          },
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should init order with tax ID', async () => {
+      const result = await client.init({
+        providerId: 'provider-1',
+        items: [{ id: 'item-1', quantity: 1 }],
+        billing: {
+          name: 'Business User',
+          phone: '+919876543213',
+          email: 'business@example.com',
+          taxId: '29ABCDE1234F1Z5',
+        },
+      });
+
+      expect(result.order).toBeDefined();
+    });
+
+    it('should init order with multiple items', async () => {
+      const result = await client.init({
+        providerId: 'provider-1',
+        items: [
+          { id: 'item-1', quantity: 2 },
+          { id: 'item-2', quantity: 1 },
+        ],
+        billing: {
+          name: 'Multi Item User',
+          phone: '+919876543214',
+          email: 'multi@example.com',
+        },
       });
 
       expect(result.order).toBeDefined();

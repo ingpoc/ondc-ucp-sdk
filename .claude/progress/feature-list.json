@@ -710,7 +710,7 @@
       "id": "WEEK1-002",
       "description": "Implement SellerClient select method with ONDC protocol",
       "priority": 45,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [

@@ -10,6 +10,8 @@ import type {
   BecknOnSearchResponse,
   BecknSelectRequest,
   BecknOnSelectResponse,
+  BecknInitRequest,
+  BecknOnInitResponse,
 } from '@ondc-agent/shared';
 import { ucpToBecknIntent } from '@ondc-agent/shared';
 import type { UCPSearchQuery } from '@ondc-agent/shared';
@@ -69,6 +71,72 @@ export interface SelectResult {
   /** Beckn context from response */
   context: BecknContext;
   /** Order with quote details */
+  order: unknown;
+}
+
+/**
+ * Billing information
+ */
+export interface BillingInfo {
+  /** Customer name */
+  name: string;
+  /** Phone number with country code */
+  phone: string;
+  /** Email address */
+  email: string;
+  /** Tax ID (GSTIN) */
+  taxId?: string;
+  /** Address */
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+}
+
+/**
+ * Payment information
+ */
+export interface PaymentInfo {
+  /** Payment type (ON-FULFILLMENT, PRE-ORDER, etc.) */
+  type?: string;
+  /** Payment status */
+  status?: string;
+  /** Payment method code */
+  method?: string;
+  /** Transaction ID reference */
+  transactionId?: string;
+}
+
+/**
+ * Parameters for init operation
+ */
+export interface InitParams {
+  /** Provider ID from select response */
+  providerId: string;
+  /** Items to initialize with quantities */
+  items: Array<{
+    id: string;
+    quantity?: number;
+    fulfillmentId?: string;
+  }>;
+  /** Billing information */
+  billing: BillingInfo;
+  /** Payment information */
+  payment?: PaymentInfo;
+  /** Fulfillment ID */
+  fulfillmentId?: string;
+}
+
+/**
+ * Init result with initialized order
+ */
+export interface InitResult {
+  /** Beckn context from response */
+  context: BecknContext;
+  /** Initialized order details */
   order: unknown;
 }
 
@@ -225,6 +293,91 @@ export class SellerClient {
 
     // Send request to ONDC gateway
     const response = await this.client.post<BecknOnSelectResponse>('/select', selectRequest);
+
+    return {
+      context: response.context,
+      order: response.message?.order,
+    };
+  }
+
+  /**
+   * Initialize order with billing and payment details
+   *
+   * @param params - Init parameters with billing and payment
+   * @returns Promise resolving to init result with order details
+   *
+   * @example
+   * ```ts
+   * const result = await client.init({
+   *   providerId: 'provider-123',
+   *   items: [
+   *     { id: 'item-1', quantity: 2 }
+   *   ],
+   *   billing: {
+   *     name: 'John Doe',
+   *     phone: '+919876543210',
+   *     email: 'john@example.com'
+   *   },
+   *   payment: {
+   *     type: 'ON-FULFILLMENT',
+   *     status: 'NOT-PAID'
+   *   }
+   * });
+   * ```
+   */
+  async init(params: InitParams): Promise<InitResult> {
+    // Build Beckn context for init
+    const context = this.buildContext('init');
+
+    // Build order items
+    const orderItems = params.items.map((item) => ({
+      id: item.id,
+      quantity: item.quantity ? { count: item.quantity } : undefined,
+      fulfillment_id: item.fulfillmentId,
+    }));
+
+    // Build billing object
+    const billing = {
+      name: params.billing.name,
+      phone: params.billing.phone,
+      email: params.billing.email,
+      taxId: params.billing.taxId,
+      address: params.billing.address
+        ? {
+            street: params.billing.address.street,
+            city: params.billing.address.city,
+            state: params.billing.address.state,
+            area_code: params.billing.address.postalCode,
+            country: params.billing.address.country,
+          }
+        : undefined,
+    };
+
+    // Build init request
+    const initRequest: BecknInitRequest = {
+      context,
+      message: {
+        order: {
+          provider: {
+            id: params.providerId,
+          },
+          items: orderItems,
+          billing,
+          payment: params.payment
+            ? {
+                type: params.payment.type,
+                status: params.payment.status,
+              }
+            : undefined,
+          fulfillments: params.fulfillmentId
+            ? [{ id: params.fulfillmentId }]
+            : undefined,
+        },
+      },
+    };
+
+    // Send request to ONDC gateway
+    const response = await this.client.post<BecknOnInitResponse>('/init', initRequest);
 
     return {
       context: response.context,
