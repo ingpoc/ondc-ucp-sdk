@@ -1,6 +1,6 @@
 {
   "state": "IMPLEMENT",
-  "entered_at": "2026-01-15T15:35:00+05:30",
+  "entered_at": "2026-01-15T16:35:00+05:30",
   "history": [
     {
       "from": "START",
@@ -45,9 +45,9 @@
       "reason": "Starting WEEK1 implementation (SellerClient ONDC protocol)"
     }
   ],
-  "feature_id": "WEEK1-001",
+  "feature_id": "WEEK1-006",
   "attempts": 0,
-  "last_updated": "2026-01-15T15:35:00+05:30",
-  "current_feature": null,
-  "health_status": "HEALTHY"
+  "last_updated": "2025-01-15T16:53:05+00:00",
+  "current_feature": "WEEK1-006",
+  "health_status": "PARTIAL"
 }

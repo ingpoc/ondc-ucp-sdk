@@ -764,7 +764,7 @@
       "id": "WEEK1-005",
       "description": "Wire MockGateway to api-server endpoint",
       "priority": 48,
-      "status": "pending",
+      "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
       "dependencies": [],
