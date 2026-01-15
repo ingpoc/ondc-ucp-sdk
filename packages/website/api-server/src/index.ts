@@ -1176,6 +1176,224 @@ app.get('/api/search/stream', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Seller Orders API Endpoints (SDK-SELLER-ORDERS-001)
+ * Manage incoming orders from seller perspective
+ */
+
+// Seller order store (shared with buyer orders, but filtered differently)
+// In production, seller would only see their own orders
+const getSellerOrders = (): UCPOrder[] => {
+  const orderKeys = ordersStore.keys();
+  return orderKeys
+    .map((key) => ordersStore.get(key))
+    .filter((entry) => entry?.data !== undefined)
+    .map((entry) => entry!.data as UCPOrder)
+    .sort((a: UCPOrder, b: UCPOrder) => b.createdAt.localeCompare(a.createdAt));
+};
+
+/**
+ * GET /api/seller/orders - List incoming orders for seller
+ */
+app.get('/api/seller/orders', (req: Request, res: Response) => {
+  try {
+    const { status, limit = '50' } = req.query;
+
+    let orders = getSellerOrders();
+
+    // Filter by status if provided
+    if (status && typeof status === 'string') {
+      orders = orders.filter((order) => order.status === status);
+    }
+
+    // Apply limit
+    const parsedLimit = parseInt(limit as string, 10);
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
+      orders = orders.slice(0, parsedLimit);
+    }
+
+    res.json({
+      success: true,
+      orders,
+      count: orders.length,
+    });
+  } catch (error) {
+    console.error('Seller orders list error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * GET /api/seller/orders/:id - Get order details for seller
+ */
+app.get('/api/seller/orders/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Seller order details error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/seller/orders/:id/accept - Accept incoming order
+ */
+app.post('/api/seller/orders/:id/accept', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Validate order can be accepted
+    if (order.status !== 'created') {
+      res.status(400).json({
+        error: `Order cannot be accepted. Current status: ${order.status}`,
+      });
+      return;
+    }
+
+    // Update order status
+    const updatedOrder: UCPOrder = {
+      ...order,
+      status: 'accepted',
+      updatedAt: new Date().toISOString(),
+    };
+
+    ordersStore.set(id, { type: 'order', data: updatedOrder });
+
+    res.json({
+      success: true,
+      order: updatedOrder,
+      message: 'Order accepted successfully',
+    });
+  } catch (error) {
+    console.error('Seller accept order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/seller/orders/:id/reject - Reject incoming order
+ */
+app.post('/api/seller/orders/:id/reject', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Validate order can be rejected
+    if (order.status !== 'created') {
+      res.status(400).json({
+        error: `Order cannot be rejected. Current status: ${order.status}`,
+      });
+      return;
+    }
+
+    // Update order status with cancellation
+    const updatedOrder: UCPOrder = {
+      ...order,
+      status: 'cancelled',
+      updatedAt: new Date().toISOString(),
+      cancellation: {
+        cancelledBy: 'seller',
+        reason: reason || 'Seller rejected the order',
+        cancelledAt: new Date().toISOString(),
+      },
+    };
+
+    ordersStore.set(id, { type: 'order', data: updatedOrder });
+
+    res.json({
+      success: true,
+      order: updatedOrder,
+      message: 'Order rejected successfully',
+    });
+  } catch (error) {
+    console.error('Seller reject order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * POST /api/seller/orders/:id/dispatch - Dispatch order
+ */
+app.post('/api/seller/orders/:id/dispatch', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { trackingId, providerName } = req.body;
+
+    const orderEntry = ordersStore.get(id);
+    if (!orderEntry?.data) {
+      res.status(404).json({ error: 'Order not found' });
+      return;
+    }
+
+    const order = orderEntry.data as UCPOrder;
+
+    // Validate order can be dispatched
+    if (!['accepted', 'packed'].includes(order.status)) {
+      res.status(400).json({
+        error: `Order cannot be dispatched. Current status: ${order.status}`,
+      });
+      return;
+    }
+
+    // Update order fulfillment status
+    const updatedOrder: UCPOrder = {
+      ...order,
+      status: 'shipped',
+      updatedAt: new Date().toISOString(),
+      fulfillment: {
+        ...order.fulfillment,
+        status: 'in_transit',
+        tracking: {
+          id: trackingId || `track-${id}`,
+          url: `https://track.example.com/${trackingId || id}`,
+          statusMessage: 'Package dispatched',
+        },
+        ...(providerName && { providerName }),
+      },
+    };
+
+    ordersStore.set(id, { type: 'order', data: updatedOrder });
+
+    res.json({
+      success: true,
+      order: updatedOrder,
+      message: 'Order dispatched successfully',
+    });
+  } catch (error) {
+    console.error('Seller dispatch order error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
 // Start server
 app.listen(PORT, async () => {
   console.log(`API server running on http://localhost:${PORT}`);
