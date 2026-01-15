@@ -1055,7 +1055,7 @@
       "id": "SDK-SELLER-ORDERS-003",
       "description": "Create seller order detail page UI",
       "priority": 63,
-      "status": "pending",
+      "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
       "dependencies": [
