@@ -336,7 +336,7 @@ describe('ondc_search handler', () => {
       })) as {
         structuredContent: {
           mode: string;
-          batches: Array<{
+          batches?: Array<{
             type: string;
             batch: unknown[];
             batchNumber: number;
@@ -346,11 +346,15 @@ describe('ondc_search handler', () => {
       };
 
       expect(result.structuredContent.mode).toBe('stream');
-      expect(result.structuredContent.batches).toHaveLength(3); // 12 items / 5 per batch = 3 batches
-      expect(result.structuredContent.batches[0].batchNumber).toBe(1);
-      expect(result.structuredContent.batches[0].batch).toHaveLength(5);
-      expect(result.structuredContent.batches[1].batch).toHaveLength(5);
-      expect(result.structuredContent.batches[2].batch).toHaveLength(2);
+      const batches = result.structuredContent.batches;
+      expect(batches).toBeDefined();
+      expect(batches).toHaveLength(3); // 12 items / 5 per batch = 3 batches
+      if (batches) {
+        expect(batches[0]!.batchNumber).toBe(1);
+        expect(batches[0]!.batch).toHaveLength(5);
+        expect(batches[1]!.batch).toHaveLength(5);
+        expect(batches[2]!.batch).toHaveLength(2);
+      }
     });
 
     it('should maintain backward compatibility when stream not specified', async () => {
@@ -407,7 +411,7 @@ describe('ondc_search handler', () => {
         stream: true,
       })) as {
         structuredContent: {
-          batches: Array<{
+          batches?: Array<{
             batchNumber: number;
             totalBatches: number;
             totalItems: number;
@@ -416,14 +420,18 @@ describe('ondc_search handler', () => {
         };
       };
 
-      const firstBatch = result.structuredContent.batches[0];
-      expect(firstBatch.batchNumber).toBe(1);
-      expect(firstBatch.totalBatches).toBe(2); // 7 items / 5 per batch = 2 batches
-      expect(firstBatch.totalItems).toBe(7);
-      expect(firstBatch.isComplete).toBe(false);
+      const batches2 = result.structuredContent.batches;
+      expect(batches2).toBeDefined();
+      if (batches2) {
+        const firstBatch = batches2[0]!;
+        expect(firstBatch.batchNumber).toBe(1);
+        expect(firstBatch.totalBatches).toBe(2); // 7 items / 5 per batch = 2 batches
+        expect(firstBatch.totalItems).toBe(7);
+        expect(firstBatch.isComplete).toBe(false);
 
-      const lastBatch = result.structuredContent.batches[1];
-      expect(lastBatch.isComplete).toBe(true);
+        const lastBatch = batches2[1]!;
+        expect(lastBatch.isComplete).toBe(true);
+      }
     });
 
     it('should handle empty results in streaming mode', async () => {

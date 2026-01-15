@@ -7,6 +7,10 @@ import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknIte
 // Import MockGateway for realistic ONDC simulation
 import { MockGateway, type MockGatewayConfig } from '@ondc-agent/gateway';
 
+// Import StateStore and session types for cart management
+import { StateStore } from '@ondc-agent/gateway';
+import type { UCPSession, UCPSessionItem, UCPSessionStatus } from '@ondc-agent/shared';
+
 // Temporarily disabled agent service due to libsodium dependency issue
 // import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
 
@@ -64,6 +68,9 @@ const mockGateway = new MockGateway(mockGatewayConfig);
 
 // Start MockGateway when api-server starts
 let mockGatewayPort: number | null = null;
+
+// Create StateStore for cart sessions (TTL: 30 minutes)
+const cartStore = new StateStore({ ttl: 30 * 60 * 1000 });
 
 // Get catalog from MockGateway (updated dynamically)
 const getMockCatalog = (): BecknCatalog => {
@@ -281,6 +288,229 @@ app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
 
 // Agent endpoints temporarily disabled due to libsodium dependency issue
 // TODO: Fix @anthropic-ai/claude-agent-sdk dependency issue
+
+// ============================================================================
+// SDK-BUYER-CART-001: Cart API endpoints for UCPSession management
+// ============================================================================
+
+/**
+ * Helper: Get or create a cart session for a session ID
+ */
+function getOrCreateSession(sessionId: string): UCPSession {
+  const existing = cartStore.get(sessionId);
+  if (existing?.data) {
+    return existing.data as UCPSession;
+  }
+
+  // Create new session
+  const newSession: UCPSession = {
+    id: sessionId,
+    status: 'created' as UCPSessionStatus,
+    items: [],
+    buyer: {
+      name: '',
+      contact: {
+        phone: '',
+        email: '',
+      },
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min TTL
+  };
+
+  cartStore.set(sessionId, {
+    type: 'cart_session',
+    data: newSession,
+  });
+
+  return newSession;
+}
+
+/**
+ * Helper: Update session in store
+ */
+function updateSession(session: UCPSession): void {
+  session.updatedAt = new Date().toISOString();
+  cartStore.set(session.id, {
+    type: 'cart_session',
+    data: session,
+  });
+}
+
+/**
+ * POST /api/cart - Add item to cart
+ */
+app.post('/api/cart', (req: Request, res: Response) => {
+  try {
+    const { sessionId, item, quantity = 1, customizations, addOns } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ error: 'Missing required field: sessionId' });
+      return;
+    }
+
+    if (!item || !item.id) {
+      res.status(400).json({ error: 'Missing required field: item with id' });
+      return;
+    }
+
+    const session = getOrCreateSession(sessionId);
+
+    // Check if item already exists in cart
+    const existingItemIndex = session.items.findIndex(
+      (cartItem) => cartItem.item.id === item.id
+    );
+
+    if (existingItemIndex >= 0) {
+      // Update existing item quantity
+      session.items[existingItemIndex].quantity += quantity;
+      if (customizations) {
+        session.items[existingItemIndex].customizations = customizations;
+      }
+      if (addOns) {
+        session.items[existingItemIndex].addOns = addOns;
+      }
+    } else {
+      // Add new item
+      const sessionItem: UCPSessionItem = {
+        item,
+        quantity,
+        customizations,
+        addOns,
+      };
+      session.items.push(sessionItem);
+    }
+
+    // Update session status
+    if (session.status === 'created') {
+      session.status = 'items_selected';
+    }
+
+    updateSession(session);
+
+    res.json({
+      success: true,
+      session,
+    });
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * GET /api/cart - Get current session
+ */
+app.get('/api/cart', (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.query;
+
+    if (!sessionId || typeof sessionId !== 'string') {
+      res.status(400).json({ error: 'Missing required query parameter: sessionId' });
+      return;
+    }
+
+    const session = getOrCreateSession(sessionId);
+    res.json({ session });
+  } catch (error) {
+    console.error('Get cart error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * DELETE /api/cart/:itemId - Remove item from cart
+ */
+app.delete('/api/cart/:itemId', (req: Request, res: Response) => {
+  try {
+    const { itemId } = req.params;
+    const { sessionId } = req.query;
+
+    if (!sessionId || typeof sessionId !== 'string') {
+      res.status(400).json({ error: 'Missing required query parameter: sessionId' });
+      return;
+    }
+
+    const session = getOrCreateSession(sessionId);
+
+    // Find and remove item
+    const itemIndex = session.items.findIndex((cartItem) => cartItem.item.id === itemId);
+
+    if (itemIndex === -1) {
+      res.status(404).json({ error: 'Item not found in cart' });
+      return;
+    }
+
+    session.items.splice(itemIndex, 1);
+
+    // Update session status if cart becomes empty
+    if (session.items.length === 0 && session.status === 'items_selected') {
+      session.status = 'created';
+    }
+
+    updateSession(session);
+
+    res.json({
+      success: true,
+      session,
+    });
+  } catch (error) {
+    console.error('Remove from cart error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * PUT /api/cart/:itemId - Update item quantity
+ */
+app.put('/api/cart/:itemId', (req: Request, res: Response) => {
+  try {
+    const { itemId } = req.params;
+    const { sessionId, quantity } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ error: 'Missing required field: sessionId' });
+      return;
+    }
+
+    if (typeof quantity !== 'number' || quantity < 0) {
+      res.status(400).json({ error: 'Invalid quantity: must be a non-negative number' });
+      return;
+    }
+
+    const session = getOrCreateSession(sessionId);
+
+    // Find item
+    const itemIndex = session.items.findIndex((cartItem) => cartItem.item.id === itemId);
+
+    if (itemIndex === -1) {
+      res.status(404).json({ error: 'Item not found in cart' });
+      return;
+    }
+
+    // Update quantity or remove if 0
+    if (quantity === 0) {
+      session.items.splice(itemIndex, 1);
+      // Update session status if cart becomes empty
+      if (session.items.length === 0 && session.status === 'items_selected') {
+        session.status = 'created';
+      }
+    } else {
+      session.items[itemIndex].quantity = quantity;
+    }
+
+    updateSession(session);
+
+    res.json({
+      success: true,
+      session,
+    });
+  } catch (error) {
+    console.error('Update cart item error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
 
 // ============================================================================
 // WEEK2-001: Progressive disclosure via SSE endpoint

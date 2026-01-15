@@ -835,7 +835,7 @@
       "id": "WEEK2-003",
       "description": "Implement request deduplication cache",
       "priority": 52,
-      "status": "pending",
+      "status": "implemented",
       "tier": "core",
       "phase": "week2",
       "dependencies": [
@@ -848,6 +848,307 @@
         "30% faster response for repeated searches"
       ],
       "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+    },
+    {
+      "id": "SDK-BUYER-CART-001",
+      "description": "Create cart API endpoints for UCPSession management",
+      "priority": 53,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "WEEK2-003"
+      ],
+      "acceptance_criteria": [
+        "Implement POST /api/cart - Add item to cart",
+        "Implement GET /api/cart - Get current session",
+        "Implement DELETE /api/cart/:itemId - Remove item",
+        "Implement PUT /api/cart/:itemId - Update quantity",
+        "Use UCPSession and UCPSessionItem from @ondc-agent/shared",
+        "Store in StateStore with TTL"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-CART-002",
+      "description": "Create buyer cart page UI",
+      "priority": 54,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-CART-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/pages/CartPage.tsx",
+        "Create CartItem component",
+        "Create CartSummary component",
+        "Display cart items with quantity controls",
+        "Remove items and calculate subtotal",
+        "Link to checkout page",
+        "Implement useCart hook"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-CART-003",
+      "description": "Create checkout API endpoint",
+      "priority": 55,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-CART-001"
+      ],
+      "acceptance_criteria": [
+        "Implement POST /api/checkout",
+        "Validate cart items",
+        "Generate UCPQuote using preference scoring",
+        "Call SellerClient.init() for ONDC protocol",
+        "Return quote for buyer confirmation",
+        "Handle validation errors"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-CART-004",
+      "description": "Create buyer checkout page UI",
+      "priority": 56,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-CART-003"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/pages/CheckoutPage.tsx",
+        "Create BillingForm component",
+        "Create PaymentSelector component",
+        "Create QuoteDisplay component",
+        "Use UCPBilling and UCPPayment types",
+        "Call confirm endpoint on form submission"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-001",
+      "description": "Create buyer orders API endpoints",
+      "priority": 57,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-CART-004"
+      ],
+      "acceptance_criteria": [
+        "Implement GET /api/orders - List buyer's orders",
+        "Implement GET /api/orders/:id - Get order details",
+        "Implement POST /api/orders/:id/confirm - Confirm order",
+        "Implement POST /api/orders/:id/cancel - Cancel order",
+        "Implement GET /api/orders/:id/track - Track order",
+        "Use UCPOrder, UCPOrderStatus, UCPTracking",
+        "Store orders in memory/database"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-002",
+      "description": "Create buyer orders page UI",
+      "priority": 58,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-ORDERS-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/pages/OrdersPage.tsx",
+        "List all orders with status",
+        "Filter by status (pending/active/complete)",
+        "Link to order detail page",
+        "Use UCPOrder type for display"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-003",
+      "description": "Create buyer order detail page UI",
+      "priority": 59,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-ORDERS-002"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/pages/OrderDetailPage.tsx",
+        "Display full order details (UCPOrder)",
+        "Show order status (UCPOrderStatus)",
+        "Display tracking info (UCPTracking)",
+        "Show delivery agent info (UCPDeliveryAgent)",
+        "Add cancellation button for cancellable orders"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-BUYER-SEARCH-001",
+      "description": "Enable progressive disclosure via SSE streaming",
+      "priority": 60,
+      "status": "pending",
+      "tier": "full",
+      "phase": "buyer-sdk-integration",
+      "dependencies": [
+        "WEEK2-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/buyer/src/hooks/useSearchStream.ts",
+        "Implement Server-Sent Events connection",
+        "Connect to /api/search/stream endpoint",
+        "Handle immediate status response",
+        "Stream results as they arrive",
+        "Timeout after 3 seconds with completion signal"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-001",
+      "description": "Create seller orders API endpoints",
+      "priority": 61,
+      "status": "pending",
+      "tier": "full",
+      "phase": "seller-sdk-integration",
+      "dependencies": [
+        "SDK-BUYER-ORDERS-001"
+      ],
+      "acceptance_criteria": [
+        "Implement GET /api/seller/orders - List incoming orders",
+        "Implement GET /api/seller/orders/:id - Order details",
+        "Implement POST /api/seller/orders/:id/accept - Accept order",
+        "Implement POST /api/seller/orders/:id/reject - Reject order",
+        "Implement POST /api/seller/orders/:id/dispatch - Dispatch order",
+        "Use SellerClient for ONDC protocol",
+        "Integrate with webhook callbacks"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-002",
+      "description": "Create seller orders page UI",
+      "priority": 62,
+      "status": "pending",
+      "tier": "full",
+      "phase": "seller-sdk-integration",
+      "dependencies": [
+        "SDK-SELLER-ORDERS-001"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/seller/src/pages/OrdersPage.tsx",
+        "List incoming orders with status",
+        "Display order status (pending/accepted/dispatched/delivered)",
+        "Add Accept/Reject actions",
+        "Filter orders by status",
+        "Create OrderCard component"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-003",
+      "description": "Create seller order detail page UI",
+      "priority": 63,
+      "status": "pending",
+      "tier": "full",
+      "phase": "seller-sdk-integration",
+      "dependencies": [
+        "SDK-SELLER-ORDERS-002"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/seller/src/pages/OrderDetailPage.tsx",
+        "Display full order details",
+        "Show buyer information (UCPBilling)",
+        "List items and quantities",
+        "Add Accept/Reject/Dispatch buttons",
+        "Display order timeline"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-SELLER-CONFIG-001",
+      "description": "Create seller configuration page UI",
+      "priority": 64,
+      "status": "pending",
+      "tier": "full",
+      "phase": "seller-sdk-integration",
+      "dependencies": [
+        "SDK-SELLER-ORDERS-002"
+      ],
+      "acceptance_criteria": [
+        "Create packages/website/seller/src/pages/ConfigPage.tsx",
+        "Create ONDC credentials form",
+        "Input fields: Subscriber ID, private key, key ID",
+        "Domain, city, country configuration",
+        "Test connection button",
+        "Use SellerClientConfig, generateKeyPair(), buildAuthHeader()"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-SELLER-DASHBOARD-001",
+      "description": "Update seller dashboard with real data",
+      "priority": 65,
+      "status": "pending",
+      "tier": "full",
+      "phase": "seller-sdk-integration",
+      "dependencies": [
+        "SDK-SELLER-ORDERS-002"
+      ],
+      "acceptance_criteria": [
+        "Update packages/website/seller/src/pages/DashboardPage.tsx",
+        "Replace hardcoded order counts with real data",
+        "Add pending orders list",
+        "Display recent activity",
+        "Add links to new pages (orders, config)"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-DEMO-001",
+      "description": "Build interactive demo website",
+      "priority": 66,
+      "status": "pending",
+      "tier": "full",
+      "phase": "adoption",
+      "dependencies": [
+        "SDK-SELLER-DASHBOARD-001"
+      ],
+      "acceptance_criteria": [
+        "Create new packages/demo package",
+        "Web-based query tester interface",
+        "Live streaming results display",
+        "Token cost calculator",
+        "API console playground",
+        "Complete SDK feature matrix"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+    },
+    {
+      "id": "SDK-DOCS-001",
+      "description": "Update root README with quickstart guide",
+      "priority": 67,
+      "status": "pending",
+      "tier": "full",
+      "phase": "adoption",
+      "dependencies": [
+        "SDK-DOCS-001"
+      ],
+      "acceptance_criteria": [
+        "Update /README.md",
+        "5-minute integration example",
+        "Problem/solution sections",
+        "Competitive comparison table",
+        "Mock and production examples",
+        "SDK feature validation guide"
+      ],
+      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
     },
     {
       "id": "WEEK3-001",
@@ -1063,6 +1364,9 @@
     "protocol": "TRANSLATE-001--STATE-002",
     "mcp": "MCP-001--MOCK-001",
     "website-phase1": "WEBSITE-001--WEBSITE-009",
-    "website-phase2": "AGENT-001--AGENT-005"
+    "website-phase2": "AGENT-001--AGENT-005",
+    "buyer-sdk-integration": "SDK-BUYER-CART-001--SDK-BUYER-ORDERS-002",
+    "seller-sdk-integration": "SDK-SELLER-ORDERS-001--SDK-SELLER-DASHBOARD-001",
+    "adoption": "SDK-DEMO-001--SDK-DOCS-001"
   }
 }
