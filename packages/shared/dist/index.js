@@ -617,6 +617,194 @@ var ONDCClient = class {
     return this.axios;
   }
 };
+
+// src/scoring/preferences.ts
+var DEFAULT_WEIGHTS = {
+  priceWeight: 0.3,
+  distanceWeight: 0.2,
+  ratingWeight: 0.25,
+  deliveryWeight: 0.25,
+  verifiedBonus: 0.1
+};
+var WEIGHT_KEYS = ["priceWeight", "distanceWeight", "ratingWeight", "deliveryWeight"];
+function normalizeWeights(userWeights = {}) {
+  const providedWeights = {};
+  let providedSum = 0;
+  let providedCount = 0;
+  for (const key of WEIGHT_KEYS) {
+    const value = userWeights[key];
+    if (value !== void 0 && value >= 0) {
+      providedWeights[key] = value;
+      providedSum += value;
+      providedCount++;
+    }
+  }
+  const verifiedBonus = userWeights.verifiedBonus ?? DEFAULT_WEIGHTS.verifiedBonus;
+  if (providedCount === 0) {
+    return { ...DEFAULT_WEIGHTS, verifiedBonus };
+  }
+  const remainingCount = WEIGHT_KEYS.length - providedCount;
+  const remainingWeight = Math.max(0, 1 - providedSum);
+  const evenShare = remainingCount > 0 ? remainingWeight / remainingCount : 0;
+  const result = {
+    priceWeight: 0,
+    distanceWeight: 0,
+    ratingWeight: 0,
+    deliveryWeight: 0,
+    verifiedBonus
+  };
+  for (const key of WEIGHT_KEYS) {
+    if (providedWeights[key] !== void 0) {
+      result[key] = providedWeights[key];
+    } else {
+      result[key] = evenShare;
+    }
+  }
+  if (providedCount === WEIGHT_KEYS.length && providedSum > 0 && Math.abs(providedSum - 1) > 1e-3) {
+    for (const key of WEIGHT_KEYS) {
+      result[key] = (providedWeights[key] ?? 0) / providedSum;
+    }
+  }
+  return result;
+}
+function parsePrice(item) {
+  const price = item.price;
+  if (price.amount !== void 0) return price.amount;
+  if (price.value !== void 0) return parseFloat(price.value);
+  return void 0;
+}
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+function toRad(deg) {
+  return deg * (Math.PI / 180);
+}
+function getItemLocation(item) {
+  const location = item.location ?? item.provider.location;
+  if (!location) return void 0;
+  if (location.latitude !== void 0 && location.longitude !== void 0) {
+    return { lat: location.latitude, lon: location.longitude };
+  }
+  return void 0;
+}
+function getDeliveryTimeMinutes(item) {
+  const fulfillment = item.fulfillment?.[0];
+  if (!fulfillment?.estimatedTime?.end) return void 0;
+  const endTime = fulfillment.estimatedTime.end;
+  const durationMatch = endTime.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (durationMatch) {
+    const hours = parseInt(durationMatch[1] ?? "0", 10);
+    const minutes = parseInt(durationMatch[2] ?? "0", 10);
+    return hours * 60 + minutes;
+  }
+  const endDate = new Date(endTime);
+  if (!isNaN(endDate.getTime())) {
+    return Math.max(0, (endDate.getTime() - Date.now()) / 6e4);
+  }
+  return void 0;
+}
+function normalize(value, min, max, invert = false) {
+  if (max === min) return invert ? 1 : 0.5;
+  const normalized = (value - min) / (max - min);
+  const clamped = Math.max(0, Math.min(1, normalized));
+  return invert ? 1 - clamped : clamped;
+}
+function calculatePriceScore(item, context) {
+  const price = parsePrice(item);
+  if (price === void 0) return 0.5;
+  const min = context.minPrice ?? price;
+  const max = context.maxPrice ?? price;
+  return normalize(price, min, max, true);
+}
+function calculateDistanceScore(item, context) {
+  if (!context.userLocation?.latitude || !context.userLocation?.longitude) {
+    return 0.5;
+  }
+  const itemLoc = getItemLocation(item);
+  if (!itemLoc) return 0.5;
+  const distance = calculateDistance(
+    context.userLocation.latitude,
+    context.userLocation.longitude,
+    itemLoc.lat,
+    itemLoc.lon
+  );
+  const maxDist = context.maxDistance ?? 50;
+  return normalize(distance, 0, maxDist, true);
+}
+function calculateRatingScore(item) {
+  const rating = item.rating?.value ?? item.provider.rating?.value;
+  if (rating === void 0) return 0.5;
+  const max = item.rating?.max ?? 5;
+  return normalize(rating, 0, max, false);
+}
+function calculateDeliveryScore(item, context) {
+  const deliveryTime = getDeliveryTimeMinutes(item);
+  if (deliveryTime === void 0) return 0.5;
+  const min = context.minDeliveryTime ?? 0;
+  const max = context.maxDeliveryTime ?? 120;
+  return normalize(deliveryTime, min, max, true);
+}
+function scoreItem(item, preferences = {}, context = {}) {
+  const weights = normalizeWeights(preferences);
+  const priceScore = calculatePriceScore(item, context);
+  const distanceScore = calculateDistanceScore(item, context);
+  const ratingScore = calculateRatingScore(item);
+  const deliveryScore = calculateDeliveryScore(item, context);
+  const score = weights.priceWeight * priceScore + weights.distanceWeight * distanceScore + weights.ratingWeight * ratingScore + weights.deliveryWeight * deliveryScore;
+  if (item.provider.verified && weights.verifiedBonus > 0) {
+    return Math.min(1, score + weights.verifiedBonus);
+  }
+  return score;
+}
+function buildScoringContext(items, userLocation) {
+  const context = { userLocation };
+  const prices = [];
+  const distances = [];
+  const deliveryTimes = [];
+  for (const item of items) {
+    const price = parsePrice(item);
+    if (price !== void 0) prices.push(price);
+    if (userLocation?.latitude !== void 0 && userLocation?.longitude !== void 0) {
+      const itemLoc = getItemLocation(item);
+      if (itemLoc) {
+        const distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          itemLoc.lat,
+          itemLoc.lon
+        );
+        distances.push(distance);
+      }
+    }
+    const deliveryTime = getDeliveryTimeMinutes(item);
+    if (deliveryTime !== void 0) deliveryTimes.push(deliveryTime);
+  }
+  if (prices.length > 0) {
+    context.minPrice = Math.min(...prices);
+    context.maxPrice = Math.max(...prices);
+  }
+  if (distances.length > 0) {
+    context.maxDistance = Math.max(...distances);
+  }
+  if (deliveryTimes.length > 0) {
+    context.minDeliveryTime = Math.min(...deliveryTimes);
+    context.maxDeliveryTime = Math.max(...deliveryTimes);
+  }
+  return context;
+}
+function scoreAndSortItems(items, preferences = {}, userLocation) {
+  const context = buildScoringContext(items, userLocation);
+  const scored = items.map((item) => ({
+    ...item,
+    _score: scoreItem(item, preferences, context)
+  }));
+  return scored.sort((a, b) => b._score - a._score);
+}
 export {
   ConfigValidationError,
   EnvVars,
@@ -630,6 +818,7 @@ export {
   allMCPTools,
   becknToUcpCatalog,
   buildAuthHeader,
+  buildScoringContext,
   checkEnvVars,
   formatDuration,
   generateKeyPair,
@@ -647,6 +836,8 @@ export {
   ondcStatusTool,
   parseAuthHeader,
   parseDuration,
+  scoreAndSortItems,
+  scoreItem,
   signMessage,
   ucpToBecknIntent,
   verifyAuthHeader,

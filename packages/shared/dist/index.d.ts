@@ -1,5 +1,5 @@
-import { BecknOnSearchResponse, UCPCatalog, UCPSearchQuery, BecknIntent, UCPPrice, UCPRating } from './types/index.js';
-export { BecknAck, BecknAckMessage, BecknAction, BecknAddOn, BecknAddress, BecknAgent, BecknAuthorization, BecknBilling, BecknCancelMessage, BecknCancelRequest, BecknCancellation, BecknCancellationReason, BecknCatalog, BecknCategory, BecknCircle, BecknCity, BecknConfirmMessage, BecknConfirmRequest, BecknContact, BecknContext, BecknCountry, BecknCredential, BecknCustomer, BecknDescriptor, BecknDocument, BecknDomain, BecknError, BecknFulfillment, BecknFulfillmentEnd, BecknImage, BecknInitMessage, BecknInitRequest, BecknIntentCategory, BecknIntentFulfillment, BecknIntentFulfillmentEnd, BecknIntentItem, BecknIntentOffer, BecknIntentProvider, BecknItem, BecknLocation, BecknMeasure, BecknMessage, BecknOffer, BecknOnCancelMessage, BecknOnCancelResponse, BecknOnConfirmMessage, BecknOnConfirmResponse, BecknOnInitMessage, BecknOnInitResponse, BecknOnSearchMessage, BecknOnSelectMessage, BecknOnSelectResponse, BecknOnStatusMessage, BecknOnStatusResponse, BecknOnTrackMessage, BecknOnTrackResponse, BecknOrder, BecknOrderAddOn, BecknOrderItem, BecknOrderOffer, BecknOrderProvider, BecknPayment, BecknPaymentParams, BecknPerson, BecknPrice, BecknProvider, BecknQuantity, BecknQuote, BecknQuoteBreakup, BecknRating, BecknSchedule, BecknSearchMessage, BecknSearchRequest, BecknSelectMessage, BecknSelectRequest, BecknSettlementDetails, BecknState, BecknStatusMessage, BecknStatusRequest, BecknTag, BecknTagGroup, BecknTime, BecknTimeRange, BecknTrackMessage, BecknTrackRequest, BecknTracking, BecknVehicle, MCPContent, MCPProperty, MCPSearchMetadata, MCPTool, MCPToolInputSchema, MCPToolResult, ONDCCancelInput, ONDCCancelOutput, ONDCCheckoutInput, ONDCCheckoutOutput, ONDCSearchInput, ONDCSearchOutput, ONDCStatusInput, ONDCStatusOutput, UCPAddOn, UCPAddress, UCPBuyer, UCPCancellation, UCPContact, UCPDeliveryAgent, UCPDocument, UCPFulfillmentOption, UCPFulfillmentStatus, UCPImage, UCPItem, UCPLocation, UCPMetadata, UCPOrder, UCPOrderFulfillment, UCPOrderItem, UCPOrderStatus, UCPPayment, UCPPaymentStatus, UCPProvider, UCPQuote, UCPQuoteBreakup, UCPRefund, UCPSearchPreferences, UCPSession, UCPSessionItem, UCPSessionStatus, UCPTimeRange, UCPTracking, allMCPTools, ondcCancelTool, ondcCheckoutTool, ondcSearchTool, ondcStatusTool } from './types/index.js';
+import { BecknOnSearchResponse, UCPCatalog, UCPSearchQuery, BecknIntent, UCPPrice, UCPRating, UCPItem, UCPSearchPreferences, UCPLocation } from './types/index.js';
+export { BecknAck, BecknAckMessage, BecknAction, BecknAddOn, BecknAddress, BecknAgent, BecknAuthorization, BecknBilling, BecknCancelMessage, BecknCancelRequest, BecknCancellation, BecknCancellationReason, BecknCatalog, BecknCategory, BecknCircle, BecknCity, BecknConfirmMessage, BecknConfirmRequest, BecknContact, BecknContext, BecknCountry, BecknCredential, BecknCustomer, BecknDescriptor, BecknDocument, BecknDomain, BecknError, BecknFulfillment, BecknFulfillmentEnd, BecknImage, BecknInitMessage, BecknInitRequest, BecknIntentCategory, BecknIntentFulfillment, BecknIntentFulfillmentEnd, BecknIntentItem, BecknIntentOffer, BecknIntentProvider, BecknItem, BecknLocation, BecknMeasure, BecknMessage, BecknOffer, BecknOnCancelMessage, BecknOnCancelResponse, BecknOnConfirmMessage, BecknOnConfirmResponse, BecknOnInitMessage, BecknOnInitResponse, BecknOnSearchMessage, BecknOnSelectMessage, BecknOnSelectResponse, BecknOnStatusMessage, BecknOnStatusResponse, BecknOnTrackMessage, BecknOnTrackResponse, BecknOrder, BecknOrderAddOn, BecknOrderItem, BecknOrderOffer, BecknOrderProvider, BecknPayment, BecknPaymentParams, BecknPerson, BecknPrice, BecknProvider, BecknQuantity, BecknQuote, BecknQuoteBreakup, BecknRating, BecknSchedule, BecknSearchMessage, BecknSearchRequest, BecknSelectMessage, BecknSelectRequest, BecknSettlementDetails, BecknState, BecknStatusMessage, BecknStatusRequest, BecknTag, BecknTagGroup, BecknTime, BecknTimeRange, BecknTrackMessage, BecknTrackRequest, BecknTracking, BecknVehicle, MCPContent, MCPProperty, MCPSearchMetadata, MCPTool, MCPToolInputSchema, MCPToolResult, ONDCCancelInput, ONDCCancelOutput, ONDCCheckoutInput, ONDCCheckoutOutput, ONDCSearchInput, ONDCSearchOutput, ONDCStatusInput, ONDCStatusOutput, UCPAddOn, UCPAddress, UCPBuyer, UCPCancellation, UCPContact, UCPDeliveryAgent, UCPDocument, UCPFulfillmentOption, UCPFulfillmentStatus, UCPImage, UCPMetadata, UCPOrder, UCPOrderFulfillment, UCPOrderItem, UCPOrderStatus, UCPPayment, UCPPaymentStatus, UCPProvider, UCPQuote, UCPQuoteBreakup, UCPRefund, UCPSession, UCPSessionItem, UCPSessionStatus, UCPTimeRange, UCPTracking, allMCPTools, ondcCancelTool, ondcCheckoutTool, ondcSearchTool, ondcStatusTool } from './types/index.js';
 export { AuthHeaderRequest, KeyPair, VerifiedAuth, buildAuthHeader, generateKeyPair, generateKeyPairFromSeed, getPublicKey, initCrypto, parseAuthHeader, signMessage, verifyAuthHeader, verifySignature } from './crypto/index.js';
 import { z } from 'zod';
 import { AxiosInstance } from 'axios';
@@ -398,4 +398,67 @@ declare class ONDCClient {
     getAxiosInstance(): AxiosInstance;
 }
 
-export { BecknIntent, BecknOnSearchResponse, ConfigValidationError, EnvVars, EnvironmentEnum, type GatewayConfig, GatewayConfigSchema, MissingEnvVarError, ONDCClient, type ONDCClientConfig, type PartialGatewayConfig, UCPCatalog, UCPPrice, UCPRating, UCPSearchQuery, becknToUcpCatalog, checkEnvVars, formatDuration, loadConfig, loadConfigWithOverrides, normalizePercentage, normalizePrice, normalizeRating, parseDuration, ucpToBecknIntent };
+/**
+ * Preference Scoring Algorithm
+ * Scores items based on user preferences with normalized weights
+ */
+
+/**
+ * Scoring context for normalization
+ * Provides min/max values from the result set for fair comparison
+ */
+interface ScoringContext {
+    /** Minimum price in result set */
+    minPrice?: number;
+    /** Maximum price in result set */
+    maxPrice?: number;
+    /** User's location for distance calculation */
+    userLocation?: UCPLocation;
+    /** Maximum distance in result set (km) */
+    maxDistance?: number;
+    /** Minimum delivery time in result set (minutes) */
+    minDeliveryTime?: number;
+    /** Maximum delivery time in result set (minutes) */
+    maxDeliveryTime?: number;
+}
+/**
+ * Score an item based on user preferences
+ *
+ * @param item - Item to score
+ * @param preferences - User preference weights (0-1 for each dimension)
+ * @param context - Scoring context with normalization bounds
+ * @returns Score between 0 and 1 (higher is better match)
+ *
+ * @example
+ * ```ts
+ * const score = scoreItem(item, {
+ *   priceWeight: 0.4,
+ *   ratingWeight: 0.3,
+ *   distanceWeight: 0.2,
+ *   deliveryWeight: 0.1,
+ * }, {
+ *   minPrice: 100,
+ *   maxPrice: 1000,
+ *   userLocation: { latitude: 12.97, longitude: 77.59 },
+ * });
+ * ```
+ */
+declare function scoreItem(item: UCPItem, preferences?: UCPSearchPreferences, context?: ScoringContext): number;
+/**
+ * Build scoring context from a list of items
+ * Calculates min/max values for normalization
+ */
+declare function buildScoringContext(items: UCPItem[], userLocation?: UCPLocation): ScoringContext;
+/**
+ * Score and sort items by preference
+ *
+ * @param items - Items to score and sort
+ * @param preferences - User preference weights
+ * @param userLocation - User's location for distance calculation
+ * @returns Items sorted by score (highest first) with scores attached
+ */
+declare function scoreAndSortItems(items: UCPItem[], preferences?: UCPSearchPreferences, userLocation?: UCPLocation): Array<UCPItem & {
+    _score: number;
+}>;
+
+export { BecknIntent, BecknOnSearchResponse, ConfigValidationError, EnvVars, EnvironmentEnum, type GatewayConfig, GatewayConfigSchema, MissingEnvVarError, ONDCClient, type ONDCClientConfig, type PartialGatewayConfig, type ScoringContext, UCPCatalog, UCPItem, UCPLocation, UCPPrice, UCPRating, UCPSearchPreferences, UCPSearchQuery, becknToUcpCatalog, buildScoringContext, checkEnvVars, formatDuration, loadConfig, loadConfigWithOverrides, normalizePercentage, normalizePrice, normalizeRating, parseDuration, scoreAndSortItems, scoreItem, ucpToBecknIntent };
