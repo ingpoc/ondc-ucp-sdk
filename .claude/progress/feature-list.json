@@ -712,7 +712,7 @@
       "id": "AGENT-006",
       "description": "Add agent API endpoints to api-server (POST /api/agent/buyer and /api/agent/seller)",
       "priority": 46,
-      "status": "pending",
+      "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
       "plan_reference": "gap-feature-discovered-during-browser-testing",
