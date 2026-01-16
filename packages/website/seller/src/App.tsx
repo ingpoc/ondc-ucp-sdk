@@ -5,6 +5,7 @@ import { ProductEditPage } from './pages/ProductEditPage';
 import { AgentChatPage } from './pages/AgentChatPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
+import { ConfigPage } from './pages/ConfigPage';
 
 export function App() {
   return (
@@ -12,7 +13,7 @@ export function App() {
       <header style={{ marginBottom: '30px' }}>
         <h1>ONDC Seller POC</h1>
         <nav>
-          <a href="/">Dashboard</a> | <a href="/catalog">Catalog</a> | <a href="/orders">Orders</a> | <a href="/agent">Agent</a>
+          <a href="/">Dashboard</a> | <a href="/catalog">Catalog</a> | <a href="/orders">Orders</a> | <a href="/config">Config</a> | <a href="/agent">Agent</a>
         </nav>
       </header>
       <main>
@@ -24,6 +25,7 @@ export function App() {
           <Route path="/catalog/:id" element={<ProductEditPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
+          <Route path="/config" element={<ConfigPage />} />
           <Route path="/agent" element={<AgentChatPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
