@@ -155,9 +155,50 @@ Use the token-efficient MCP tools for data processing and context-graph for lear
 }
 
 /**
+ * Transform SDK message to frontend-compatible format
+ *
+ * The SDK sends nested structures like:
+ *   { type: "assistant", message: { content: [{ type: "text", text: "..." }] } }
+ *
+ * But frontend expects:
+ *   { type: "assistant", content: "..." }
+ */
+function transformMessageForFrontend(message: SDKMessage): SDKMessage {
+  // Handle assistant messages with nested content
+  if (message.type === 'assistant' && message.message) {
+    const msg = message.message as { content?: Array<{ type: string; text: string }> };
+    if (msg.content && Array.isArray(msg.content)) {
+      // Extract text content from the first text block
+      const textBlock = msg.content.find((block) => block.type === 'text');
+      if (textBlock) {
+        return {
+          type: 'assistant',
+          content: textBlock.text,
+          session_id: message.session_id
+        };
+      }
+    }
+  }
+
+  // Handle tool_progress messages
+  if (message.type === 'tool_progress' && message.message) {
+    const msg = message.message as { tool_name?: string };
+    return {
+      type: 'tool_progress',
+      tool_name: msg.tool_name,
+      session_id: message.session_id
+    };
+  }
+
+  // Pass through other message types as-is
+  return message;
+}
+
+/**
  * Convert SDKMessage to SSE format
  */
 export function messageToSSE(message: SDKMessage): string {
-  const data = JSON.stringify(message);
+  const transformed = transformMessageForFrontend(message);
+  const data = JSON.stringify(transformed);
   return `data: ${data}\n\n`;
 }
