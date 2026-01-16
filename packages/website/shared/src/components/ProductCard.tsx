@@ -37,7 +37,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       <h3>{name}</h3>
       {description && <p>{description}</p>}
       <PriceDisplay price={(product as any).price} />
-      {(product as any).rating && <RatingStars rating={(product as any).rating.value} />}
+      {(product as any).rating && <RatingStars rating={typeof (product as any).rating === 'number' ? (product as any).rating : (product as any).rating?.value} />}
       <p style={{ fontSize: '0.9em', color: '#666' }}>
         Seller: {providerName}
       </p>
@@ -66,6 +66,9 @@ export interface RatingStarsProps {
 }
 
 export function RatingStars({ rating, max = 5 }: RatingStarsProps) {
+  if (rating === undefined || rating === null) {
+    return null;
+  }
   const stars = Array.from({ length: max }, (_, i) => (
     <span key={i} style={{ color: i < rating ? '#f59e0b' : '#d1d5db' }}>
       ★

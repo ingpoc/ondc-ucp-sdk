@@ -6,7 +6,7 @@ export default defineConfig({
     alias: {
       'libsodium-wrappers': path.resolve(
         __dirname,
-        'node_modules/.pnpm/libsodium-wrappers@0.7.16/node_modules/libsodium-wrappers/dist/modules/libsodium-wrappers.js'
+        'node_modules/.pnpm/libsodium-wrappers@0.8.0/node_modules/libsodium-wrappers/dist/modules/libsodium-wrappers.js'
       ),
     },
   },

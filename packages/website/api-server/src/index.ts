@@ -236,6 +236,39 @@ app.get('/api/catalog', (_req: Request, res: Response) => {
   res.json(getMockCatalog());
 });
 
+/**
+ * GET /api/catalog/products/:id - Get single product by ID
+ * Gap feature: ProductDetailPage needs this endpoint to fetch product details
+ */
+app.get('/api/catalog/products/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Search through all items in the catalog to find the matching item
+    const catalog = getMockCatalog();
+    const providers = catalog['bpp/providers'] ?? [];
+
+    for (const provider of providers) {
+      const items = provider.items ?? [];
+      const item = items.find((item) => item.id === id);
+      if (item) {
+        // Return the item with provider info
+        res.json({
+          ...item,
+          _provider: provider.descriptor?.name,
+        });
+        return;
+      }
+    }
+
+    // Item not found
+    res.status(404).json({ error: 'Product not found' });
+  } catch (error) {
+    console.error('Get product error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
 app.post('/api/catalog/products', (req: Request, res: Response) => {
   try {
     const newItem: BecknItem = req.body;

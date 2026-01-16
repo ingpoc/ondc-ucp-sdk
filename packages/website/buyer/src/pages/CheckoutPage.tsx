@@ -22,12 +22,13 @@ export function CheckoutPage() {
     country: 'IND',
   });
 
-  // Redirect to cart if empty
+  // Redirect to cart if empty (only after we've loaded the session)
   useEffect(() => {
-    if (!loading && itemCount === 0) {
+    // Check session is not null to ensure we've actually loaded the cart
+    if (!loading && session && itemCount === 0) {
       navigate('/cart');
     }
-  }, [loading, itemCount, navigate]);
+  }, [loading, itemCount, navigate, session]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -5,7 +5,7 @@
   "description": "MCP-first gateway bridging AI agents with ONDC network",
   "plan_reference": "~/.claude/plans/happy-gliding-hellman.md",
   "created": "2025-01-14",
-  "updated": "2026-01-15",
+  "updated": "2026-01-16",
   "features": [
     {
       "id": "INIT-001",
@@ -589,6 +589,25 @@
         "Document missing SDK functions",
         "Identify what belongs in SDK vs app layer"
       ]
+    },
+    {
+      "id": "WEBSITE-010",
+      "description": "Add GET /api/catalog/products/:id endpoint for product details",
+      "priority": 41,
+      "status": "implemented",
+      "tier": "mvp",
+      "phase": "website-phase1",
+      "dependencies": [
+        "WEBSITE-003"
+      ],
+      "acceptance_criteria": [
+        "Implement GET /api/catalog/products/:id endpoint",
+        "Search catalog providers for matching item ID",
+        "Return product with provider info (_provider field)",
+        "Return 404 if product not found",
+        "ProductDetailPage can load product details"
+      ],
+      "plan_reference": "gap-feature-discovered-during-browser-testing"
     },
     {
       "id": "AGENT-001",
@@ -1363,7 +1382,7 @@
     "foundation": "INIT-001--CI-001",
     "protocol": "TRANSLATE-001--STATE-002",
     "mcp": "MCP-001--MOCK-001",
-    "website-phase1": "WEBSITE-001--WEBSITE-009",
+    "website-phase1": "WEBSITE-001--WEBSITE-010",
     "website-phase2": "AGENT-001--AGENT-005",
     "buyer-sdk-integration": "SDK-BUYER-CART-001--SDK-BUYER-ORDERS-002",
     "seller-sdk-integration": "SDK-SELLER-ORDERS-001--SDK-SELLER-DASHBOARD-001",
