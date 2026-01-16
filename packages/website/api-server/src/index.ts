@@ -12,8 +12,8 @@ import { StateStore } from '@ondc-agent/gateway';
 import type { UCPSession, UCPSessionItem, UCPSessionStatus, UCPQuote } from '@ondc-agent/shared';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-agent/shared';
 
-// Temporarily disabled agent service due to libsodium dependency issue
-// import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
+// Agent service for buyer/seller AI assistants
+import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
 
 // Local implementations of SDK functions to avoid libsodium dependency
 interface UCPCatalog {
@@ -323,8 +323,101 @@ app.delete('/api/catalog/products/:id', (req: Request, res: Response) => {
   }
 });
 
-// Agent endpoints temporarily disabled due to libsodium dependency issue
-// TODO: Fix @anthropic-ai/claude-agent-sdk dependency issue
+// ============================================================================
+// AGENT-006: Agent API endpoints for buyer/seller AI assistants
+// ============================================================================
+
+/**
+ * POST /api/agent/buyer - Execute buyer agent workflow with SSE streaming
+ * Agent helps users search, filter, compare, and select products
+ */
+app.post('/api/agent/buyer', async (req: Request, res: Response) => {
+  // Set headers for SSE (Server-Sent Events)
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  try {
+    const { prompt, sessionId, context } = req.body;
+
+    if (!prompt || typeof prompt !== 'string') {
+      res.write(messageToSSE({
+        type: 'result',
+        subtype: 'error_during_execution',
+        is_error: true,
+        errors: ['Prompt is required and must be a string'],
+        uuid: crypto.randomUUID(),
+        session_id: sessionId || '',
+      } as any));
+      res.end();
+      return;
+    }
+
+    // Execute buyer agent with streaming
+    for await (const message of executeBuyerAgent({ prompt, sessionId, context })) {
+      res.write(messageToSSE(message));
+    }
+
+    res.end();
+  } catch (error) {
+    console.error('Buyer agent error:', error);
+    res.write(messageToSSE({
+      type: 'result',
+      subtype: 'error_during_execution',
+      is_error: true,
+      errors: [error instanceof Error ? error.message : String(error)],
+      uuid: crypto.randomUUID(),
+      session_id: req.body?.sessionId || '',
+    } as any));
+    res.end();
+  }
+});
+
+/**
+ * POST /api/agent/seller - Execute seller agent workflow with SSE streaming
+ * Agent helps sellers manage catalog, optimize listings, and analyze pricing
+ */
+app.post('/api/agent/seller', async (req: Request, res: Response) => {
+  // Set headers for SSE (Server-Sent Events)
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  try {
+    const { prompt, sessionId, context } = req.body;
+
+    if (!prompt || typeof prompt !== 'string') {
+      res.write(messageToSSE({
+        type: 'result',
+        subtype: 'error_during_execution',
+        is_error: true,
+        errors: ['Prompt is required and must be a string'],
+        uuid: crypto.randomUUID(),
+        session_id: sessionId || '',
+      } as any));
+      res.end();
+      return;
+    }
+
+    // Execute seller agent with streaming
+    for await (const message of executeSellerAgent({ prompt, sessionId, context })) {
+      res.write(messageToSSE(message));
+    }
+
+    res.end();
+  } catch (error) {
+    console.error('Seller agent error:', error);
+    res.write(messageToSSE({
+      type: 'result',
+      subtype: 'error_during_execution',
+      is_error: true,
+      errors: [error instanceof Error ? error.message : String(error)],
+      uuid: crypto.randomUUID(),
+      session_id: req.body?.sessionId || '',
+    } as any));
+    res.end();
+  }
+});
 
 // ============================================================================
 // SDK-BUYER-CART-001: Cart API endpoints for UCPSession management

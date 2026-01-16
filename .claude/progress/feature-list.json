@@ -709,6 +709,26 @@
       ]
     },
     {
+      "id": "AGENT-006",
+      "description": "Add agent API endpoints to api-server (POST /api/agent/buyer and /api/agent/seller)",
+      "priority": 46,
+      "status": "pending",
+      "tier": "core",
+      "phase": "website-phase2",
+      "plan_reference": "gap-feature-discovered-during-browser-testing",
+      "dependencies": [
+        "AGENT-003",
+        "AGENT-004"
+      ],
+      "acceptance_criteria": [
+        "Uncomment agent-service import in api-server/src/index.ts",
+        "Add POST /api/agent/buyer endpoint with SSE streaming",
+        "Add POST /api/agent/seller endpoint with SSE streaming",
+        "Agent UI can successfully call endpoints and receive responses",
+        "Fix libsodium dependency issue blocking agent service"
+      ]
+    },
+    {
       "id": "WEEK1-001",
       "description": "Implement SellerClient search method with ONDC protocol",
       "priority": 44,
@@ -1383,7 +1403,7 @@
     "protocol": "TRANSLATE-001--STATE-002",
     "mcp": "MCP-001--MOCK-001",
     "website-phase1": "WEBSITE-001--WEBSITE-010",
-    "website-phase2": "AGENT-001--AGENT-005",
+    "website-phase2": "AGENT-001--AGENT-006",
     "buyer-sdk-integration": "SDK-BUYER-CART-001--SDK-BUYER-ORDERS-002",
     "seller-sdk-integration": "SDK-SELLER-ORDERS-001--SDK-SELLER-DASHBOARD-001",
     "adoption": "SDK-DEMO-001--SDK-DOCS-001"
