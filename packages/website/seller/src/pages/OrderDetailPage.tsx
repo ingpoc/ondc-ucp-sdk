@@ -58,7 +58,7 @@ const getOrderTimeline = (order: UCPOrder): TimelineEvent[] => {
     });
   }
 
-  if (order.fulfillment.status === 'in_transit' || order.status === 'shipped') {
+  if (order.fulfillment?.status === 'in_transit' || order.status === 'shipped') {
     events.push({
       status: 'packed',
       label: 'Order Packed',
@@ -66,7 +66,7 @@ const getOrderTimeline = (order: UCPOrder): TimelineEvent[] => {
     });
   }
 
-  if (order.status === 'shipped' || order.fulfillment.status === 'in_transit') {
+  if (order.status === 'shipped' || order.fulfillment?.status === 'in_transit') {
     events.push({
       status: 'shipped',
       label: 'Order Dispatched',
@@ -404,13 +404,13 @@ export function OrderDetailPage() {
         }}
       >
         <h3 style={{ margin: '0 0 12px 0', fontSize: '1em' }}>Buyer Information</h3>
-        <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{order.buyer.name}</p>
-        {order.buyer.contact?.phone && (
+        <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{order.buyer?.name}</p>
+        {order.buyer?.contact?.phone && (
           <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
             Phone: {order.buyer.contact.phone}
           </p>
         )}
-        {order.buyer.contact?.email && (
+        {order.buyer?.contact?.email && (
           <p style={{ margin: '0', color: '#6b7280' }}>
             Email: {order.buyer.contact.email}
           </p>
@@ -422,16 +422,16 @@ export function OrderDetailPage() {
         <h3 style={{ fontSize: '1.1em', marginBottom: '12px' }}>Delivery Address</h3>
         <div style={{ color: '#374151', lineHeight: '1.6' }}>
           <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>
-            {order.deliveryAddress.line1}
+            {order.deliveryAddress?.line1}
           </p>
-          {order.deliveryAddress.line2 && (
+          {order.deliveryAddress?.line2 && (
             <p style={{ margin: '0 0 4px 0' }}>{order.deliveryAddress.line2}</p>
           )}
           <p style={{ margin: '0 0 4px 0' }}>
-            {order.deliveryAddress.city}, {order.deliveryAddress.state}{' '}
-            {order.deliveryAddress.postalCode}
+            {order.deliveryAddress?.city}, {order.deliveryAddress?.state}{' '}
+            {order.deliveryAddress?.postalCode}
           </p>
-          <p style={{ margin: '0' }}>{order.deliveryAddress.country}</p>
+          <p style={{ margin: '0' }}>{order.deliveryAddress?.country}</p>
         </div>
       </div>
 
@@ -459,7 +459,7 @@ export function OrderDetailPage() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: '0', fontWeight: '600' }}>
-                  {order.quote.total.currency} {item.price.value}
+                  {order.quote?.total?.currency} {item.price.value ?? item.price.amount}
                 </p>
               </div>
             </div>
@@ -481,7 +481,7 @@ export function OrderDetailPage() {
       >
         <span style={{ fontSize: '1.1em', fontWeight: '600' }}>Order Total</span>
         <span style={{ fontSize: '1.2em', fontWeight: '700', color: '#16a34a' }}>
-          {order.quote.total.currency} {order.quote.total.value}
+          {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
         </span>
       </div>
 
@@ -543,7 +543,7 @@ export function OrderDetailPage() {
       </div>
 
       {/* Tracking Info (if dispatched) */}
-      {order.fulfillment.tracking && (
+      {order.fulfillment?.tracking && (
         <div
           style={{
             marginBottom: '24px',

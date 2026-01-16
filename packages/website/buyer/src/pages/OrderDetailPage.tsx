@@ -38,6 +38,8 @@ const getOrderStatusColor = (status: UCPOrderStatus): string => {
 const getFulfillmentStatusLabel = (status: UCPFulfillmentStatus): string => {
   const labels: Record<UCPFulfillmentStatus, string> = {
     pending: 'Pending',
+    processing: 'Processing',
+    packed: 'Packed',
     searching_agent: 'Searching for Agent',
     agent_assigned: 'Agent Assigned',
     picking_up: 'Picking Up',
@@ -250,7 +252,7 @@ export function OrderDetailPage() {
             {order.cancellation.reason && ` - ${order.cancellation.reason}`}
           </p>
           <p style={{ margin: '4px 0 0 0', color: '#7f1d1d', fontSize: '0.85em' }}>
-            {new Date(order.cancellation.cancelledAt).toLocaleString()}
+            {new Date(order.cancellation.cancelledAt || '').toLocaleString()}
           </p>
           {order.cancellation.refund && (
             <p style={{ margin: '8px 0 0 0', color: '#059669', fontSize: '0.9em' }}>
@@ -271,8 +273,8 @@ export function OrderDetailPage() {
         }}
       >
         <h3 style={{ margin: '0 0 8px 0', fontSize: '1em' }}>Seller</h3>
-        <p style={{ margin: '0', fontWeight: '600' }}>{order.provider.name}</p>
-        {order.provider.verified && (
+        <p style={{ margin: '0', fontWeight: '600' }}>{order.provider?.name}</p>
+        {order.provider?.verified && (
           <span style={{ color: '#16a34a', fontSize: '0.9em' }}>✓ Verified</span>
         )}
       </div>
@@ -310,10 +312,10 @@ export function OrderDetailPage() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: '0', fontWeight: '600' }}>
-                  {formatPrice(item.price.currency, item.price.value, item.quantity)}
+                  {formatPrice(item.price.currency, (item.price.value ?? String(item.price.amount ?? 0)), item.quantity)}
                 </p>
                 <p style={{ margin: '0', color: '#6b7280', fontSize: '0.85em' }}>
-                  {item.price.currency} {item.price.value} each
+                  {item.price.currency} {item.price.value ?? item.price.amount} each
                 </p>
               </div>
             </div>
@@ -331,7 +333,7 @@ export function OrderDetailPage() {
         }}
       >
         <h2 style={{ fontSize: '1.2em', marginBottom: '16px' }}>Order Summary</h2>
-        {order.quote.breakup?.map((item, index) => (
+        {order.quote?.breakup?.map((item, index) => (
           <div
             key={index}
             style={{
@@ -342,7 +344,7 @@ export function OrderDetailPage() {
             }}
           >
             <span style={{ color: '#6b7280' }}>{item.title}</span>
-            <span>{item.price.currency} {item.price.value}</span>
+            <span>{item.price.currency} {item.price.value ?? item.price.amount}</span>
           </div>
         ))}
         <div
@@ -358,7 +360,7 @@ export function OrderDetailPage() {
         >
           <span>Total</span>
           <span>
-            {order.quote.total.currency} {order.quote.total.value}
+            {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
           </span>
         </div>
       </div>
@@ -368,23 +370,23 @@ export function OrderDetailPage() {
         <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>Delivery Address</h2>
         <div style={{ color: '#374151', lineHeight: '1.6' }}>
           <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>
-            {order.deliveryAddress.line1}
+            {order.deliveryAddress?.line1}
           </p>
-          {order.deliveryAddress.line2 && (
+          {order.deliveryAddress?.line2 && (
             <p style={{ margin: '0 0 4px 0' }}>{order.deliveryAddress.line2}</p>
           )}
           <p style={{ margin: '0 0 4px 0' }}>
-            {order.deliveryAddress.city}, {order.deliveryAddress.state}{' '}
-            {order.deliveryAddress.postalCode}
+            {order.deliveryAddress?.city}, {order.deliveryAddress?.state}{' '}
+            {order.deliveryAddress?.postalCode}
           </p>
-          <p style={{ margin: '0' }}>{order.deliveryAddress.country}</p>
+          <p style={{ margin: '0' }}>{order.deliveryAddress?.country}</p>
         </div>
       </div>
 
       {/* Fulfillment & Tracking */}
       <div style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>
-          {order.fulfillment.type === 'delivery' ? 'Delivery' : 'Fulfillment'} Status
+          {order.fulfillment?.type === 'delivery' ? 'Delivery' : 'Fulfillment'} Status
         </h2>
         <div
           style={{
@@ -394,9 +396,9 @@ export function OrderDetailPage() {
           }}
         >
           <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>
-            Status: {getFulfillmentStatusLabel(order.fulfillment.status)}
+            Status: {getFulfillmentStatusLabel(order.fulfillment?.status ?? 'pending')}
           </p>
-          {order.fulfillment.estimatedTime && (
+          {order.fulfillment?.estimatedTime && (
             <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
               Est. Delivery:{' '}
               {order.fulfillment.estimatedTime.start
@@ -408,29 +410,29 @@ export function OrderDetailPage() {
                 : 'TBD'}
             </p>
           )}
-          {order.fulfillment.providerName && (
+          {order.fulfillment?.providerName && (
             <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
-              Provider: {order.fulfillment.providerName}
+              Provider: {order.fulfillment?.providerName}
             </p>
           )}
 
           {/* Tracking Info */}
-          {order.fulfillment.tracking && (
+          {order.fulfillment?.tracking && (
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
               <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>Tracking</p>
-              {order.fulfillment.tracking.id && (
+              {order.fulfillment?.tracking?.id && (
                 <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
-                  Tracking ID: {order.fulfillment.tracking.id}
+                  Tracking ID: {order.fulfillment?.tracking?.id}
                 </p>
               )}
-              {order.fulfillment.tracking.statusMessage && (
+              {order.fulfillment?.tracking?.statusMessage && (
                 <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
-                  {order.fulfillment.tracking.statusMessage}
+                  {order.fulfillment?.tracking?.statusMessage}
                 </p>
               )}
-              {order.fulfillment.tracking.url && (
+              {order.fulfillment?.tracking?.url && (
                 <a
-                  href={order.fulfillment.tracking.url}
+                  href={order.fulfillment?.tracking?.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -446,17 +448,17 @@ export function OrderDetailPage() {
           )}
 
           {/* Delivery Agent */}
-          {order.fulfillment.agent && (
+          {order.fulfillment?.agent && (
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
               <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>Delivery Agent</p>
-              {order.fulfillment.agent.name && (
+              {order.fulfillment?.agent?.name && (
                 <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
-                  Name: {order.fulfillment.agent.name}
+                  Name: {order.fulfillment?.agent?.name}
                 </p>
               )}
-              {order.fulfillment.agent.phone && (
+              {order.fulfillment?.agent?.phone && (
                 <p style={{ margin: '0', color: '#6b7280' }}>
-                  Phone: {order.fulfillment.agent.phone}
+                  Phone: {order.fulfillment?.agent?.phone}
                 </p>
               )}
             </div>
@@ -477,13 +479,13 @@ export function OrderDetailPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ color: '#6b7280' }}>Method</span>
             <span style={{ fontWeight: '600', textTransform: 'capitalize' }}>
-              {order.payment.type}
+              {order.payment?.type}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ color: '#6b7280' }}>Amount</span>
             <span style={{ fontWeight: '600' }}>
-              {order.payment.amount.currency} {order.payment.amount.value}
+              {order.payment?.amount?.currency} {order.payment?.amount?.value}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -492,25 +494,25 @@ export function OrderDetailPage() {
               style={{
                 fontWeight: '600',
                 color:
-                  order.payment.status === 'completed'
+                  order.payment?.status === 'completed'
                     ? '#16a34a'
-                    : order.payment.status === 'failed'
+                    : order.payment?.status === 'failed'
                       ? '#dc2626'
                       : '#ea580c',
                 textTransform: 'capitalize',
               }}
             >
-              {order.payment.status}
+              {order.payment?.status}
             </span>
           </div>
-          {order.payment.transactionId && (
+          {order.payment?.transactionId && (
             <p style={{ margin: '8px 0 0 0', color: '#6b7280', fontSize: '0.9em' }}>
-              Transaction ID: {order.payment.transactionId}
+              Transaction ID: {order.payment?.transactionId}
             </p>
           )}
-          {order.payment.completedAt && (
+          {order.payment?.completedAt && (
             <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.9em' }}>
-              Completed: {new Date(order.payment.completedAt).toLocaleString()}
+              Completed: {new Date(order.payment?.completedAt || '').toLocaleString()}
             </p>
           )}
         </div>

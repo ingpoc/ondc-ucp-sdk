@@ -108,7 +108,7 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
               {item.quantity}x {item.name}
             </span>
             <span style={{ color: '#6b7280' }}>
-              {order.quote.total.currency} {item.price.value}
+              {order.quote?.total?.currency} {item.price.value ?? item.price.amount}
             </span>
           </div>
         ))}
@@ -121,9 +121,9 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
 
       {/* Customer & Delivery */}
       <div style={{ marginBottom: '16px', fontSize: '0.9em', color: '#6b7280' }}>
-        <div>Customer: {order.buyer.name}</div>
+        <div>Customer: {order.buyer?.name}</div>
         <div>
-          Delivery to: {order.deliveryAddress.city}, {order.deliveryAddress.state}
+          Delivery to: {order.deliveryAddress?.city}, {order.deliveryAddress?.state}
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
         }}
       >
         <div style={{ fontSize: '1.1em', fontWeight: '600', color: '#374151' }}>
-          Total: {order.quote.total.currency} {order.quote.total.value}
+          Total: {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
         </div>
 
         {/* Actions */}

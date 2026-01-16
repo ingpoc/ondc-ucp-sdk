@@ -1,129 +1,219 @@
-# ONDC Agent SDK: Phase 1 vs Phase 2 Analysis
+# Agent Testing Workflow Analysis
 
-**Purpose**: Compare direct SDK usage (Phase 1) vs AI Agent workflows (Phase 2) to determine optimal boundaries.
+## Session: TypeScript Type Fixing & App Testing (2026-01-16)
 
-## Phase 1: Direct SDK Usage
+---
 
-### What Works Well
+## Key Learnings
 
-| Use Case | Why Direct SDK |
-|----------|----------------|
-| **Simple CRUD** | `/api/catalog/*` - straightforward data operations |
-| **Health checks** | Status endpoints with no logic |
-| **Basic search** | Category filter + pagination |
-| **Mock catalog** | In-memory POC data store |
-| **Type safety** | Full TypeScript types throughout |
+### 1. Type System Fragility
 
-### Limitations
+**Problem**: Frontend types (`@ondc-website/shared`) were incomplete shadows of backend types.
 
-| Limitation | Impact |
-|------------|--------|
-| **No optimization** | Can't suggest price changes or SEO improvements |
-| **No workflow** | Each call is independent, no multi-step reasoning |
-| **No learning** | Doesn't remember previous decisions |
-| **No flexibility** | Exact inputs required, no natural language |
-| **No analysis** | Can't compare products or explain recommendations |
+**Root Causes**:
 
-## Phase 2: AI Agent Workflows
+- Types manually copied instead of imported from source of truth
+- Divergence over time as features added
+- Missing fields: `buyer`, `deliveryAddress`, `cancellation.cancelledBy`, `fulfillment.status`
 
-### What Works Well
+**Impact**:
 
-| Use Case | Why Agent |
-|----------|-----------|
-| **Complex queries** | "Find organic mangoes under ₹500" → structured search |
-| **Multi-step workflows** | Search → compare → select in one conversation |
-| **Catalog optimization** | SEO + pricing analysis with recommendations |
-| **Natural language** | Users describe needs, agent translates to API calls |
-| **Tool composition** | Combines multiple MCP tools (search, scoring, context-graph) |
+- 60+ TypeScript errors blocking dev servers from starting
+- Unable to test any functionality until types fixed
 
-### Limitations
+### 2. Build Dependency Chain
 
-| Limitation | Impact |
-|------------|--------|
-| **Latency** | Agent orchestration adds overhead |
-| **Cost** | Per-token pricing for all agent operations |
-| **Non-deterministic** | Responses vary, harder to test |
-| **Overkill** | Simple CRUD doesn't need LLM reasoning |
-
-## Decision Matrix
-
-| Scenario | Approach | Rationale |
-|----------|----------|-----------|
-| Product CRUD | **Direct SDK** | Simple operations, deterministic |
-| Search with filters | **Direct SDK** | Well-defined inputs, fast response |
-| Product comparison | **Agent** | Needs analysis and explanation |
-| Pricing optimization | **Agent** | Requires market analysis and reasoning |
-| SEO suggestions | **Agent** | Content generation + semantic understanding |
-| Catalog preview | **Agent** | Ranking analysis requires multi-step logic |
-| Health/status | **Direct SDK** | No reasoning needed |
-| Session management | **Agent** | Maintains context across turns |
-
-## Recommended Architecture
+**Discovery**: Type changes require rebuild cascade:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        User Interface                        │
-├─────────────────────────────────────────────────────────────┤
-│  Direct API Endpoints          │        Agent Endpoints      │
-│  ┌─────────────────────────┐   │   ┌──────────────────────┐ │
-│  │ GET/POST/PUT/DELETE     │   │   │ POST /api/agent/*    │ │
-│  │ /api/catalog/*          │   │   │ - buyer              │ │
-│  │ /api/search             │   │   │ - seller             │ │
-│  │ /health                 │   │   │ - Streaming SSE      │ │
-│  └─────────────────────────┘   │   └──────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│  ONDC SDK Layer (Shared)                                    │
-│  - Types (Beckn, UCP)                                       │
-│  - Scoring algorithms                                       │
-│  - Protocol converters                                      │
-├─────────────────────────────────────────────────────────────┤
-│  Agent Layer (Claude Agent SDK + MCP)                       │
-│  - buyer-skill, seller-skill                               │
-│  - token-efficient MCP                                      │
-│  - context-graph MCP                                        │
-└─────────────────────────────────────────────────────────────┘
+@ondc-website/shared → pnpm build → typecheck passes
 ```
 
-## Boundary Guidelines
+**Time Cost**: ~2 minutes per iteration
 
-### Use Direct SDK When
+### 3. Error Patterns
 
-- Operation is CRUD (create, read, update, delete)
-- Inputs/outputs are well-defined and typed
-- Performance is critical
-- Deterministic behavior required
-- No reasoning or analysis needed
+**Common Patterns Found**:
 
-### Use Agent When
+| Pattern | Count | Fix |
+|---------|-------|-----|
+| `price.value` undefined | 8 | `price.value ?? price.amount` |
+| Missing optional chaining | 40+ | Add `?.` throughout |
+| Type mismatches | 15 | Update type definitions |
 
-- Natural language input required
-- Multi-step workflow needed
-- Content generation (descriptions, SEO)
-- Analysis or comparison required
-- Recommendations needed
-- Context from previous decisions helps
+---
 
-## Implementation Status
+## Optimized Workflow Recommendations
 
-| Component | Type | Endpoint/Feature |
-|-----------|------|------------------|
-| Catalog CRUD | Direct SDK | `/api/catalog/*` |
-| Search | Direct SDK | `/api/search` |
-| Buyer Agent | Agent | `/api/agent/buyer` |
-| Seller Agent | Agent | `/api/agent/seller` |
-| Health Check | Direct SDK | `/health` |
-| ONDC Callback | Direct SDK | `/on_search` |
-| Chat UI | Client | `AgentChat` component |
+### Phase 1: Pre-Flight Checks (DO THIS FIRST)
 
-## Next Steps
+```bash
+# 1. Check context graph for similar issues
+context_query_traces("UCPPrice type mismatch")
 
-1. **Keep direct SDK** for all catalog operations
-2. **Expand agent capabilities** for:
-   - Competitor price analysis
-   - SEO content generation
-   - Inventory optimization
-   - Sales trend analysis
-3. **Add agent tools** for:
-   - Direct catalog read access
-   - Analytics data processing
-   - Report generation
+# 2. Verify build state
+pnpm typecheck 2>&1 | grep -E "(error|Failed)"
+
+# 3. If errors > 20, use batch fixes (see Phase 2)
+# If errors < 20, fix manually
+```
+
+### Phase 2: Batch Fix Strategy
+
+**For repetitive errors (>10 instances)**:
+
+1. **Create fix script** instead of manual edits:
+
+```bash
+# Fix UCPPrice fallback pattern
+find packages/website -name "*.tsx" -exec sed -i '' \
+  's/price\.value/price.value ?? price.amount/g' {} +
+```
+
+1. **Update type definitions** in single file, not scattered:
+
+```typescript
+// packages/shared/src/types/ucp/order.ts - SOURCE OF TRUTH
+// Re-export from here, don't copy-paste
+```
+
+### Phase 3: Verification
+
+```bash
+# 1. Rebuild affected packages
+cd packages/website/shared && pnpm build
+
+# 2. Full typecheck
+pnpm typecheck
+
+# 3. Start servers ONLY after typecheck passes
+pnpm dev
+```
+
+### Phase 4: Browser Testing
+
+**Sequence**:
+
+1. Test **Buyer App** → localhost:3000
+   - Search functionality
+   - Product details
+   - Cart management
+   - Checkout flow
+   - Order tracking
+
+2. Test **Seller App** → localhost:3002
+   - Catalog management
+   - Order receiving
+   - Order fulfillment
+   - Configuration
+
+3. Test **Integration**
+   - Buyer places order → Seller receives
+   - Seller updates status → Buyer sees changes
+   - Cancellation flow
+
+---
+
+## Time Optimization
+
+| Current | Optimized | Savings |
+|---------|-----------|---------|
+| Manual fix 60+ errors (45 min) | Batch script (2 min) | 43 min |
+| Trial-and-error rebuild | Single rebuild cascade | 10 min |
+| No context graph check | Check first | 15 min+ |
+
+**Total session time**: ~2 hours
+**Optimized time**: ~30 minutes
+
+---
+
+## Rules for Future Agents
+
+### 1. ALWAYS Check Context Graph First
+
+```typescript
+// Before making changes:
+context_query_traces("keyword from error")
+context_get_trace(trace_id) // Read full context
+```
+
+### 2. Type Hierarchy Rule
+
+```
+Source of Truth: packages/shared/src/types/
+↓
+Re-export in packages/website/shared/src/types/
+↓
+Import in components: @ondc-website/shared
+```
+
+### 3. When Error Count > 20
+
+- STOP manual editing
+- CREATE fix script
+- RUN on all files
+- VERIFY with typecheck
+
+### 4. Rebuild Command Sequence
+
+```bash
+# After type changes:
+cd packages/website/shared && pnpm build && cd ../.. && pnpm typecheck
+```
+
+### 5. Browser Testing Protocol
+
+- Start servers ONLY after clean typecheck
+- Test ONE app completely before next
+- Document issues as you find them
+- Fix BEFORE recording to context graph
+
+---
+
+## Context Graph Entry Template
+
+**AFTER issue is fixed and tested**, store with:
+
+```typescript
+context_store_trace({
+  decision: "Fixed UCPPrice optional property access pattern across buyer/seller apps",
+  category: "error",
+  outcome: "success",
+  feature: "SDK-BUYER-ORDERS-003"
+})
+```
+
+**Key**: Only store SUCCESSFUL fixes with working solutions.
+
+---
+
+## Tools That Helped
+
+| Tool | Use Case | Time Saved |
+|------|----------|------------|
+| `context_query_traces` | Find similar past issues | 15+ min |
+| `grep -E "error\|Failed"` | Quick error count | 2 min |
+| `sed` batch replace | Repetitive fixes | 40+ min |
+| `pnpm build` | Update types | Required |
+
+---
+
+## What Didn't Work
+
+❌ Manual editing of 60+ similar errors
+❌ Fixing without understanding type hierarchy
+❌ Not checking context graph first
+❌ Starting dev servers before typecheck passes
+
+---
+
+## Next Session Checklist
+
+- [ ] Query context graph for error patterns
+- [ ] Count errors: `pnpm typecheck 2>&1 | grep -c error`
+- [ ] If >20: create batch fix script
+- [ ] Rebuild shared package
+- [ ] Verify clean typecheck
+- [ ] Start servers
+- [ ] Browser test systematically
+- [ ] Store ONLY working fixes to context graph

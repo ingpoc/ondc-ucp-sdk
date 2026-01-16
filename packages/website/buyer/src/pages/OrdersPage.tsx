@@ -222,10 +222,10 @@ export function OrdersPage() {
                 }}
               >
                 <div style={{ fontSize: '0.9em', color: '#6b7280' }}>
-                  {order.provider.name}
+                  {order.provider?.name}
                 </div>
                 <div style={{ fontSize: '1.1em', fontWeight: '600', color: '#374151' }}>
-                  Total: {order.quote.total.currency} {order.quote.total.value}
+                  Total: {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
                 </div>
               </div>
             </div>

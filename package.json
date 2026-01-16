@@ -11,7 +11,8 @@
     "lint": "eslint packages/*/src --ext .ts",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter @ondc-agent/gateway dev",
-    "clean": "pnpm -r clean && rm -rf node_modules"
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "postinstall": "node ./.claude/scripts/fix-symlinks.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

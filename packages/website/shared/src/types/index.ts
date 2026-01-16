@@ -8,6 +8,16 @@ export interface UCPSession {
   status: UCPSessionStatus;
   createdAt: string;
   updatedAt: string;
+  buyer?: {
+    name: string;
+    email: string;
+    phone: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    pincode?: string;
+  };
 }
 
 export interface UCPSessionItem {
@@ -33,6 +43,7 @@ export interface UCPItem {
   _provider?: string;
   provider?: BecknProvider;
   rating?: BecknRating;
+  quantity?: number;
 }
 
 export interface UCPCatalog {
@@ -43,6 +54,7 @@ export interface UCPPrice {
   value?: string;
   amount?: number;
   currency: string;
+  price?: string;
 }
 
 export interface UCPAddress {
@@ -50,10 +62,13 @@ export interface UCPAddress {
   phone: string;
   email?: string;
   street?: string;
+  line1?: string;
+  line2?: string;
   city?: string;
   state?: string;
   country?: string;
   pincode?: string;
+  postalCode?: string;
 }
 
 export interface UCPContact {
@@ -72,20 +87,47 @@ export interface UCPLocation {
 
 export interface UCPQuote {
   price: UCPPrice;
+  total: UCPPrice;
+  subtotal: UCPPrice;
+  deliveryCost?: UCPPrice;
+  tax?: UCPPrice;
+  discount?: UCPPrice;
   breakup: UCPQuoteBreakup[];
-  taxes: number;
-  total: number;
+  taxes?: number;
+  ttl?: string;
+  currency?: string;
+  amount?: {
+    currency: string;
+    value: string;
+  };
 }
 
 export interface UCPQuoteBreakup {
   title: string;
-  price: number;
+  price: UCPPrice;
+  type?: string;
+  quantity?: number;
 }
 
 export interface UCPFulfillment {
-  id: string;
+  id?: string;
   type: string;
-  state: string;
+  state?: string;
+  status: 'pending' | 'searching_agent' | 'agent_assigned' | 'picking_up' | 'picked_up' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  providerName?: string;
+  estimatedTime?: { start?: string; end?: string };
+  tracking?: {
+    id?: string;
+    url?: string;
+    status?: string;
+    statusMessage?: string;
+    estimatedDelivery?: string;
+  };
+  agent?: {
+    name?: string;
+    phone?: string;
+    image?: string;
+  };
 }
 
 export type UCPOrderStatus =
@@ -105,11 +147,30 @@ export type UCPFulfillmentStatus =
   | 'packed'
   | 'out_for_delivery'
   | 'delivered'
-  | 'cancelled';
+  | 'cancelled'
+  | 'searching_agent'
+  | 'agent_assigned'
+  | 'picking_up'
+  | 'picked_up'
+  | 'in_transit';
 
 export interface UCPPayment {
-  type: 'PRE-FULFILLMENT' | 'ON-FULFILLMENT' | 'POST-FULFILLMENT';
-  status: 'PAID' | 'NOT-PAID';
+  type:
+    | 'PRE-FULFILLMENT'
+    | 'ON-FULFILLMENT'
+    | 'POST-FULFILLMENT'
+    | 'upi'
+    | 'card'
+    | 'netbanking'
+    | 'wallet'
+    | 'cod';
+  status: 'PAID' | 'NOT-PAID' | 'completed' | 'failed';
+  amount?: {
+    currency: string;
+    value: string;
+  };
+  transactionId?: string;
+  completedAt?: string;
 }
 
 export interface UCPSearchPreferences {
@@ -136,16 +197,24 @@ export interface BecknItem {
   price: BecknPrice;
   images: BecknImage[];
   category: BecknCategory;
+  descriptor?: {
+    name: string;
+    short_desc?: string;
+  };
+  category_id?: string;
 }
 
 export interface BecknCatalog {
   items: BecknItem[];
+  'bpp/providers'?: any[];
 }
 
 export interface BecknProvider {
   id: string;
   name: string;
   location: BecknLocation;
+  verified?: boolean;
+  rating?: BecknRating;
 }
 
 export interface BecknOffer {
@@ -242,5 +311,54 @@ export interface BecknCountry {
 
 export interface BecknCategory {
   name: string;
+}
+
+export interface UCPOrder {
+  id: string;
+  status: UCPOrderStatus;
+  items: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    price: UCPPrice;
+    customizations?: Record<string, string>;
+    status?: UCPOrderStatus;
+  }>;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
+  provider?: BecknProvider;
+  buyer?: {
+    name: string;
+    email: string;
+    phone: string;
+    contact?: {
+      phone?: string;
+      email?: string;
+    };
+  };
+  deliveryAddress?: UCPAddress;
+  fulfillment?: UCPFulfillment;
+  payment?: UCPPayment;
+  quote?: UCPQuote;
+  documents?: Array<{
+    id: string;
+    url: string;
+    name: string;
+    type: string;
+    label?: string;
+  }>;
+  cancellation?: {
+    cancelledBy?: 'buyer' | 'seller' | 'system';
+    reason?: string;
+    cancelledAt?: string;
+    refundedAmount?: number;
+    refund?: {
+      status: string;
+      amount: UCPPrice;
+      transactionId?: string;
+      completedAt?: string;
+    };
+  };
 }
 
