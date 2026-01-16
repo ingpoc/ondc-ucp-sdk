@@ -225,10 +225,6 @@ importers:
         version: 5.4.21(@types/node@22.19.6)
 
   packages/website/shared:
-    dependencies:
-      '@ondc-agent/shared':
-        specifier: workspace:*
-        version: link:../../shared
     devDependencies:
       '@types/react':
         specifier: ^18.2.0

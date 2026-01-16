@@ -239,6 +239,7 @@ interface SearchToolDependencies {
 }
 /**
  * Register ondc_search tool with MCP server
+ * WEEK2-002: Enhanced with streaming support
  *
  * @param server - MCP server instance
  * @param deps - Tool dependencies (client, state store, poller)

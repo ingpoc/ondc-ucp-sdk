@@ -90,7 +90,8 @@ var searchInputSchema = {
     minRating: z.number().min(0).max(5).optional().describe("Minimum rating (0-5)"),
     sortBy: z.enum(["price", "rating", "distance", "relevance"]).optional().describe("Sort order")
   }).optional().describe("Search preferences"),
-  maxResults: z.number().min(1).max(100).optional().describe("Maximum results (default: 10)")
+  maxResults: z.number().min(1).max(100).optional().describe("Maximum results (default: 10)"),
+  stream: z.boolean().optional().describe("Enable progressive disclosure (returns batches)")
 };
 var searchOutputSchema = {
   items: z.array(z.object({
@@ -143,11 +144,12 @@ function registerSearchTool(server, deps) {
     "ondc_search",
     {
       title: "ONDC Search",
-      description: "Search for products and services on the ONDC network",
+      description: "Search for products and services on the ONDC network. Set stream=true for progressive disclosure with batched results.",
       inputSchema: searchInputSchema,
       outputSchema: searchOutputSchema
     },
     async (input) => {
+      const { stream = false } = input;
       const transactionId = generateTransactionId();
       const ucpQuery = inputToUcpQuery(input);
       const becknIntent = ucpToBecknIntent(ucpQuery);
@@ -185,7 +187,35 @@ function registerSearchTool(server, deps) {
         throw error;
       }
       const limitedItems = catalog.items.slice(0, input.maxResults ?? 10);
+      if (stream) {
+        const batchSize = 5;
+        const batches = [];
+        for (let i = 0; i < limitedItems.length; i += batchSize) {
+          const batch = limitedItems.slice(i, i + batchSize);
+          const batchNumber = Math.floor(i / batchSize) + 1;
+          const totalBatches = Math.ceil(limitedItems.length / batchSize);
+          batches.push({
+            type: "results",
+            batch,
+            batchNumber,
+            totalBatches,
+            totalItems: limitedItems.length,
+            isComplete: i + batchSize >= limitedItems.length
+          });
+        }
+        const output2 = {
+          mode: "stream",
+          transactionId,
+          totalCount: catalog.totalCount ?? limitedItems.length,
+          batches
+        };
+        return {
+          content: [{ type: "text", text: JSON.stringify(output2, null, 2) }],
+          structuredContent: output2
+        };
+      }
       const output = {
+        mode: "standard",
         items: limitedItems.map((item) => ({
           id: item.id,
           name: item.name,

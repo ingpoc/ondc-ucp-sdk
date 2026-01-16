@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { UCPSession, UCPSessionItem } from '../types';
-import type { BecknItem } from '@ondc-agent/shared';
+import type { UCPSession, UCPSessionItem, BecknItem } from '../types';
 
 const API_BASE = 'http://localhost:3001';
 
