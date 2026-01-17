@@ -15,6 +15,8 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState<UCPAddress>({
+    name: session?.buyer?.name || '',
+    phone: session?.buyer?.phone || '',
     line1: '',
     city: '',
     state: '',
@@ -151,7 +153,7 @@ export function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={submitting || !session?.buyer?.name || !session?.buyer?.contact?.email}
+              disabled={submitting || !session?.buyer?.name || !session?.buyer?.email}
               style={{
                 width: '100%',
                 padding: '14px',

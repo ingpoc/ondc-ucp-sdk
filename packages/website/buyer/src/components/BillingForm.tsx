@@ -9,9 +9,9 @@ export interface BillingFormProps {
 
 export function BillingForm({ session }: BillingFormProps) {
   const [name, setName] = useState(session?.buyer?.name || '');
-  const [email, setEmail] = useState(session?.buyer?.contact?.email || '');
-  const [phone, setPhone] = useState(session?.buyer?.contact?.phone || '');
-  const [taxId, setTaxId] = useState(session?.buyer?.taxId || '');
+  const [email, setEmail] = useState(session?.buyer?.email || '');
+  const [phone, setPhone] = useState(session?.buyer?.phone || '');
+  const [taxId, setTaxId] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -19,9 +19,8 @@ export function BillingForm({ session }: BillingFormProps) {
   useEffect(() => {
     if (session?.buyer) {
       setName(session.buyer.name || '');
-      setEmail(session.buyer.contact?.email || '');
-      setPhone(session.buyer.contact?.phone || '');
-      setTaxId(session.buyer.taxId || '');
+      setEmail(session.buyer.email || '');
+      setPhone(session.buyer.phone || '');
     }
   }, [session]);
 
@@ -63,9 +62,9 @@ export function BillingForm({ session }: BillingFormProps) {
 
   const isDirty =
     name !== session?.buyer?.name ||
-    email !== session?.buyer?.contact?.email ||
-    phone !== session?.buyer?.contact?.phone ||
-    taxId !== session?.buyer?.taxId;
+    email !== session?.buyer?.email ||
+    phone !== session?.buyer?.phone ||
+    taxId !== '';
 
   const isValid = name.trim() !== '' && email.trim() !== '' && phone.trim() !== '';
 

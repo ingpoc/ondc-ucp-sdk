@@ -25,10 +25,11 @@ export function QuoteDisplay({ quote, currency }: QuoteDisplayProps) {
 
   // Group breakup items by type
   const groupedBreakup = quote.breakup?.reduce((acc, item) => {
-    if (!acc[item.type]) {
-      acc[item.type] = [];
+    const type = item.type || 'other';
+    if (!acc[type]) {
+      acc[type] = [];
     }
-    acc[item.type].push(item);
+    acc[type].push(item);
     return acc;
   }, {} as Record<string, typeof quote.breakup>) ?? {};
 
