@@ -1,21 +1,16 @@
 /**
  * UCP Protocol Zod Schemas
- * Runtime validation for UCP protocol types
  */
 
 import { z } from 'zod';
 
-/**
- * UCP Price schema
- */
+/** UCP Price schema */
 export const UCPPriceSchema = z.object({
   amount: z.number().nonnegative(),
   currency: z.string().length(3),
 });
 
-/**
- * UCP Image schema
- */
+/** UCP Image schema */
 export const UCPImageSchema = z.object({
   url: z.string().url(),
   alt: z.string().optional(),
@@ -23,9 +18,7 @@ export const UCPImageSchema = z.object({
   height: z.number().positive().optional(),
 });
 
-/**
- * UCP Address schema
- */
+/** UCP Address schema */
 export const UCPAddressSchema = z.object({
   name: z.string().optional(),
   line1: z.string().min(1),
@@ -37,9 +30,7 @@ export const UCPAddressSchema = z.object({
   gps: z.string().optional(),
 });
 
-/**
- * UCP Contact schema
- */
+/** UCP Contact schema */
 export const UCPContactSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email().optional(),
@@ -48,9 +39,7 @@ export const UCPContactSchema = z.object({
   'At least one of phone or email is required'
 );
 
-/**
- * UCP Location schema
- */
+/** UCP Location schema */
 export const UCPLocationSchema = z.object({
   address: UCPAddressSchema.optional(),
   gps: z.string().optional(),
@@ -81,9 +70,7 @@ export const UCPSearchPreferencesSchema = z.object({
   verifiedBonus: z.number().optional(),
 });
 
-/**
- * UCP Search Query schema
- */
+/** UCP Search Query schema */
 export const UCPSearchQuerySchema = z.object({
   text: z.string().optional(),
   category: z.string().optional(),
@@ -112,16 +99,12 @@ export function validateUCPSearchQuery(data: unknown) {
   return UCPSearchQuerySchema.safeParse(data);
 }
 
-/**
- * Validate UCP location
- */
+/** Validate UCP location */
 export function validateUCPLocation(data: unknown) {
   return UCPLocationSchema.safeParse(data);
 }
 
-/**
- * Validate UCP price
- */
+/** Validate UCP price */
 export function validateUCPPrice(data: unknown) {
   return UCPPriceSchema.safeParse(data);
 }

@@ -27,29 +27,19 @@ export interface ONDCClientConfig {
 }
 
 /**
- * Retry condition function type
+ * Check if error is retryable (5xx errors)
  */
-type RetryCondition = (error: AxiosError) => boolean;
-
-/**
- * Default retry condition: retry on 5xx errors
- */
-const isRetryableError: RetryCondition = (error) => {
+function isRetryableError(error: AxiosError): boolean {
   if (!error.response) return false;
   const status = error.response.status;
   return status >= 500 && status < 600;
-};
+}
 
 /**
  * Calculate exponential backoff delay with jitter
- * @param attempt - Retry attempt number (0-indexed)
- * @param baseDelay - Base delay in milliseconds
- * @returns Delay in milliseconds
  */
 function calculateBackoff(attempt: number, baseDelay: number): number {
-  // Exponential backoff: baseDelay * 2^attempt
   const exponentialDelay = baseDelay * Math.pow(2, attempt);
-  // Add jitter: +/- 25% to prevent thundering herd
   const jitter = exponentialDelay * 0.25 * (Math.random() * 2 - 1);
   return exponentialDelay + jitter;
 }
@@ -84,8 +74,6 @@ export class ONDCClient {
 
   /**
    * Execute request with retry logic
-   * @param fn - Function that returns a Promise with the request
-   * @returns Promise resolving to response data
    */
   private async withRetry<T>(fn: () => Promise<T>): Promise<T> {
     let lastError: Error | undefined;
@@ -112,21 +100,7 @@ export class ONDCClient {
   }
 
   /**
-   * Make an authenticated POST request with retry support
-   *
-   * @param path - Request path (e.g., "/search")
-   * @param body - Request body (will be JSON stringified)
-   * @returns Promise resolving to response data
-   *
-   * @example
-   * ```ts
-   * const client = new ONDCClient({
-   *   baseURL: 'https://gateway.ondc.org',
-   *   subscriberId: 'ondc.example.com',
-   *   privateKey: privateKey
-   * });
-   * const response = await client.post('/search', { intent: {...} });
-   * ```
+   * Make authenticated POST request with retry
    */
   async post<T = unknown>(path: string, body: unknown): Promise<T> {
     return this.withRetry(async () => {
@@ -162,10 +136,7 @@ export class ONDCClient {
   }
 
   /**
-   * Make an authenticated GET request with retry support
-   *
-   * @param path - Request path
-   * @returns Promise resolving to response data
+   * Make authenticated GET request with retry
    */
   async get<T = unknown>(path: string): Promise<T> {
     return this.withRetry(async () => {

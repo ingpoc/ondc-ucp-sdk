@@ -1,13 +1,10 @@
 /**
  * Beckn Protocol Zod Schemas
- * Runtime validation for Beckn protocol messages
  */
 
 import { z } from 'zod';
 
-/**
- * Beckn Action schema
- */
+/** Beckn Action schema */
 export const BecknActionSchema = z.enum([
   'search',
   'select',
@@ -31,9 +28,7 @@ export const BecknActionSchema = z.enum([
   'on_support',
 ]);
 
-/**
- * Beckn Domain schema
- */
+/** Beckn Domain schema */
 export const BecknDomainSchema = z.union([
   z.literal('ONDC:RET10'),
   z.literal('ONDC:RET11'),
@@ -52,9 +47,7 @@ export const BecknDomainSchema = z.union([
   z.string(),
 ]);
 
-/**
- * Beckn Error schema
- */
+/** Beckn Error schema */
 export const BecknErrorSchema = z.object({
   type: z.string(),
   code: z.string(),
@@ -62,9 +55,7 @@ export const BecknErrorSchema = z.object({
   message: z.string().optional(),
 });
 
-/**
- * Beckn Context schema
- */
+/** Beckn Context schema */
 export const BecknContextSchema = z.object({
   domain: BecknDomainSchema,
   action: BecknActionSchema,
@@ -83,25 +74,19 @@ export const BecknContextSchema = z.object({
   key: z.string().optional(),
 });
 
-/**
- * Generic Beckn Ack schema
- */
+/** Generic Beckn Ack schema */
 export const BecknAckSchema = z.object({
   status: z.enum(['ACK', 'NACK']),
 });
 
-/**
- * Generic Beckn Message wrapper schema
- */
+/** Generic Beckn Message wrapper schema */
 export const BecknMessageSchema = z.object({
   context: BecknContextSchema,
   message: z.any(), // Message content varies by action
   error: BecknErrorSchema.optional(),
 });
 
-/**
- * Beckn Ack Message schema
- */
+/** Beckn Ack Message schema */
 export const BecknAckMessageSchema = z.object({
   context: BecknContextSchema,
   message: z.object({
@@ -110,9 +95,7 @@ export const BecknAckMessageSchema = z.object({
   error: BecknErrorSchema.optional(),
 });
 
-/**
- * Create a typed Beckn message schema
- */
+/** Create typed Beckn message schema */
 export function createBecknMessageSchema<T extends z.ZodType>(messageSchema: T) {
   return z.object({
     context: BecknContextSchema,
@@ -121,23 +104,17 @@ export function createBecknMessageSchema<T extends z.ZodType>(messageSchema: T) 
   });
 }
 
-/**
- * Validate Beckn context
- */
+/** Validate Beckn context */
 export function validateBecknContext(data: unknown) {
   return BecknContextSchema.safeParse(data);
 }
 
-/**
- * Validate Beckn message
- */
+/** Validate Beckn message */
 export function validateBecknMessage(data: unknown) {
   return BecknMessageSchema.safeParse(data);
 }
 
-/**
- * Validate Beckn ack message
- */
+/** Validate Beckn ack message */
 export function validateBecknAckMessage(data: unknown) {
   return BecknAckMessageSchema.safeParse(data);
 }
