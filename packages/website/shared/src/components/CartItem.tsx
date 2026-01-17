@@ -7,14 +7,42 @@ export interface CartItemProps {
   disabled?: boolean;
 }
 
+// Extract static styles
+const CONTAINER_STYLE = {
+  display: 'flex',
+  gap: '16px',
+  padding: '16px',
+  border: '1px solid #ddd',
+  borderRadius: '8px',
+  marginBottom: '12px',
+};
+
+const QUANTITY_BUTTON_STYLE = {
+  width: '32px',
+  height: '32px',
+  border: '1px solid #ddd',
+  borderRadius: '4px',
+  backgroundColor: 'white',
+  cursor: 'pointer',
+  fontSize: '18px',
+};
+
+const REMOVE_BUTTON_STYLE = {
+  padding: '6px 12px',
+  border: '1px solid #dc2626',
+  borderRadius: '4px',
+  backgroundColor: 'white',
+  color: '#dc2626',
+  cursor: 'pointer',
+  fontSize: '0.9em',
+};
+
 export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }: CartItemProps) {
-  // Handle both UCPItem and BecknItem structures
   const descriptor = (item.item as any).descriptor;
   const name = descriptor?.name || (item.item as any).name || 'Unknown Product';
   const description = descriptor?.short_desc || (item.item as any).description || '';
   const providerName = (item.item as any)._provider || (item.item as any).provider?.name || 'Unknown Provider';
 
-  // Parse price
   const priceValue = typeof item.item.price?.value === 'string'
     ? parseFloat(item.item.price.value)
     : (item.item.price?.value ?? 0);
@@ -22,20 +50,18 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
   const totalPrice = priceValue * item.quantity;
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 0) {
+    if (newQuantity >= 1) {
       onUpdateQuantity(item.item.id, newQuantity);
     }
   };
 
+  const handleDecrement = () => handleQuantityChange(item.quantity - 1);
+  const handleIncrement = () => handleQuantityChange(item.quantity + 1);
+
   return (
     <div
       style={{
-        display: 'flex',
-        gap: '16px',
-        padding: '16px',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        marginBottom: '12px',
+        ...CONTAINER_STYLE,
         backgroundColor: disabled ? '#f5f5f5' : 'white',
       }}
     >
@@ -73,16 +99,11 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
-            onClick={() => handleQuantityChange(item.quantity - 1)}
+            onClick={handleDecrement}
             disabled={disabled || item.quantity <= 1}
             style={{
-              width: '32px',
-              height: '32px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              backgroundColor: 'white',
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              fontSize: '18px',
+              ...QUANTITY_BUTTON_STYLE,
+              cursor: disabled || item.quantity <= 1 ? 'not-allowed' : 'pointer',
             }}
           >
             −
@@ -91,16 +112,11 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
             {item.quantity}
           </span>
           <button
-            onClick={() => handleQuantityChange(item.quantity + 1)}
+            onClick={handleIncrement}
             disabled={disabled}
             style={{
-              width: '32px',
-              height: '32px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              backgroundColor: 'white',
+              ...QUANTITY_BUTTON_STYLE,
               cursor: disabled ? 'not-allowed' : 'pointer',
-              fontSize: '18px',
             }}
           >
             +
@@ -117,13 +133,8 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
           onClick={() => onRemove(item.item.id)}
           disabled={disabled}
           style={{
-            padding: '6px 12px',
-            border: '1px solid #dc2626',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            color: '#dc2626',
+            ...REMOVE_BUTTON_STYLE,
             cursor: disabled ? 'not-allowed' : 'pointer',
-            fontSize: '0.9em',
           }}
         >
           Remove

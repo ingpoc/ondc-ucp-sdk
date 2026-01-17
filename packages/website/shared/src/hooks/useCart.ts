@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { UCPSession, UCPSessionItem, BecknItem } from '../types';
 
 const API_BASE = 'http://localhost:3001';
+const STORAGE_KEY = 'ondc-session-id';
 
 export interface UseCartResult {
   session: UCPSession | null;
@@ -16,25 +17,17 @@ export interface UseCartResult {
   subtotal: number;
 }
 
-/**
- * Generate a unique session ID for the user
- * In a real app, this would be stored in localStorage or managed by auth
- */
 function getSessionId(): string {
-  const storageKey = 'ondc-session-id';
-  let sessionId = localStorage.getItem(storageKey);
+  let sessionId = localStorage.getItem(STORAGE_KEY);
 
   if (!sessionId) {
     sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    localStorage.setItem(storageKey, sessionId);
+    localStorage.setItem(STORAGE_KEY, sessionId);
   }
 
   return sessionId;
 }
 
-/**
- * Calculate subtotal from session items
- */
 function calculateSubtotal(items: UCPSessionItem[]): number {
   return items.reduce((total, item) => {
     const priceValue = typeof item.item.price?.value === 'string'
@@ -44,33 +37,31 @@ function calculateSubtotal(items: UCPSessionItem[]): number {
   }, 0);
 }
 
-/**
- * Hook for cart state management
- * Manages cart operations using the backend cart API
- */
+async function cartRequest(
+  url: string,
+  options: RequestInit = {}
+): Promise<{ session: UCPSession }> {
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export function useCart(): UseCartResult {
   const [session, setSession] = useState<UCPSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sessionId = getSessionId();
 
-  // Fetch cart on mount
-  useEffect(() => {
-    refreshCart();
-  }, []);
-
   const refreshCart = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/cart?sessionId=${sessionId}`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cart: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await cartRequest(`${API_BASE}/api/cart?sessionId=${sessionId}`);
       setSession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load cart');
@@ -79,28 +70,20 @@ export function useCart(): UseCartResult {
     }
   }, [sessionId]);
 
+  useEffect(() => {
+    refreshCart();
+  }, [refreshCart]);
+
   const addToCart = useCallback(async (item: BecknItem, quantity = 1) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/cart`, {
+      const data = await cartRequest(`${API_BASE}/api/cart`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          item,
-          quantity,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, item, quantity }),
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to add to cart: ${response.status}`);
-      }
-
-      const data = await response.json();
       setSession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add item to cart');
@@ -115,15 +98,10 @@ export function useCart(): UseCartResult {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/cart/${itemId}?sessionId=${sessionId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to remove from cart: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await cartRequest(
+        `${API_BASE}/api/cart/${itemId}?sessionId=${sessionId}`,
+        { method: 'DELETE' }
+      );
       setSession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove item from cart');
@@ -138,22 +116,11 @@ export function useCart(): UseCartResult {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/cart/${itemId}`, {
+      const data = await cartRequest(`${API_BASE}/api/cart/${itemId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          quantity,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, quantity }),
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update quantity: ${response.status}`);
-      }
-
-      const data = await response.json();
       setSession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update quantity');
@@ -167,7 +134,6 @@ export function useCart(): UseCartResult {
     setError(null);
   }, []);
 
-  // Calculate derived values
   const itemCount = session?.items.length ?? 0;
   const subtotal = session ? calculateSubtotal(session.items) : 0;
 

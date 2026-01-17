@@ -9,9 +9,6 @@ export interface UseApiResult<T> {
   execute: () => Promise<void>;
 }
 
-/**
- * Hook for making API calls to the backend
- */
 export function useApi<T>(
   endpoint: string,
   options?: RequestInit
@@ -49,13 +46,8 @@ export function useApi<T>(
   return { data, loading, error, execute };
 }
 
-/**
- * Hook for search API
- */
 export function useSearch(category: string, params?: { query?: string; preferences?: unknown; location?: unknown }) {
-  const queryParams = new URLSearchParams({
-    category,
-  });
+  const queryParams = new URLSearchParams({ category });
 
   if (params?.query) {
     queryParams.append('q', params.query);

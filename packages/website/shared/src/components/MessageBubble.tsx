@@ -8,11 +8,10 @@ export interface SDKMessage {
   errors?: string[];
   tool_name?: string;
   session_id?: string;
-  structured_data?: Record<string, unknown>; // For product cards and other structured data
+  structured_data?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
-// Product Card Types
 export interface CardAction {
   type: 'add_to_cart' | 'compare' | 'view_details' | 'wishlist';
   label: string;
@@ -350,36 +349,28 @@ function ProductCardsGrid({
 }
 
 /**
- * Try to parse product cards from message
- * First checks structured_data from backend, then falls back to content parsing
+ * Extract product cards from message
+ * Checks structured_data from backend first, then falls back to content parsing
  */
 function tryParseProductCards(message: SDKMessage): ProductCardsResponse | null {
-  // First, check if backend provided structured_data
-  if (message.structured_data) {
-    const data = message.structured_data as { type?: string; cards?: unknown[]; totalCount?: number; query?: string; message?: string };
-    if (data.type === 'product_cards' && Array.isArray(data.cards)) {
-      return data as ProductCardsResponse;
-    }
+  const structuredData = message.structured_data as { type?: string; cards?: unknown[] } | undefined;
+
+  if (structuredData?.type === 'product_cards' && Array.isArray(structuredData.cards)) {
+    return structuredData as ProductCardsResponse;
   }
 
-  // Fallback: parse from content (for backwards compatibility)
   if (!message.content) return null;
 
   try {
-    const content = message.content;
-
-    // First try to extract from [TOOL_RESULT]...[/TOOL_RESULT] tags
-    const toolResultMatch = content.match(/\[TOOL_RESULT\]([\s\S]*?)\[\/TOOL_RESULT\]/);
+    const toolResultMatch = message.content.match(/\[TOOL_RESULT\]([\s\S]*?)\[\/TOOL_RESULT\]/);
     if (toolResultMatch) {
-      const jsonContent = toolResultMatch[1].trim();
-      const parsed = JSON.parse(jsonContent);
+      const parsed = JSON.parse(toolResultMatch[1].trim());
       if (parsed.type === 'product_cards' && Array.isArray(parsed.cards)) {
         return parsed as ProductCardsResponse;
       }
     }
 
-    // Fallback: Try to find direct JSON in the content
-    const jsonMatch = content.match(/\{[\s\S]*"type":\s*"product_cards"[\s\S]*\}/);
+    const jsonMatch = message.content.match(/\{[\s\S]*"type":\s*"product_cards"[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       if (parsed.type === 'product_cards' && Array.isArray(parsed.cards)) {
@@ -389,7 +380,32 @@ function tryParseProductCards(message: SDKMessage): ProductCardsResponse | null 
   } catch {
     // Not JSON or not product cards
   }
+
   return null;
+}
+
+/**
+ * Extract display content from message based on type
+ */
+function getMessageContent(message: SDKMessage): string {
+  if (message.type === 'result') {
+    if (message.errors && message.errors.length > 0) {
+      return `Error: ${message.errors.join(', ')}`;
+    }
+    if (message.result) {
+      return message.result;
+    }
+  }
+
+  if (message.type === 'tool_progress') {
+    return 'Working on it...';
+  }
+
+  if (typeof message.content === 'string') {
+    return message.content;
+  }
+
+  return '';
 }
 
 export function MessageBubble({
@@ -398,36 +414,20 @@ export function MessageBubble({
 }: MessageBubbleProps): React.ReactElement | null {
   const isUser = message.type === 'user';
   const isAssistant = message.type === 'assistant';
-  const isSystem = message.type === 'system';
-  const isResult = message.type === 'result';
   const isToolProgress = message.type === 'tool_progress';
 
-  // Don't render system messages
-  if (isSystem && message.subtype === 'init') {
+  if (message.type === 'system' && message.subtype === 'init') {
     return null;
   }
 
-  // Extract content
-  let content = '';
-
-  if (isUser && typeof message.content === 'string') {
-    content = message.content;
-  } else if (isAssistant && typeof message.content === 'string') {
-    content = message.content;
-  } else if (isResult && message.result) {
-    content = message.result;
-  } else if (isResult && message.errors && message.errors.length > 0) {
-    content = `Error: ${message.errors.join(', ')}`;
-  } else if (isToolProgress) {
-    content = 'Working on it...'; // Don't expose tool names
-  }
-
-  if (!content && !isToolProgress) {
-    return null;
-  }
-
-  // Check for product cards in assistant messages (from structured_data or content)
+  const content = getMessageContent(message);
   const productCards = isAssistant ? tryParseProductCards(message) : null;
+
+  const shouldRender = productCards || (isUser && content) || (!isUser && (content || isToolProgress));
+
+  if (!shouldRender) {
+    return null;
+  }
 
   return (
     <div
