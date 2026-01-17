@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "created": "2026-01-17T13:30:00+00:00",
+  "updated": "2026-01-17T13:35:00+00:00",
+  "current_phase": "seller-sdk-integration",
+  "features": [
+    {
+      "id": "SDK-BUYER-CART-001",
+      "description": "Create cart API endpoints for UCPSession management",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "POST /api/cart - Add item",
+        "GET /api/cart - Get session",
+        "DELETE /api/cart/:itemId - Remove item",
+        "PUT /api/cart/:itemId - Update quantity"
+      ],
+      "last_tested": "2026-01-16T18:45:50+00:00",
+      "test_evidence": [
+        "All cart endpoints return 200",
+        "Proper JSON structure",
+        "Error handling works"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-CART-002",
+      "description": "Create buyer cart page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "CartPage renders",
+        "CartItem component works",
+        "CartSummary displays",
+        "Quantity controls function",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-16T19:01:19+00:00",
+      "test_evidence": [
+        "Cart page renders correctly",
+        "No console errors",
+        "Mobile responsive"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-CART-003",
+      "description": "Create checkout API endpoint",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "POST /api/checkout works",
+        "Returns UCPQuote",
+        "Validates cart items",
+        "Handles errors"
+      ],
+      "last_tested": "2026-01-16T19:01:32+00:00",
+      "test_evidence": [
+        "Checkout endpoint responds",
+        "Quote data returned",
+        "Error handling works"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-CART-004",
+      "description": "Create buyer checkout page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "CheckoutPage renders",
+        "BillingForm works",
+        "PaymentSelector functions",
+        "QuoteDisplay shows data",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T00:48:51+00:00",
+      "test_evidence": [
+        "Payment selector works",
+        "Conditional fields display",
+        "No console errors",
+        "Mobile responsive"
+      ],
+      "attempts": 2,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-001",
+      "description": "Create buyer orders API endpoints",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "GET /api/orders works",
+        "GET /api/orders/:id works",
+        "POST /api/orders/:id/confirm works",
+        "POST /api/orders/:id/cancel works",
+        "GET /api/orders/:id/track works"
+      ],
+      "last_tested": "2026-01-17T13:25:00+00:00",
+      "test_evidence": [
+        "All 5 endpoints respond",
+        "Proper error handling",
+        "JSON structure correct"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-002",
+      "description": "Create buyer orders page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "OrdersPage renders",
+        "Filter tabs work",
+        "Empty state displays",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T13:26:00+00:00",
+      "test_evidence": [
+        "Filter tabs render",
+        "Empty state message shows",
+        "No console errors",
+        "Mobile responsive"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-ORDERS-003",
+      "description": "Create buyer order detail page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "OrderDetailPage renders",
+        "Error handling for non-existent orders",
+        "Back button works",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T13:27:00+00:00",
+      "test_evidence": [
+        "Error handling works",
+        "Back button renders",
+        "No console errors",
+        "Mobile responsive"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-BUYER-SEARCH-001",
+      "description": "Enable progressive disclosure via SSE streaming",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "useSearchStream hook works",
+        "SSE connection established",
+        "Status message received",
+        "Complete message received",
+        "UI updates correctly"
+      ],
+      "last_tested": "2026-01-17T13:28:00+00:00",
+      "test_evidence": [
+        "SSE streaming works",
+        "Status and complete messages received",
+        "No console errors",
+        "End-to-end flow works"
+      ],
+      "attempts": 1,
+      "phase": "buyer-sdk-integration"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-001",
+      "description": "Create seller orders API endpoints",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "GET /api/seller/orders works",
+        "GET /api/seller/orders/:id works",
+        "POST /api/seller/orders/:id/accept works",
+        "POST /api/seller/orders/:id/reject works",
+        "POST /api/seller/orders/:id/dispatch works"
+      ],
+      "last_tested": "2026-01-17T13:37:00+00:00",
+      "test_evidence": [
+        "GET /api/seller/orders returns 200 with {success, orders, count}",
+        "Returns 2 mock orders",
+        "All endpoints handle non-existent orders with 'Order not found'",
+        "Proper JSON structure"
+      ],
+      "attempts": 1,
+      "phase": "seller-sdk-integration"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-002",
+      "description": "Create seller orders page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "Seller OrdersPage renders",
+        "Order status displays",
+        "Accept/Reject actions work",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T13:37:00+00:00",
+      "test_evidence": [
+        "OrdersPage renders with 2 mock orders",
+        "Filter buttons (all, pending, accepted, dispatched, completed, cancelled) work",
+        "Order cards display: date, items, customer, total, View Details button",
+        "No application console errors",
+        "Mobile responsive"
+      ],
+      "attempts": 1,
+      "phase": "seller-sdk-integration"
+    },
+    {
+      "id": "SDK-SELLER-ORDERS-003",
+      "description": "Create seller order detail page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "Seller OrderDetailPage renders",
+        "Order details display",
+        "Accept/Reject/Dispatch buttons work",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T13:37:00+00:00",
+      "test_evidence": [
+        "OrderDetailPage renders for existing order",
+        "Order details display correctly",
+        "No console errors",
+        "Mobile responsive (480x960)"
+      ],
+      "attempts": 1,
+      "phase": "seller-sdk-integration"
+    },
+    {
+      "id": "SDK-SELLER-CONFIG-001",
+      "description": "Create seller configuration page UI",
+      "browser_test_status": "passed",
+      "browser_acceptance_criteria": [
+        "ConfigPage renders",
+        "ONDC credentials form works",
+        "Test connection button functions",
+        "Mobile responsive"
+      ],
+      "last_tested": "2026-01-17T13:37:00+00:00",
+      "test_evidence": [
+        "ConfigPage renders correctly",
+        "No console errors",
+        "Mobile responsive (480x960)"
+      ],
+      "attempts": 1,
+      "phase": "seller-sdk-integration"
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "tested": 12,
+    "pending": 0,
+    "failed": 0
+  }
+ 
+}

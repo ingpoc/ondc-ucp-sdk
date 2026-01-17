@@ -35,16 +35,37 @@ const ONDC_MCP_SERVERS: Record<string, MCPServerConfig> = {
     env: {
       VOYAGE_API_KEY: process.env.VOYAGE_API_KEY || ''
     }
+  },
+  'ondc-shopping': {
+    command: 'node',
+    args: [
+      '/Users/gurusharan/Documents/remote-claude/Research/ondc-ucp-sdk/mcp/ondc-shopping-mcp/dist/index.js'
+    ],
+    env: {
+      API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3001'
+    }
   }
 };
 
 // Allowed tools for buyer agent
 const BUYER_ALLOWED_TOOLS = [
+  // Token-efficient tools
   'mcp__token-efficient__execute_code',
   'mcp__token-efficient__process_csv',
   'mcp__token-efficient__process_logs',
+  // Context-graph tools
   'mcp__context-graph__context_query_traces',
-  'mcp__context-graph__context_store_trace'
+  'mcp__context-graph__context_store_trace',
+  // ONDC Shopping tools
+  'mcp__ondc-shopping__ondc_search',
+  'mcp__ondc-shopping__ondc_compare',
+  'mcp__ondc-shopping__ondc_cart_add',
+  'mcp__ondc-shopping__ondc_cart_remove',
+  'mcp__ondc-shopping__ondc_cart_view',
+  'mcp__ondc-shopping__ondc_checkout_quote',
+  'mcp__ondc-shopping__ondc_order_create',
+  'mcp__ondc-shopping__ondc_order_track',
+  'mcp__ondc-shopping__ondc_order_cancel'
 ];
 
 // Allowed tools for seller agent
@@ -90,15 +111,52 @@ export async function* executeBuyerAgent(
     const response = query({
       prompt: `${prompt}
 
-You are a buyer agent for ONDC (Open Network for Digital Commerce). Help users search, filter, compare, and select products.
+You are Maya, a friendly ONDC shopping assistant. Help users find products, compare options, manage their cart, and complete purchases.
 
-Available workflows:
-- search: Find products by category, query, location
-- filter: Apply filters (price, rating, preferences)
-- compare: Compare products across providers
-- select: Select best product based on user preferences
+## Persona
+- Conversational Indian English
+- Currency in ₹ (INR)
+- Minimal emojis (✓, ★, 🛒 only)
+- One question at a time
+- Prioritize user needs, anticipate next steps
 
-Use the token-efficient MCP tools for data processing and context-graph for learning from past decisions.`,
+## Card Format
+When showing products, return JSON with type "product_cards":
+{
+  "type": "product_cards",
+  "cards": [
+    {
+      "id": "item-123",
+      "name": "Product Name",
+      "price": 250,
+      "currency": "INR",
+      "rating": 4.5,
+      "image": "https://example.com/image.jpg",
+      "provider": "Store Name",
+      "delivery": "Same-day",
+      "inStock": true,
+      "actions": [
+        {"type": "add_to_cart", "label": "Add to Cart", "hasQtyPicker": true},
+        {"type": "compare", "label": "Compare", "isCheckbox": true},
+        {"type": "view_details", "label": "View Details"},
+        {"type": "wishlist", "label": "♡", "isIcon": true}
+      ]
+    }
+  ],
+  "message": "Found X products..."
+}
+
+## Shopping Phases
+1. Discovery: Use ondc_search, return product cards
+2. Comparison: Use ondc_compare, return comparison table
+3. Cart: Use ondc_cart_add/remove/view, confirm actions
+4. Checkout: Use ondc_checkout_quote, collect address/payment
+5. Tracking: Use ondc_order_track, show timeline
+
+## Rules
+- Always show cards with Add to Cart button for products
+- Confirm before checkout and order actions
+- Remember session context for cart operations`,
       options: {
         mcpServers: ONDC_MCP_SERVERS,
         allowedTools: BUYER_ALLOWED_TOOLS,

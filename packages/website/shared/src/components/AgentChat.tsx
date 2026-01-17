@@ -7,6 +7,7 @@ interface AgentChatProps {
   title?: string;
   sessionId?: string;
   onMessage?: (message: SDKMessage) => void;
+  onCardAction?: (action: string, itemId: string, quantity?: number) => void;
 }
 
 export function AgentChat({
@@ -14,12 +15,14 @@ export function AgentChat({
   placeholder = 'Type your message...',
   title = 'Agent Chat',
   sessionId: initialSessionId = '',
-  onMessage
+  onMessage,
+  onCardAction
 }: AgentChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SDKMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(initialSessionId);
+  const [compareItems, setCompareItems] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -37,91 +40,147 @@ export function AgentChat({
     };
   }, []);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // Core message sending function
+  const sendMessageWithPrompt = useCallback(
+    async (prompt: string) => {
+      if (!prompt.trim() || isLoading) return;
 
-    const userMessage: SDKMessage = {
-      type: 'user',
-      content: input
-    };
+      const userMessage: SDKMessage = {
+        type: 'user',
+        content: prompt
+      };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+      setMessages((prev) => [...prev, userMessage]);
+      setIsLoading(true);
 
-    try {
-      const response = await fetch('http://localhost:3001' + endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt: input,
-          sessionId,
-          context: {}
-        })
-      });
+      try {
+        const response = await fetch('http://localhost:3001' + endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt,
+            sessionId,
+            context: {}
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
 
-      if (!reader) {
-        throw new Error('No response body');
-      }
+        if (!reader) {
+          throw new Error('No response body');
+        }
 
-      let buffer = '';
+        let buffer = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
+        while (true) {
+          const { done, value } = await reader.read();
 
-        if (done) break;
+          if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data: SDKMessage = JSON.parse(line.slice(6));
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data: SDKMessage = JSON.parse(line.slice(6));
 
-              if (data.type === 'result' && data.subtype === 'success') {
-                if (data.session_id) {
-                  setSessionId(data.session_id);
+                if (data.type === 'result' && data.subtype === 'success') {
+                  if (data.session_id) {
+                    setSessionId(data.session_id);
+                  }
+                  setIsLoading(false);
+                } else if (data.type === 'result' && data.subtype === 'error_during_execution') {
+                  setMessages((prev) => [...prev, data]);
+                  setIsLoading(false);
+                  break;
+                } else {
+                  setMessages((prev) => [...prev, data]);
                 }
-                setIsLoading(false);
-              } else if (data.type === 'result' && data.subtype === 'error_during_execution') {
-                setMessages((prev) => [...prev, data]);
-                setIsLoading(false);
-                break;
-              } else {
-                setMessages((prev) => [...prev, data]);
-              }
 
-              onMessage?.(data);
-            } catch (e) {
-              console.error('Failed to parse SSE data:', e);
+                onMessage?.(data);
+              } catch (e) {
+                console.error('Failed to parse SSE data:', e);
+              }
             }
           }
         }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        const errorMessage: SDKMessage = {
+          type: 'result',
+          subtype: 'error_during_execution',
+          errors: [error instanceof Error ? error.message : 'Unknown error']
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        onMessage?.(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: SDKMessage = {
-        type: 'result',
-        subtype: 'error_during_execution',
-        errors: [error instanceof Error ? error.message : 'Unknown error']
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-      onMessage?.(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    [endpoint, isLoading, onMessage, sessionId]
+  );
+
+  // Send message from input field
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+    const prompt = input;
+    setInput('');
+    await sendMessageWithPrompt(prompt);
   };
+
+  // Handle card actions from product cards
+  const handleCardAction = useCallback(
+    async (action: string, itemId: string, quantity?: number) => {
+      // Call external handler if provided
+      onCardAction?.(action, itemId, quantity);
+
+      // Generate message based on action
+      let message = '';
+      switch (action) {
+        case 'add_to_cart':
+          message = `Add ${quantity || 1} of item ${itemId} to my cart`;
+          break;
+        case 'compare':
+          // Toggle compare selection
+          setCompareItems((prev) => {
+            const newItems = prev.includes(itemId)
+              ? prev.filter((id) => id !== itemId)
+              : [...prev, itemId];
+
+            // If 2+ items selected, trigger compare
+            if (newItems.length >= 2 && !prev.includes(itemId)) {
+              setTimeout(() => {
+                sendMessageWithPrompt(`Compare these items: ${newItems.join(', ')}`);
+              }, 100);
+            }
+            return newItems;
+          });
+          return; // Don't send message for toggle
+        case 'view_details':
+          message = `Show me details for item ${itemId}`;
+          break;
+        case 'wishlist':
+          message = `Add item ${itemId} to my wishlist`;
+          break;
+        default:
+          return;
+      }
+
+      if (message) {
+        await sendMessageWithPrompt(message);
+      }
+    },
+    [onCardAction, sendMessageWithPrompt]
+  );
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -171,7 +230,11 @@ export function AgentChat({
         }}
       >
         {messages.map((message, index) => (
-          <MessageBubble key={index} message={message} />
+          <MessageBubble
+            key={index}
+            message={message}
+            onCardAction={handleCardAction}
+          />
         ))}
         {isLoading && (
           <div
