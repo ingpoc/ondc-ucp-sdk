@@ -3,81 +3,91 @@ import type { UCPPayment } from '@ondc-website/shared';
 
 export type PaymentMethod = UCPPayment['type'];
 
-export interface PaymentSelectorProps {
-  selected?: PaymentMethod;
-  onSelect?: (method: PaymentMethod) => void;
-}
-
-const PAYMENT_METHODS: Array<{
-  type: PaymentMethod;
-  label: string;
-  description: string;
-  icon: string;
-}> = [
+const PAYMENT_METHODS = [
   {
-    type: 'upi',
+    type: 'upi' as const,
     label: 'UPI',
     description: 'Pay using any UPI app (GPay, PhonePe, Paytm)',
     icon: '📱',
   },
   {
-    type: 'card',
+    type: 'card' as const,
     label: 'Credit / Debit Card',
     description: 'Visa, Mastercard, RuPay',
     icon: '💳',
   },
   {
-    type: 'netbanking',
+    type: 'netbanking' as const,
     label: 'Net Banking',
     description: 'Pay from your bank account',
     icon: '🏦',
   },
   {
-    type: 'wallet',
+    type: 'wallet' as const,
     label: 'Wallet',
     description: 'Paytm, Amazon Pay, Mobikwik',
     icon: '👛',
   },
   {
-    type: 'cod',
+    type: 'cod' as const,
     label: 'Cash on Delivery',
     description: 'Pay when you receive the order',
     icon: '💵',
   },
-];
+] as const;
 
-export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps) {
+const CONTAINER_STYLE = {
+  backgroundColor: 'white',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  padding: '20px',
+  marginBottom: '20px',
+};
+
+const OPTION_STYLE = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '12px',
+  border: '2px solid #e5e7eb',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'all 0.2s',
+  backgroundColor: 'white',
+};
+
+const OPTION_SELECTED_STYLE = {
+  border: '2px solid #16a34a',
+  backgroundColor: '#f0fdf4',
+};
+
+export interface PaymentSelectorProps {
+  selected?: PaymentMethod;
+  onSelect?: (method: PaymentMethod) => void;
+}
+
+export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps): JSX.Element {
   const [internalSelected, setInternalSelected] = useState<PaymentMethod>('upi');
 
   const currentSelected = selected ?? internalSelected;
   const handleSelect = onSelect ?? setInternalSelected;
 
+  function getOptionStyle(methodType: PaymentMethod) {
+    const base = OPTION_STYLE;
+    if (currentSelected === methodType) {
+      return { ...base, ...OPTION_SELECTED_STYLE };
+    }
+    return base;
+  }
+
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '20px',
-      }}
-    >
+    <div style={CONTAINER_STYLE}>
       <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Payment Method</h2>
 
       <div style={{ display: 'grid', gap: '12px' }}>
         {PAYMENT_METHODS.map((method) => (
           <label
             key={method.type}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '12px',
-              border: `2px solid ${currentSelected === method.type ? '#16a34a' : '#e5e7eb'}`,
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              backgroundColor: currentSelected === method.type ? '#f0fdf4' : 'white',
-            }}
+            style={getOptionStyle(method.type)}
           >
             <input
               type="radio"
@@ -120,7 +130,7 @@ interface FormWrapperProps {
   style?: React.CSSProperties;
 }
 
-function UPIInputForm({ style }: FormWrapperProps) {
+function UPIInputForm({ style }: FormWrapperProps): JSX.Element {
   const [upiId, setUpiId] = useState('');
 
   return (
@@ -157,26 +167,26 @@ function UPIInputForm({ style }: FormWrapperProps) {
   );
 }
 
-function CardInputForm({ style }: FormWrapperProps) {
+function formatCardNumber(value: string): string {
+  return value
+    .replace(/\s/g, '')
+    .replace(/(\d{4})/g, '$1 ')
+    .trim()
+    .substring(0, 19);
+}
+
+function formatExpiry(value: string): string {
+  if (value.length >= 2) {
+    return value.substring(0, 2) + '/' + value.substring(2, 4);
+  }
+  return value;
+}
+
+function CardInputForm({ style }: FormWrapperProps): JSX.Element {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
   const [name, setName] = useState('');
-
-  const formatCardNumber = (value: string) => {
-    return value
-      .replace(/\s/g, '')
-      .replace(/(\d{4})/g, '$1 ')
-      .trim()
-      .substring(0, 19);
-  };
-
-  const formatExpiry = (value: string) => {
-    if (value.length >= 2) {
-      return value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    return value;
-  };
 
   return (
     <div

@@ -1,21 +1,31 @@
+const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Relevance' },
+  { value: 'price', label: 'Price' },
+  { value: 'rating', label: 'Rating' },
+  { value: 'distance', label: 'Distance' },
+] as const;
+
+const STYLE = { padding: '5px', borderRadius: '4px', border: '1px solid #ccc' } as const;
+
 export interface SortDropdownProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-export function SortDropdown({ value, onChange }: SortDropdownProps) {
+export function SortDropdown({ value, onChange }: SortDropdownProps): JSX.Element {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <label>Sort by:</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+        style={STYLE}
       >
-        <option value="relevance">Relevance</option>
-        <option value="price">Price</option>
-        <option value="rating">Rating</option>
-        <option value="distance">Distance</option>
+        {SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </select>
     </div>
   );

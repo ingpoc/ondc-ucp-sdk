@@ -4,7 +4,26 @@ import { useApi, useCart } from '@ondc-website/shared/hooks';
 import { PriceDisplay, RatingStars } from '@ondc-website/shared/components';
 import type { UCPItem } from '@ondc-website/shared';
 
-export function ProductDetailPage() {
+const CONTAINER_STYLE = { maxWidth: '600px' };
+
+const BUTTON_STYLE = {
+  padding: '12px 24px',
+  border: 'none',
+  borderRadius: '6px',
+  backgroundColor: '#16a34a',
+  color: 'white',
+  fontSize: '1em',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+};
+
+const BUTTON_DISABLED_STYLE = {
+  ...BUTTON_STYLE,
+  backgroundColor: '#9ca3af',
+  cursor: 'not-allowed',
+};
+
+export function ProductDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data, loading, error, execute } = useApi<UCPItem>(`/api/catalog/products/${id}`);
@@ -16,21 +35,23 @@ export function ProductDetailPage() {
     execute();
   }, [execute]);
 
-  const handleAddToCart = async () => {
+  async function handleAddToCart(): Promise<void> {
     if (!data) return;
+
     setAddingToCart(true);
     setCartMessage('');
+
     try {
       await addToCart(data as any);
       setCartMessage('Added to cart!');
       setTimeout(() => setCartMessage(''), 2000);
-    } catch (err) {
+    } catch {
       setCartMessage('Failed to add to cart');
       setTimeout(() => setCartMessage(''), 2000);
     } finally {
       setAddingToCart(false);
     }
-  };
+  }
 
   if (loading) {
     return <div>Loading...</div>;
@@ -45,8 +66,10 @@ export function ProductDetailPage() {
     );
   }
 
+  const messageColor = cartMessage.includes('Failed') ? '#dc2626' : '#16a34a';
+
   return (
-    <div style={{ maxWidth: '600px' }}>
+    <div style={CONTAINER_STYLE}>
       <button onClick={() => navigate(-1)} style={{ marginBottom: '20px' }}>
         ← Back
       </button>
@@ -76,21 +99,12 @@ export function ProductDetailPage() {
         <button
           onClick={handleAddToCart}
           disabled={addingToCart}
-          style={{
-            padding: '12px 24px',
-            border: 'none',
-            borderRadius: '6px',
-            backgroundColor: addingToCart ? '#9ca3af' : '#16a34a',
-            color: 'white',
-            fontSize: '1em',
-            fontWeight: 'bold',
-            cursor: addingToCart ? 'not-allowed' : 'pointer',
-          }}
+          style={addingToCart ? BUTTON_DISABLED_STYLE : BUTTON_STYLE}
         >
           {addingToCart ? 'Adding...' : 'Add to Cart'}
         </button>
         {cartMessage && (
-          <span style={{ marginLeft: '12px', color: cartMessage.includes('Failed') ? '#dc2626' : '#16a34a' }}>
+          <span style={{ marginLeft: '12px', color: messageColor }}>
             {cartMessage}
           </span>
         )}

@@ -10,7 +10,7 @@ interface SearchResponse {
   totalCount: number;
 }
 
-export function ResultsPage() {
+export function ResultsPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const category = searchParams.get('category') ?? 'grocery';
@@ -31,6 +31,18 @@ export function ResultsPage() {
     execute();
   }, [execute, filters, query, category]);
 
+  function handleSearch(cat: string, q: string): void {
+    navigate(`/results?category=${cat}&q=${encodeURIComponent(q)}`);
+  }
+
+  function handleSortChange(value: string): void {
+    setFilters({ ...filters, sortBy: value });
+  }
+
+  function handleItemClick(item: UCPItem): void {
+    navigate(`/product/${item.id}`);
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -50,9 +62,7 @@ export function ResultsPage() {
     <div>
       <div style={{ marginBottom: '20px' }}>
         <SearchBar
-          onSearch={(cat, q) =>
-            navigate(`/results?category=${cat}&q=${encodeURIComponent(q)}`)
-          }
+          onSearch={handleSearch}
           defaultCategory={category}
           defaultQuery={query ?? ''}
         />
@@ -67,12 +77,12 @@ export function ResultsPage() {
             </h2>
             <SortDropdown
               value={filters.sortBy ?? 'relevance'}
-              onChange={(value) => setFilters({ ...filters, sortBy: value })}
+              onChange={handleSortChange}
             />
           </div>
           <ResultGrid
             items={items}
-            onItemClick={(item) => navigate(`/product/${item.id}`)}
+            onItemClick={handleItemClick}
             loading={loading}
           />
         </div>

@@ -1,7 +1,6 @@
-import React from 'react';
 import { AgentChat } from '@ondc-website/shared/components';
 
-export function AgentChatPage(): React.ReactElement {
+export function AgentChatPage(): JSX.Element {
   return (
     <div style={{ padding: '20px' }}>
       <h2>Buyer Agent Assistant</h2>
