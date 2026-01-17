@@ -1520,20 +1520,22 @@ app.post('/api/seller/orders/:id/dispatch', (req: Request, res: Response) => {
   }
 });
 
-// Start server
-app.listen(PORT, async () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+// Start server only when not in test environment
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  app.listen(PORT, async () => {
+    console.log(`API server running on http://localhost:${PORT}`);
 
-  // Start MockGateway for realistic ONDC simulation
-  try {
-    mockGatewayPort = await mockGateway.start();
-    console.log(`MockGateway running on port ${mockGatewayPort} for realistic testing`);
+    // Start MockGateway for realistic ONDC simulation
+    try {
+      mockGatewayPort = await mockGateway.start();
+      console.log(`MockGateway running on port ${mockGatewayPort} for realistic testing`);
 
-    // Log MockGateway configuration
-    console.log(`MockGateway config: delay=${mockGatewayConfig.callbackDelay}ms, autoCallback=${mockGatewayConfig.autoCallback}`);
-  } catch (error) {
-    console.error('Failed to start MockGateway:', error);
-  }
-});
+      // Log MockGateway configuration
+      console.log(`MockGateway config: delay=${mockGatewayConfig.callbackDelay}ms, autoCallback=${mockGatewayConfig.autoCallback}`);
+    } catch (error) {
+      console.error('Failed to start MockGateway:', error);
+    }
+  });
+}
 
 export { app };

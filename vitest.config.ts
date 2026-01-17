@@ -20,6 +20,7 @@ export default defineConfig({
         singleFork: true,
       },
     },
+    setupFiles: ['./test/setup.ts'],
     server: {
       deps: {
         inline: ['libsodium-wrappers'],

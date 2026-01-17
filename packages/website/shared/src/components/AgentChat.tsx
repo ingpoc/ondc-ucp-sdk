@@ -10,6 +10,22 @@ interface AgentChatProps {
   onCardAction?: (action: string, itemId: string, quantity?: number) => void;
 }
 
+/**
+ * Get or create session ID from localStorage
+ * Shares the same session as useCart hook for cart persistence
+ */
+function getSharedSessionId(): string {
+  const storageKey = 'ondc-session-id';
+  let sessionId = localStorage.getItem(storageKey);
+
+  if (!sessionId) {
+    sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem(storageKey, sessionId);
+  }
+
+  return sessionId;
+}
+
 export function AgentChat({
   endpoint,
   placeholder = 'Type your message...',
@@ -21,7 +37,8 @@ export function AgentChat({
   const [messages, setMessages] = useState<SDKMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState(initialSessionId);
+  // Use shared session ID from localStorage (same as useCart)
+  const [sessionId, setSessionId] = useState(initialSessionId || getSharedSessionId());
   const [compareItems, setCompareItems] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);

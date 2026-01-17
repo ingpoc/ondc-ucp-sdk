@@ -3,1132 +3,653 @@
   "version": "1.0.0",
   "project": "ondc-agent-gateway",
   "description": "MCP-first gateway bridging AI agents with ONDC network",
-  "plan_reference": "~/.claude/plans/happy-gliding-hellman.md",
+  "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md",
   "created": "2025-01-14",
-  "updated": "2026-01-16",
+  "updated": "2026-01-17",
   "features": [
     {
       "id": "INIT-001",
-      "description": "Set up pnpm workspace configuration",
-      "priority": 1,
+      "description": "pnpm workspace config",
       "status": "implemented",
       "tier": "mvp",
-      "phase": "foundation",
-      "plan_reference": "~/.claude/plans/concurrent-petting-lobster.md",
-      "dependencies": [],
-      "acceptance_criteria": [
-        "pnpm-workspace.yaml configured",
-        "3 packages defined"
-      ]
+      "phase": "foundation"
     },
     {
       "id": "INIT-002",
-      "description": "Create package.json for each workspace package",
-      "priority": 2,
+      "description": "package.json for workspace packages",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "INIT-001"
-      ],
-      "acceptance_criteria": [
-        "All packages have build scripts"
-      ]
+      "dependencies": ["INIT-001"]
     },
     {
       "id": "INIT-003",
-      "description": "Configure TypeScript for all packages",
-      "priority": 3,
+      "description": "TypeScript configuration",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "INIT-002"
-      ],
-      "acceptance_criteria": [
-        "tsup.config.ts in each package"
-      ]
+      "dependencies": ["INIT-002"]
     },
     {
       "id": "INIT-004",
-      "description": "Configure Vitest for testing",
-      "priority": 4,
+      "description": "Vitest configuration",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "INIT-003"
-      ],
-      "acceptance_criteria": [
-        "vitest.config.ts at root"
-      ]
+      "dependencies": ["INIT-003"]
     },
     {
       "id": "TYPES-001",
-      "description": "Define Beckn protocol types",
-      "priority": 5,
+      "description": "Beckn protocol types",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "INIT-004"
-      ],
-      "acceptance_criteria": [
-        "BecknMessage interface defined"
-      ]
+      "dependencies": ["INIT-004"]
     },
     {
       "id": "TYPES-002",
-      "description": "Define UCP protocol types",
-      "priority": 6,
+      "description": "UCP protocol types",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "TYPES-001"
-      ],
-      "acceptance_criteria": [
-        "UCPSearchQuery, UCPCatalog defined"
-      ]
+      "dependencies": ["TYPES-001"]
     },
     {
       "id": "TYPES-003",
-      "description": "Define MCP tool types",
-      "priority": 7,
+      "description": "MCP tool types",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "TYPES-002"
-      ],
-      "acceptance_criteria": [
-        "MCPTool schema defined"
-      ]
+      "dependencies": ["TYPES-002"]
     },
     {
       "id": "TYPES-004",
-      "description": "Create Zod schemas for validation",
-      "priority": 8,
+      "description": "Zod schemas for validation",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "TYPES-003"
-      ],
-      "acceptance_criteria": [
-        "BecknMessageSchema, UCPSearchQuerySchema"
-      ]
+      "dependencies": ["TYPES-003"]
     },
     {
       "id": "CRYPTO-001",
-      "description": "Implement Ed25519 key generation",
-      "priority": 9,
+      "description": "Ed25519 key generation",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "generateKeyPair() function"
-      ]
+      "dependencies": ["TYPES-004"]
     },
     {
       "id": "CRYPTO-002",
-      "description": "Implement Ed25519 sign and verify",
-      "priority": 10,
+      "description": "Ed25519 sign and verify",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "CRYPTO-001"
-      ],
-      "acceptance_criteria": [
-        "signMessage(), verifySignature()"
-      ]
+      "dependencies": ["CRYPTO-001"]
     },
     {
       "id": "CRYPTO-003",
-      "description": "Build ONDC Authorization header",
-      "priority": 11,
+      "description": "ONDC Authorization header",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "CRYPTO-002"
-      ],
-      "acceptance_criteria": [
-        "buildAuthHeader() function"
-      ]
+      "dependencies": ["CRYPTO-002"]
     },
     {
       "id": "CONFIG-001",
-      "description": "Set up Zod config schema",
-      "priority": 12,
+      "description": "Zod config schema",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "GatewayConfigSchema"
-      ]
+      "dependencies": ["TYPES-004"]
     },
     {
       "id": "CONFIG-002",
-      "description": "Implement environment variable loading",
-      "priority": 13,
+      "description": "Environment variable loading",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "CONFIG-001"
-      ],
-      "acceptance_criteria": [
-        "loadConfig() function"
-      ]
+      "dependencies": ["CONFIG-001"]
     },
     {
       "id": "CI-001",
-      "description": "Create GitHub Actions workflow",
-      "priority": 14,
+      "description": "GitHub Actions workflow",
       "status": "implemented",
       "tier": "mvp",
       "phase": "foundation",
-      "dependencies": [
-        "CONFIG-002"
-      ],
-      "acceptance_criteria": [
-        ".github/workflows/ci.yml"
-      ]
+      "dependencies": ["CONFIG-002"]
     },
     {
       "id": "TRANSLATE-001",
-      "description": "Implement Beckn to UCP catalog translator",
-      "priority": 17,
+      "description": "Beckn to UCP catalog translator",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "TYPES-004"
-      ],
-      "acceptance_criteria": [
-        "becknToUcpCatalog() function"
-      ]
+      "dependencies": ["TYPES-004"]
     },
     {
       "id": "TRANSLATE-002",
-      "description": "Implement price and rating normalization",
-      "priority": 18,
+      "description": "Price and rating normalization",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "TRANSLATE-001"
-      ],
-      "acceptance_criteria": [
-        "normalizePrice(), normalizeRating()"
-      ]
+      "dependencies": ["TRANSLATE-001"]
     },
     {
       "id": "TRANSLATE-003",
-      "description": "Implement UCP to Beckn search translator",
-      "priority": 19,
+      "description": "UCP to Beckn search translator",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "TRANSLATE-002"
-      ],
-      "acceptance_criteria": [
-        "ucpToBecknIntent() function"
-      ]
+      "dependencies": ["TRANSLATE-002"]
     },
     {
       "id": "HTTP-001",
-      "description": "Implement ONDC HTTP client",
-      "priority": 20,
+      "description": "ONDC HTTP client",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "CONFIG-002"
-      ],
-      "acceptance_criteria": [
-        "ONDCClient class with post()"
-      ]
+      "dependencies": ["CONFIG-002"]
     },
     {
       "id": "HTTP-002",
-      "description": "Add retry logic with exponential backoff",
-      "priority": 21,
+      "description": "Retry logic with exponential backoff",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "HTTP-001"
-      ],
-      "acceptance_criteria": [
-        "Retry on 5xx, max 3 retries"
-      ]
+      "dependencies": ["HTTP-001"]
     },
     {
       "id": "WEBHOOK-001",
-      "description": "Create Express webhook receiver",
-      "priority": 22,
+      "description": "Express webhook receiver",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "HTTP-002"
-      ],
-      "acceptance_criteria": [
-        "POST /on_search, /on_select endpoints"
-      ]
+      "dependencies": ["HTTP-002"]
     },
     {
       "id": "WEBHOOK-002",
-      "description": "Implement webhook signature verification",
-      "priority": 23,
+      "description": "Webhook signature verification",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "WEBHOOK-001",
-        "CRYPTO-003"
-      ],
-      "acceptance_criteria": [
-        "Verify Authorization header"
-      ]
+      "dependencies": ["WEBHOOK-001", "CRYPTO-003"]
     },
     {
       "id": "WEBHOOK-003",
-      "description": "Implement transaction ID correlation",
-      "priority": 24,
+      "description": "Transaction ID correlation",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "WEBHOOK-002"
-      ],
-      "acceptance_criteria": [
-        "Extract and match transaction_id"
-      ]
+      "dependencies": ["WEBHOOK-002"]
     },
     {
       "id": "STATE-001",
-      "description": "Implement in-memory state store",
-      "priority": 25,
+      "description": "In-memory state store",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "WEBHOOK-003"
-      ],
-      "acceptance_criteria": [
-        "StateStore class with Map"
-      ]
+      "dependencies": ["WEBHOOK-003"]
     },
     {
       "id": "STATE-002",
-      "description": "Implement async poller with timeout",
-      "priority": 26,
+      "description": "Async poller with timeout",
       "status": "implemented",
       "tier": "mvp",
       "phase": "protocol",
-      "dependencies": [
-        "STATE-001"
-      ],
-      "acceptance_criteria": [
-        "waitForCallback() function"
-      ]
+      "dependencies": ["STATE-001"]
     },
     {
       "id": "MCP-001",
-      "description": "Initialize MCP server with SDK",
-      "priority": 27,
+      "description": "MCP server with SDK",
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": [
-        "STATE-002"
-      ],
-      "acceptance_criteria": [
-        "McpServer with stdio transport"
-      ]
+      "dependencies": ["STATE-002"]
     },
     {
       "id": "MCP-002",
-      "description": "Implement ondc_search MCP tool",
-      "priority": 28,
+      "description": "ondc_search MCP tool",
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": [
-        "MCP-001",
-        "TRANSLATE-003"
-      ],
-      "acceptance_criteria": [
-        "ondc_search tool registered"
-      ]
+      "dependencies": ["MCP-001", "TRANSLATE-003"]
     },
     {
       "id": "PREF-001",
-      "description": "Implement preference scoring algorithm",
-      "priority": 29,
+      "description": "Preference scoring algorithm",
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": [
-        "MCP-002"
-      ],
-      "acceptance_criteria": [
-        "scoreItem() function"
-      ]
+      "dependencies": ["MCP-002"]
     },
     {
       "id": "PREF-002",
-      "description": "Implement weight normalization",
-      "priority": 30,
+      "description": "Weight normalization",
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": [
-        "PREF-001"
-      ],
-      "acceptance_criteria": [
-        "normalizeWeights() function"
-      ]
+      "dependencies": ["PREF-001"]
     },
     {
       "id": "MOCK-001",
-      "description": "Create mock ONDC gateway server",
-      "priority": 31,
+      "description": "Mock ONDC gateway server",
       "status": "implemented",
       "tier": "mvp",
       "phase": "mcp",
-      "dependencies": [
-        "PREF-002"
-      ],
-      "acceptance_criteria": [
-        "Express server with /search endpoint"
-      ]
+      "dependencies": ["PREF-002"]
     },
     {
       "id": "WEBSITE-001",
-      "description": "Create website/api-server package structure",
-      "priority": 32,
+      "description": "website/api-server package",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "MOCK-001"
-      ],
-      "acceptance_criteria": [
-        "website/api-server/package.json created",
-        "Express server setup",
-        "CORS enabled",
-        "Direct SDK imports (no MCP)"
-      ]
+      "dependencies": ["MOCK-001"]
     },
     {
       "id": "WEBSITE-002",
-      "description": "Implement /api/search endpoint",
-      "priority": 33,
+      "description": "/api/search endpoint",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-001"
-      ],
-      "acceptance_criteria": [
-        "GET /api/search accepts query params",
-        "Calls becknToUcpCatalog() from SDK",
-        "Calls scoreAndSortItems() for ranking",
-        "Returns UCPCatalog JSON"
-      ]
+      "dependencies": ["WEBSITE-001"]
     },
     {
       "id": "WEBSITE-003",
-      "description": "Implement /api/catalog endpoints for CRUD",
-      "priority": 34,
+      "description": "/api/catalog CRUD endpoints",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-001"
-      ],
-      "acceptance_criteria": [
-        "GET /api/catalog returns MockGateway data",
-        "POST /api/catalog/products adds product",
-        "PUT /api/catalog/products/:id updates product",
-        "DELETE /api/catalog/products/:id removes product"
-      ]
+      "dependencies": ["WEBSITE-001"]
     },
     {
       "id": "WEBSITE-004",
-      "description": "Create website/shared package",
-      "priority": 35,
+      "description": "website/shared package",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [],
-      "acceptance_criteria": [
-        "website/shared/package.json created",
-        "Re-exports UCP types from @ondc-agent/shared",
-        "useApi hook for API calls",
-        "ProductCard component",
-        "PriceDisplay component",
-        "RatingStars component"
-      ]
+      "dependencies": []
     },
     {
       "id": "WEBSITE-005",
-      "description": "Create website/buyer Vite React app",
-      "priority": 36,
+      "description": "Buyer app (Vite + React)",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-004"
-      ],
-      "acceptance_criteria": [
-        "Vite + React + TypeScript setup",
-        "React Router configured",
-        "SearchPage component",
-        "ResultsPage component",
-        "ProductDetailPage component"
-      ]
+      "dependencies": ["WEBSITE-004"]
     },
     {
       "id": "WEBSITE-006",
-      "description": "Build buyer search UI components",
-      "priority": 37,
+      "description": "Buyer search UI components",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-005"
-      ],
-      "acceptance_criteria": [
-        "SearchBar component",
-        "FilterSidebar component",
-        "SortDropdown component",
-        "ResultGrid component",
-        "Connects to /api/search endpoint"
-      ]
+      "dependencies": ["WEBSITE-005"]
     },
     {
       "id": "WEBSITE-007",
-      "description": "Create website/seller Vite React app",
-      "priority": 38,
+      "description": "Seller app (Vite + React)",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-004"
-      ],
-      "acceptance_criteria": [
-        "Vite + React + TypeScript setup",
-        "React Router configured",
-        "DashboardPage component",
-        "CatalogPage component",
-        "ProductEditPage component"
-      ]
+      "dependencies": ["WEBSITE-004"]
     },
     {
       "id": "WEBSITE-008",
-      "description": "Build seller catalog UI components",
-      "priority": 39,
+      "description": "Seller catalog UI components",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-007"
-      ],
-      "acceptance_criteria": [
-        "ProductForm component",
-        "InventoryTable component",
-        "SearchPreview component",
-        "Connects to /api/catalog endpoints"
-      ]
+      "dependencies": ["WEBSITE-007"]
     },
     {
       "id": "WEBSITE-009",
-      "description": "Test both webapps and document SDK gaps",
-      "priority": 40,
+      "description": "Test webapps and document SDK gaps",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 1: Direct SDK Integration",
-      "dependencies": [
-        "WEBSITE-006",
-        "WEBSITE-008"
-      ],
-      "acceptance_criteria": [
-        "Buyer can search and see results",
-        "Seller can add/edit products",
-        "Document missing SDK functions",
-        "Identify what belongs in SDK vs app layer"
-      ]
+      "dependencies": ["WEBSITE-006", "WEBSITE-008"]
     },
     {
       "id": "WEBSITE-010",
-      "description": "Add GET /api/catalog/products/:id endpoint for product details",
-      "priority": 41,
+      "description": "GET /api/catalog/products/:id endpoint",
       "status": "implemented",
       "tier": "mvp",
       "phase": "website-phase1",
-      "dependencies": [
-        "WEBSITE-003"
-      ],
-      "acceptance_criteria": [
-        "Implement GET /api/catalog/products/:id endpoint",
-        "Search catalog providers for matching item ID",
-        "Return product with provider info (_provider field)",
-        "Return 404 if product not found",
-        "ProductDetailPage can load product details"
-      ],
-      "plan_reference": "gap-feature-discovered-during-browser-testing"
+      "dependencies": ["WEBSITE-003"]
     },
     {
       "id": "AGENT-001",
-      "description": "Create packages/buyer-skill",
-      "priority": 41,
+      "description": "packages/buyer-skill",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": [
-        "WEBSITE-009"
-      ],
-      "acceptance_criteria": [
-        "packages/buyer-skill/skill.md created",
-        "Defines buyer search workflow",
-        "Defines filter workflow",
-        "Defines comparison workflow",
-        "Deterministic response format"
-      ]
+      "dependencies": ["WEBSITE-009"]
     },
     {
       "id": "AGENT-002",
-      "description": "Create packages/seller-skill",
-      "priority": 42,
+      "description": "packages/seller-skill",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": [
-        "WEBSITE-009"
-      ],
-      "acceptance_criteria": [
-        "packages/seller-skill/skill.md created",
-        "Defines add product workflow",
-        "Defines edit product workflow",
-        "Defines preview workflow",
-        "Deterministic response format"
-      ]
+      "dependencies": ["WEBSITE-009"]
     },
     {
       "id": "AGENT-003",
-      "description": "Integrate Claude Agent SDK into api-server",
-      "priority": 43,
+      "description": "Claude Agent SDK integration",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": [
-        "AGENT-001",
-        "AGENT-002"
-      ],
-      "acceptance_criteria": [
-        "Add @anthropic-ai/claude-agent-sdk dependency",
-        "POST /api/agent/buyer endpoint",
-        "POST /api/agent/seller endpoint",
-        "Connects to ONDC MCP server via stdio",
-        "Streaming response support"
-      ]
+      "dependencies": ["AGENT-001", "AGENT-002"]
     },
     {
       "id": "AGENT-004",
-      "description": "Add Agent Chat UI to webapps",
-      "priority": 44,
+      "description": "Agent Chat UI components",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": [
-        "AGENT-003"
-      ],
-      "acceptance_criteria": [
-        "AgentChat component in shared",
-        "Streaming message handling",
-        "Tool call indicators",
-        "MessageBubble component"
-      ]
+      "dependencies": ["AGENT-003"]
     },
     {
       "id": "AGENT-005",
-      "description": "Compare Phase 1 vs Phase 2 and finalize boundaries",
-      "priority": 45,
+      "description": "Phase 1 vs Phase 2 comparison",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "~/.claude/plans/iterative-wishing-wigderson.md",
-      "plan_section": "## Implementation Steps > Phase 2: Agent Layer",
-      "dependencies": [
-        "AGENT-004"
-      ],
-      "acceptance_criteria": [
-        "Document what's easier with agent",
-        "Document what's better direct SDK",
-        "Finalize SDK vs Skill boundaries",
-        "Create decision matrix"
-      ]
+      "dependencies": ["AGENT-004"]
     },
     {
       "id": "AGENT-006",
-      "description": "Add agent API endpoints to api-server (POST /api/agent/buyer and /api/agent/seller)",
-      "priority": 46,
+      "description": "Agent API endpoints (SSE streaming)",
       "status": "implemented",
       "tier": "core",
       "phase": "website-phase2",
-      "plan_reference": "gap-feature-discovered-during-browser-testing",
-      "dependencies": [
-        "AGENT-003",
-        "AGENT-004"
-      ],
-      "acceptance_criteria": [
-        "Uncomment agent-service import in api-server/src/index.ts",
-        "Add POST /api/agent/buyer endpoint with SSE streaming",
-        "Add POST /api/agent/seller endpoint with SSE streaming",
-        "Agent UI can successfully call endpoints and receive responses",
-        "Fix libsodium dependency issue blocking agent service"
-      ]
+      "dependencies": ["AGENT-003", "AGENT-004"]
+    },
+    {
+      "id": "BUYER-AGENT-001",
+      "description": "Update buyer-skill SKILL.md with cart/checkout workflows",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["AGENT-006"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-002",
+      "description": "Add Maya persona definition to buyer-skill",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-001"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-003",
+      "description": "Add product card format specification to SKILL.md",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-001"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-004",
+      "description": "Add cart/checkout/order workflows to buyer-skill",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-001"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-005",
+      "description": "Create ondc-shopping-mcp server skeleton",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-004"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-006",
+      "description": "Implement ondc_search and ondc_compare tools",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-005"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-007",
+      "description": "Implement cart tools (add, remove, view)",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-005"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-008",
+      "description": "Implement checkout and order tools",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-005"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-009",
+      "description": "Add ondc-shopping MCP server config to agent-service",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-008"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-010",
+      "description": "Update BUYER_ALLOWED_TOOLS with ONDC shopping tools",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-009"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-011",
+      "description": "Update buyer system prompt with shopping phases",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-009"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-012",
+      "description": "Add ProductCard component to shared",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-011"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
+    },
+    {
+      "id": "BUYER-AGENT-013",
+      "description": "Update MessageBubble for product card rendering",
+      "status": "implemented",
+      "tier": "core",
+      "phase": "buyer-agent-workflow",
+      "dependencies": ["BUYER-AGENT-012"],
+      "plan_reference": "~/.claude/plans/flickering-enchanting-backus.md"
     },
     {
       "id": "WEEK1-001",
-      "description": "Implement SellerClient search method with ONDC protocol",
-      "priority": 44,
+      "description": "SellerClient.search() with ONDC",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [],
-      "acceptance_criteria": [
-        "search() method implemented in packages/seller-sdk/src/client.ts",
-        "HTTP client with exponential backoff",
-        "Ed25519 signing for auth headers",
-        "Request/response translation through shared utilities",
-        "Unit tests for search method"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": []
     },
     {
       "id": "WEEK1-002",
-      "description": "Implement SellerClient select method with ONDC protocol",
-      "priority": 45,
+      "description": "SellerClient.select() with ONDC",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [
-        "WEEK1-001"
-      ],
-      "acceptance_criteria": [
-        "select() method implemented in packages/seller-sdk/src/client.ts",
-        "Product selection workflow",
-        "Error handling and retry logic",
-        "Unit tests for select method"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK1-001"]
     },
     {
       "id": "WEEK1-003",
-      "description": "Implement SellerClient init method with ONDC protocol",
-      "priority": 46,
+      "description": "SellerClient.init() with ONDC",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [
-        "WEEK1-002"
-      ],
-      "acceptance_criteria": [
-        "init() method implemented in packages/seller-sdk/src/client.ts",
-        "Order initialization workflow",
-        "Session management",
-        "Unit tests for init method"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK1-002"]
     },
     {
       "id": "WEEK1-004",
-      "description": "Implement SellerClient confirm method with ONDC protocol",
-      "priority": 47,
+      "description": "SellerClient.confirm() with ONDC",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [
-        "WEEK1-003"
-      ],
-      "acceptance_criteria": [
-        "confirm() method implemented in packages/seller-sdk/src/client.ts",
-        "Order confirmation workflow",
-        "Transaction completion",
-        "Unit tests for confirm method"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK1-003"]
     },
     {
       "id": "WEEK1-005",
-      "description": "Wire MockGateway to api-server endpoint",
-      "priority": 48,
+      "description": "Wire MockGateway to api-server",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [],
-      "acceptance_criteria": [
-        "Connect packages/website/api-server/src/index.ts to MockGateway",
-        "Replace mockCatalog with MockGateway instance",
-        "Configure realistic behavior (0-2000ms delay, 10-50 items)",
-        "Enable full webapp testing with realistic data"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": []
     },
     {
       "id": "WEEK1-006",
-      "description": "Update test suite with SellerClient verification",
-      "priority": 49,
+      "description": "Update tests with SellerClient",
       "status": "implemented",
       "tier": "mvp",
       "phase": "week1",
-      "dependencies": [
-        "WEEK1-004",
-        "WEEK1-005"
-      ],
-      "acceptance_criteria": [
-        "Add SellerClient tests to .claude/scripts/run-tests.sh",
-        "Test all ONDC protocol methods",
-        "Verify MockGateway integration",
-        "Run full test suite successfully"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK1-004", "WEEK1-005"]
     },
     {
       "id": "WEEK2-001",
-      "description": "Implement progressive disclosure via SSE endpoint",
-      "priority": 50,
+      "description": "Progressive disclosure via SSE",
       "status": "implemented",
       "tier": "core",
       "phase": "week2",
-      "dependencies": [
-        "WEEK1-005"
-      ],
-      "acceptance_criteria": [
-        "Add /api/search/stream endpoint to packages/gateway/src/mcp/index.ts",
-        "Send immediate status response",
-        "Stream results as they arrive",
-        "Timeout after 3 seconds with completion signal"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK1-005"]
     },
     {
       "id": "WEEK2-002",
-      "description": "Enhance ondc_search MCP tool with streaming support",
-      "priority": 51,
+      "description": "ondc_search with streaming",
       "status": "implemented",
       "tier": "core",
       "phase": "week2",
-      "dependencies": [
-        "WEEK2-001"
-      ],
-      "acceptance_criteria": [
-        "Update MCP tool to support stream parameter",
-        "Return streaming results when requested",
-        "Maintain backward compatibility",
-        "Update MCP tool documentation"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK2-001"]
     },
     {
       "id": "WEEK2-003",
-      "description": "Implement request deduplication cache",
-      "priority": 52,
+      "description": "Request deduplication cache",
       "status": "implemented",
       "tier": "core",
       "phase": "week2",
-      "dependencies": [
-        "WEEK2-001"
-      ],
-      "acceptance_criteria": [
-        "Create packages/gateway/src/state/searchCache.ts",
-        "5-second TTL for duplicate queries",
-        "Request merging instead of rebroadcasting",
-        "30% faster response for repeated searches"
-      ],
-      "plan_reference": "~/.claude/plans/happy-gliding-hellman.md"
+      "dependencies": ["WEEK2-001"]
     },
     {
       "id": "SDK-BUYER-CART-001",
-      "description": "Create cart API endpoints for UCPSession management",
-      "priority": 53,
+      "description": "Cart API endpoints",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "WEEK2-003"
-      ],
-      "acceptance_criteria": [
-        "Implement POST /api/cart - Add item to cart",
-        "Implement GET /api/cart - Get current session",
-        "Implement DELETE /api/cart/:itemId - Remove item",
-        "Implement PUT /api/cart/:itemId - Update quantity",
-        "Use UCPSession and UCPSessionItem from @ondc-agent/shared",
-        "Store in StateStore with TTL"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["WEEK2-003"]
     },
     {
       "id": "SDK-BUYER-CART-002",
-      "description": "Create buyer cart page UI",
-      "priority": 54,
+      "description": "Buyer cart page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-CART-001"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/buyer/src/pages/CartPage.tsx",
-        "Create CartItem component",
-        "Create CartSummary component",
-        "Display cart items with quantity controls",
-        "Remove items and calculate subtotal",
-        "Link to checkout page",
-        "Implement useCart hook"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-CART-001"]
     },
     {
       "id": "SDK-BUYER-CART-003",
-      "description": "Create checkout API endpoint",
-      "priority": 55,
+      "description": "Checkout API endpoint",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-CART-001"
-      ],
-      "acceptance_criteria": [
-        "Implement POST /api/checkout",
-        "Validate cart items",
-        "Generate UCPQuote using preference scoring",
-        "Call SellerClient.init() for ONDC protocol",
-        "Return quote for buyer confirmation",
-        "Handle validation errors"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-CART-001"]
     },
     {
       "id": "SDK-BUYER-CART-004",
-      "description": "Create buyer checkout page UI",
-      "priority": 56,
+      "description": "Buyer checkout page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-CART-003"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/buyer/src/pages/CheckoutPage.tsx",
-        "Create BillingForm component",
-        "Create PaymentSelector component",
-        "Create QuoteDisplay component",
-        "Use UCPBilling and UCPPayment types",
-        "Call confirm endpoint on form submission"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-CART-003"]
     },
     {
       "id": "SDK-BUYER-ORDERS-001",
-      "description": "Create buyer orders API endpoints",
-      "priority": 57,
+      "description": "Buyer orders API endpoints",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-CART-004"
-      ],
-      "acceptance_criteria": [
-        "Implement GET /api/orders - List buyer's orders",
-        "Implement GET /api/orders/:id - Get order details",
-        "Implement POST /api/orders/:id/confirm - Confirm order",
-        "Implement POST /api/orders/:id/cancel - Cancel order",
-        "Implement GET /api/orders/:id/track - Track order",
-        "Use UCPOrder, UCPOrderStatus, UCPTracking",
-        "Store orders in memory/database"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-CART-004"]
     },
     {
       "id": "SDK-BUYER-ORDERS-002",
-      "description": "Create buyer orders page UI",
-      "priority": 58,
+      "description": "Buyer orders page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-ORDERS-001"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/buyer/src/pages/OrdersPage.tsx",
-        "List all orders with status",
-        "Filter by status (pending/active/complete)",
-        "Link to order detail page",
-        "Use UCPOrder type for display"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-ORDERS-001"]
     },
     {
       "id": "SDK-BUYER-ORDERS-003",
-      "description": "Create buyer order detail page UI",
-      "priority": 59,
+      "description": "Buyer order detail page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-ORDERS-002"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/buyer/src/pages/OrderDetailPage.tsx",
-        "Display full order details (UCPOrder)",
-        "Show order status (UCPOrderStatus)",
-        "Display tracking info (UCPTracking)",
-        "Show delivery agent info (UCPDeliveryAgent)",
-        "Add cancellation button for cancellable orders"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-ORDERS-002"]
     },
     {
       "id": "SDK-BUYER-SEARCH-001",
-      "description": "Enable progressive disclosure via SSE streaming",
-      "priority": 60,
+      "description": "Progressive disclosure with SSE",
       "status": "implemented",
       "tier": "full",
       "phase": "buyer-sdk-integration",
-      "dependencies": [
-        "WEEK2-001"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/buyer/src/hooks/useSearchStream.ts",
-        "Implement Server-Sent Events connection",
-        "Connect to /api/search/stream endpoint",
-        "Handle immediate status response",
-        "Stream results as they arrive",
-        "Timeout after 3 seconds with completion signal"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["WEEK2-001"]
     },
     {
       "id": "SDK-SELLER-ORDERS-001",
-      "description": "Create seller orders API endpoints",
-      "priority": 61,
+      "description": "Seller orders API endpoints",
       "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
-      "dependencies": [
-        "SDK-BUYER-ORDERS-001"
-      ],
-      "acceptance_criteria": [
-        "Implement GET /api/seller/orders - List incoming orders",
-        "Implement GET /api/seller/orders/:id - Order details",
-        "Implement POST /api/seller/orders/:id/accept - Accept order",
-        "Implement POST /api/seller/orders/:id/reject - Reject order",
-        "Implement POST /api/seller/orders/:id/dispatch - Dispatch order",
-        "Use SellerClient for ONDC protocol",
-        "Integrate with webhook callbacks"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-BUYER-ORDERS-001"]
     },
     {
       "id": "SDK-SELLER-ORDERS-002",
-      "description": "Create seller orders page UI",
-      "priority": 62,
+      "description": "Seller orders page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
-      "dependencies": [
-        "SDK-SELLER-ORDERS-001"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/seller/src/pages/OrdersPage.tsx",
-        "List incoming orders with status",
-        "Display order status (pending/accepted/dispatched/delivered)",
-        "Add Accept/Reject actions",
-        "Filter orders by status",
-        "Create OrderCard component"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-SELLER-ORDERS-001"]
     },
     {
       "id": "SDK-SELLER-ORDERS-003",
-      "description": "Create seller order detail page UI",
-      "priority": 63,
+      "description": "Seller order detail page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
-      "dependencies": [
-        "SDK-SELLER-ORDERS-002"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/seller/src/pages/OrderDetailPage.tsx",
-        "Display full order details",
-        "Show buyer information (UCPBilling)",
-        "List items and quantities",
-        "Add Accept/Reject/Dispatch buttons",
-        "Display order timeline"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-SELLER-ORDERS-002"]
     },
     {
       "id": "SDK-SELLER-CONFIG-001",
-      "description": "Create seller configuration page UI",
-      "priority": 64,
+      "description": "Seller configuration page UI",
       "status": "implemented",
       "tier": "full",
       "phase": "seller-sdk-integration",
-      "dependencies": [
-        "SDK-SELLER-ORDERS-002"
-      ],
-      "acceptance_criteria": [
-        "Create packages/website/seller/src/pages/ConfigPage.tsx",
-        "Create ONDC credentials form",
-        "Input fields: Subscriber ID, private key, key ID",
-        "Domain, city, country configuration",
-        "Test connection button",
-        "Use SellerClientConfig, generateKeyPair(), buildAuthHeader()"
-      ],
-      "plan_reference": "~/.claude/plans/recursive-bubbling-snail.md"
+      "dependencies": ["SDK-SELLER-ORDERS-002"]
     },
     {
       "id": "SDK-SELLER-DASHBOARD-001",
@@ -1404,6 +925,7 @@
     "mcp": "MCP-001--MOCK-001",
     "website-phase1": "WEBSITE-001--WEBSITE-010",
     "website-phase2": "AGENT-001--AGENT-006",
+    "buyer-agent-workflow": "BUYER-AGENT-001--BUYER-AGENT-013",
     "buyer-sdk-integration": "SDK-BUYER-CART-001--SDK-BUYER-ORDERS-002",
     "seller-sdk-integration": "SDK-SELLER-ORDERS-001--SDK-SELLER-DASHBOARD-001",
     "adoption": "SDK-DEMO-001--SDK-DOCS-001"

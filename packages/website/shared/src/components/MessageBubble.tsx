@@ -350,10 +350,21 @@ function ProductCardsGrid({
 
 /**
  * Try to parse product cards from content
+ * Looks for [TOOL_RESULT]...[/TOOL_RESULT] tags or direct JSON
  */
 function tryParseProductCards(content: string): ProductCardsResponse | null {
   try {
-    // Try to find JSON in the content
+    // First try to extract from [TOOL_RESULT]...[/TOOL_RESULT] tags
+    const toolResultMatch = content.match(/\[TOOL_RESULT\]([\s\S]*?)\[\/TOOL_RESULT\]/);
+    if (toolResultMatch) {
+      const jsonContent = toolResultMatch[1].trim();
+      const parsed = JSON.parse(jsonContent);
+      if (parsed.type === 'product_cards' && Array.isArray(parsed.cards)) {
+        return parsed as ProductCardsResponse;
+      }
+    }
+
+    // Fallback: Try to find direct JSON in the content
     const jsonMatch = content.match(/\{[\s\S]*"type":\s*"product_cards"[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
@@ -385,7 +396,9 @@ export function MessageBubble({
   // Extract content
   let content = '';
 
-  if (isAssistant && typeof message.content === 'string') {
+  if (isUser && typeof message.content === 'string') {
+    content = message.content;
+  } else if (isAssistant && typeof message.content === 'string') {
     content = message.content;
   } else if (isResult && message.result) {
     content = message.result;
