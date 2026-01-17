@@ -34,10 +34,7 @@ export class CallbackManager {
   }
 
   /**
-   * Register a pending request
-   * @param transactionId - Transaction ID
-   * @param type - Request type (e.g., 'search', 'select')
-   * @param data - Additional request data
+   * Register pending request
    */
   registerRequest(
     transactionId: string,
@@ -49,9 +46,6 @@ export class CallbackManager {
 
   /**
    * Wait for callback result
-   * @param transactionId - Transaction ID to wait for
-   * @param timeout - Timeout in milliseconds (optional)
-   * @returns Promise resolving to callback message
    */
   async waitForCallback<T = BecknMessage>(
     transactionId: string,
@@ -62,7 +56,6 @@ export class CallbackManager {
 
   /**
    * Handle incoming callback and route to waiting promise
-   * @param message - Beckn callback message
    */
   handleCallback(message: BecknMessage): void {
     const transactionId = message.context?.transaction_id;
@@ -101,9 +94,7 @@ export class CallbackManager {
   }
 
   /**
-   * Register a one-time handler for a specific transaction
-   * @param transactionId - Transaction ID
-   * @param handler - Handler function
+   * Register one-time handler for transaction
    */
   onTransaction(
     transactionId: string,
@@ -116,9 +107,7 @@ export class CallbackManager {
   }
 
   /**
-   * Complete a request with an error
-   * @param transactionId - Transaction ID
-   * @param error - Error message
+   * Complete request with error
    */
   completeWithError(transactionId: string, error: string): void {
     const pendingRequest = this.stateStore.get(transactionId);
@@ -132,9 +121,7 @@ export class CallbackManager {
   }
 
   /**
-   * Complete a request with a result
-   * @param transactionId - Transaction ID
-   * @param result - Result data
+   * Complete request with result
    */
   completeWithResult<T>(transactionId: string, result: T): void {
     const pendingRequest = this.stateStore.get(transactionId);
@@ -148,8 +135,7 @@ export class CallbackManager {
   }
 
   /**
-   * Remove a pending request
-   * @param transactionId - Transaction ID
+   * Remove pending request
    */
   removeRequest(transactionId: string): void {
     this.stateStore.delete(transactionId);
@@ -158,7 +144,6 @@ export class CallbackManager {
 
   /**
    * Get statistics about pending requests
-   * @returns Statistics object
    */
   getStats(): {
     pendingRequests: number;

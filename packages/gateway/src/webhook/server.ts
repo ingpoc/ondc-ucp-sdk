@@ -56,9 +56,7 @@ export class WebhookServer {
   }
 
   /**
-   * Register webhook handler for specific action
-   * @param action - Beckn action (e.g., 'on_search', 'on_select')
-   * @param handler - Handler function
+   * Register webhook handler for action
    */
   on(action: string, handler: WebhookHandler): void {
     if (!this.handlers.has(action)) {
@@ -68,34 +66,27 @@ export class WebhookServer {
   }
 
   /**
-   * Register a public key for a subscriber
-   * @param subscriberId - Subscriber ID (e.g., "ondc.example.com")
-   * @param publicKey - Base64 encoded Ed25519 public key
+   * Register public key for subscriber
    */
   registerPublicKey(subscriberId: string, publicKey: string): void {
     this.publicKeys.set(subscriberId, publicKey);
   }
 
   /**
-   * Remove a public key for a subscriber
-   * @param subscriberId - Subscriber ID
+   * Remove public key for subscriber
    */
   removePublicKey(subscriberId: string): void {
     this.publicKeys.delete(subscriberId);
   }
 
   /**
-   * Get the registered public key for a subscriber
-   * @param subscriberId - Subscriber ID
-   * @returns Public key or undefined if not registered
+   * Get registered public key for subscriber
    */
   getPublicKey(subscriberId: string): string | undefined {
     return this.publicKeys.get(subscriberId);
   }
 
-  /**
-   * Register webhook endpoints
-   */
+  /** Register webhook endpoints */
   private registerEndpoints(): void {
     // POST /on_search - Search results callback
     this.app.post('/on_search', (req: Request, res: Response) => {
@@ -128,9 +119,7 @@ export class WebhookServer {
     });
   }
 
-  /**
-   * Handle incoming webhook callback
-   */
+  /** Handle incoming webhook callback */
   private async handleCallback(action: string, req: Request, res: Response): Promise<void> {
     try {
       // Parse request body
@@ -254,9 +243,7 @@ export class WebhookServer {
   }
 
   /**
-   * Start the webhook server
-   * @param port - Port to listen on (overrides config)
-   * @param host - Host to bind to (overrides config)
+   * Start webhook server
    */
   async start(port?: number, host?: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -294,9 +281,7 @@ export class WebhookServer {
     });
   }
 
-  /**
-   * Stop the webhook server
-   */
+  /** Stop webhook server */
   async stop(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.server) {
@@ -318,25 +303,18 @@ export class WebhookServer {
   }
 
   /**
-   * Get the actual port the server is listening on
-   * Useful when port 0 is used for random port assignment
+   * Get actual listening port
    */
   getPort(): number | null {
     return this.listeningPort;
   }
 
-  /**
-   * Get the Express app instance
-   * Useful for testing or adding custom middleware
-   */
+  /** Get Express app instance */
   getApp(): Express {
     return this.app;
   }
 
-  /**
-   * Get registered handler count for an action
-   * @param action - Beckn action
-   */
+  /** Get registered handler count for action */
   handlerCount(action: string): number {
     return this.handlers.get(action)?.length ?? 0;
   }
