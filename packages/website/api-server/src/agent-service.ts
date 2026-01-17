@@ -100,32 +100,11 @@ You are following the buyer-skill workflow instructions below:
 
 ${withoutFrontmatter}
 
-## CRITICAL: Product Card JSON Format - DO NOT IGNORE
-When the ondc_search tool returns data, you MUST copy the ENTIRE JSON response exactly as received. DO NOT summarize, DO NOT reformat, DO NOT modify.
-
-Format your response like this:
-
-[TOOL_RESULT]
-{"type":"product_cards","cards":[{exact tool output here}],"message":"..."}
-[/TOOL_RESULT]
-
-After the tags, you may add a brief comment.
-
-The frontend ONLY renders visual product cards when it finds this exact JSON format. Text descriptions will NOT render as cards.
-
-Example - WRONG:
-"I found 5 mangoes..."
-
-Example - CORRECT:
-[TOOL_RESULT]
-{"type":"product_cards","cards":[{"id":"item-001",...}]}
-[/TOOL_RESULT]
-Great! Here are your options.
-
 ## Response Format
-- If a tool returns JSON: Include it EXACTLY in [TOOL_RESULT] tags
-- Then: Add brief conversational response
+- Respond naturally and conversationally to users
 - Keep responses concise and helpful
+- Use tools to fulfill user requests
+- Let the backend handle structured data formatting
 `;
   } catch (error) {
     console.error('Failed to load buyer-skill SKILL.md:', error);
@@ -187,8 +166,8 @@ ${prompt}
 
 ## Response Format
 - Use tools to fulfill user requests
-- Return search results in [TOOL_RESULT] tags with product_cards JSON format
-- Keep responses conversational and helpful`,
+- Keep responses conversational and helpful
+- Let the backend handle structured data formatting`,
       options: {
         mcpServers: ONDC_MCP_SERVERS,
         allowedTools: BUYER_ALLOWED_TOOLS,
@@ -252,32 +231,26 @@ Use the token-efficient MCP tools for data processing and context-graph for lear
  *   OR
  *   { type: "user", message: { content: [{ "tool_use_id": "...", type: "tool_result", content: [...] }] } }
  *
- * We need to preserve tool_use blocks and include them in the output
+ * We extract structured data from tool results and sanitize conversational content
  */
 function transformMessageForFrontend(message: SDKMessage): SDKMessage {
   // Handle assistant messages with nested content
   if (message.type === 'assistant' && message.message) {
     const msg = message.message as { content?: Array<{ type: string; text: string; tool_name?: string; id?: string }> };
     if (msg.content && Array.isArray(msg.content)) {
-      // Find all text blocks and tool_use blocks
+      // Find all text blocks
       const textBlocks = msg.content.filter((block) => block.type === 'text');
-      const toolUseBlocks = msg.content.filter((block) => block.type === 'tool_use');
 
-      if (textBlocks.length > 0 || toolUseBlocks.length > 0) {
-        // Create combined content with tool information
+      if (textBlocks.length > 0) {
+        // Combine text blocks and sanitize
         let combinedContent = '';
 
-        // Add text blocks
         textBlocks.forEach(block => {
           combinedContent += block.text;
         });
 
-        // Add tool use information as formatted text
-        toolUseBlocks.forEach(block => {
-          if (block.type === 'tool_use' && block.tool_name) {
-            combinedContent += `\n\n🔧 Calling: ${block.tool_name}`;
-          }
-        });
+        // Sanitize content: remove any [TOOL_RESULT] tags or similar internal markers
+        combinedContent = sanitizeContent(combinedContent);
 
         return {
           type: 'assistant',
@@ -288,28 +261,52 @@ function transformMessageForFrontend(message: SDKMessage): SDKMessage {
     }
   }
 
-  // Handle user messages with tool results
+  // Handle user messages with tool results - extract structured data
   if (message.type === 'user' && message.message) {
-    const msg = message.message as { content?: Array<{ type: string; text: string; tool_name?: string; id?: string }> };
-    if (msg.content && Array.isArray(msg.content)) {
-      // Find text blocks and tool_use blocks
-      const textBlocks = msg.content.filter((block) => block.type === 'text');
-      const toolUseBlocks = msg.content.filter((block) => block.type === 'tool_use');
+    const msg = message.message as {
+      content?: Array<{
+        type: string;
+        text?: string;
+        tool_use_id?: string;
+        content?: unknown;
+        is_error?: boolean;
+      }>
+    };
 
+    if (msg.content && Array.isArray(msg.content)) {
+      // Look for tool_result blocks
+      const toolResultBlocks = msg.content.filter((block) => block.type === 'tool_result');
+
+      // If we have tool results, extract structured data for product cards
+      if (toolResultBlocks.length > 0) {
+        for (const block of toolResultBlocks) {
+          if (block.content && typeof block.content === 'object') {
+            // Check if this is a product_cards response from ondc_search
+            const content = block.content as { type?: string; cards?: unknown[]; totalCount?: number; query?: string; message?: string };
+
+            if (content.type === 'product_cards' && Array.isArray(content.cards)) {
+              // Return structured data for frontend rendering
+              return {
+                type: 'user',
+                content: '', // Empty conversational content
+                structured_data: content, // Structured product cards
+                session_id: message.session_id
+              };
+            }
+          }
+        }
+      }
+
+      // Fallback: handle text blocks
+      const textBlocks = msg.content.filter((block) => block.type === 'text');
       if (textBlocks.length > 0) {
         let combinedContent = '';
 
-        // Add text blocks
         textBlocks.forEach(block => {
-          combinedContent += block.text;
+          combinedContent += block.text || '';
         });
 
-        // Add tool use information
-        toolUseBlocks.forEach(block => {
-          if (block.type === 'tool_use' && block.tool_name) {
-            combinedContent += `\n\n🔧 Calling: ${block.tool_name}`;
-          }
-        });
+        combinedContent = sanitizeContent(combinedContent);
 
         return {
           type: 'user',
@@ -320,18 +317,42 @@ function transformMessageForFrontend(message: SDKMessage): SDKMessage {
     }
   }
 
-  // Handle tool_progress messages
+  // Handle tool_progress messages - but don't expose tool names
   if (message.type === 'tool_progress' && message.message) {
     const msg = message.message as { tool_name?: string };
     return {
       type: 'tool_progress',
-      tool_name: msg.tool_name || '',
+      tool_name: '', // Don't expose tool names to users
       session_id: message.session_id
     };
   }
 
   // Pass through other message types as-is
   return message;
+}
+
+/**
+ * Sanitize content to remove internal implementation details
+ * Removes [TOOL_RESULT] tags, JSON artifacts, and internal markers
+ */
+function sanitizeContent(content: string): string {
+  if (!content) return '';
+
+  let sanitized = content;
+
+  // Remove [TOOL_RESULT]...[/TOOL_RESULT] tags and their content
+  sanitized = sanitized.replace(/\[TOOL_RESULT\][\s\S]*?\[\/TOOL_RESULT\]/g, '');
+
+  // Remove any standalone JSON objects (likely tool output artifacts)
+  sanitized = sanitized.replace(/\{[\s\S]*?type[\s\S]*?product_cards[\s\S]*?\}/g, '');
+
+  // Remove any remaining tool call markers
+  sanitized = sanitized.replace(/🔧 Calling: [^\n]+/g, '');
+
+  // Clean up extra whitespace
+  sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
+  return sanitized;
 }
 
 /**

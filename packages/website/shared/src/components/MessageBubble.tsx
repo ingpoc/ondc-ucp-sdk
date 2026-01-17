@@ -8,6 +8,7 @@ export interface SDKMessage {
   errors?: string[];
   tool_name?: string;
   session_id?: string;
+  structured_data?: Record<string, unknown>; // For product cards and other structured data
   [key: string]: unknown;
 }
 
@@ -349,11 +350,24 @@ function ProductCardsGrid({
 }
 
 /**
- * Try to parse product cards from content
- * Looks for [TOOL_RESULT]...[/TOOL_RESULT] tags or direct JSON
+ * Try to parse product cards from message
+ * First checks structured_data from backend, then falls back to content parsing
  */
-function tryParseProductCards(content: string): ProductCardsResponse | null {
+function tryParseProductCards(message: SDKMessage): ProductCardsResponse | null {
+  // First, check if backend provided structured_data
+  if (message.structured_data) {
+    const data = message.structured_data as { type?: string; cards?: unknown[]; totalCount?: number; query?: string; message?: string };
+    if (data.type === 'product_cards' && Array.isArray(data.cards)) {
+      return data as ProductCardsResponse;
+    }
+  }
+
+  // Fallback: parse from content (for backwards compatibility)
+  if (!message.content) return null;
+
   try {
+    const content = message.content;
+
     // First try to extract from [TOOL_RESULT]...[/TOOL_RESULT] tags
     const toolResultMatch = content.match(/\[TOOL_RESULT\]([\s\S]*?)\[\/TOOL_RESULT\]/);
     if (toolResultMatch) {
@@ -404,16 +418,16 @@ export function MessageBubble({
     content = message.result;
   } else if (isResult && message.errors && message.errors.length > 0) {
     content = `Error: ${message.errors.join(', ')}`;
-  } else if (isToolProgress && message.tool_name) {
-    content = `Running ${message.tool_name}...`;
+  } else if (isToolProgress) {
+    content = 'Working on it...'; // Don't expose tool names
   }
 
   if (!content && !isToolProgress) {
     return null;
   }
 
-  // Check for product cards in assistant messages
-  const productCards = isAssistant ? tryParseProductCards(content) : null;
+  // Check for product cards in assistant messages (from structured_data or content)
+  const productCards = isAssistant ? tryParseProductCards(message) : null;
 
   return (
     <div
@@ -449,7 +463,7 @@ export function MessageBubble({
               animation: 'spin 1s linear infinite'
             }}
           />
-          <span>{message.tool_name}</span>
+          <span>Searching...</span> {/* Don't expose tool names */}
         </div>
       )}
 
