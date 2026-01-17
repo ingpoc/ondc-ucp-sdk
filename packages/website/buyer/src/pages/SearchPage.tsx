@@ -3,44 +3,41 @@ import { SearchBar } from '../components/SearchBar';
 
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  backgroundColor: '#f8fafc',
   display: 'flex',
   flexDirection: 'column' as const,
   alignItems: 'center',
   justifyContent: 'center',
   padding: '80px 24px',
-  width: '100vw',
-  marginLeft: 'calc(-50vw + 50%)',
+  width: '100%',
 };
 
 const HERO_STYLE = {
-  maxWidth: '1000px',
+  maxWidth: '800px',
   width: '100%',
   textAlign: 'center' as const,
 };
 
 const HEADING_STYLE = {
-  fontSize: '72px',
+  fontSize: '56px',
   fontWeight: 800,
-  letterSpacing: '-3px',
-  color: '#ffffff',
-  marginBottom: '24px',
+  letterSpacing: '-2px',
+  color: '#0f172a',
+  marginBottom: '16px',
   lineHeight: 1.1,
-  textShadow: '0 4px 20px rgba(0,0,0,0.15)',
 };
 
 const SUBHEADING_STYLE = {
-  fontSize: '22px',
+  fontSize: '18px',
   fontWeight: 400,
-  color: 'rgba(255,255,255,0.95)',
-  marginBottom: '56px',
+  color: '#475569',
+  marginBottom: '40px',
   lineHeight: 1.6,
-  textShadow: '0 2px 10px rgba(0,0,0,0.1)',
 };
 
 const SEARCH_WRAPPER_STYLE = {
-  maxWidth: '700px',
-  margin: '0 auto',
+  maxWidth: '600px',
+  width: '100%',
 };
 
 export function SearchPage(): JSX.Element {

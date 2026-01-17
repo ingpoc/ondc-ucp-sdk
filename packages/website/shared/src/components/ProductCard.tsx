@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { UCPItem, UCPPrice, BecknItem } from '../types';
+import { DRAMS_CARD, SPACING, TYPOGRAPHY, DRAMS, RADIUS, PILL_BUTTON } from '@ondc-agent/shared/design-system';
 
 type ProductLike = UCPItem | BecknItem;
 
@@ -57,41 +58,27 @@ function getProductImages(product: ProductLike): Array<{ url: string }> | undefi
   return undefined;
 }
 
-const CARD_STYLE = {
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  padding: '16px',
-  backgroundColor: 'white',
-  cursor: 'pointer',
-  transition: 'box-shadow 0.2s, transform 0.2s',
-};
-
-const CARD_HOVER_STYLE = {
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-  transform: 'translateY(-2px)',
-};
-
 const IMAGE_STYLE = {
   width: '100%',
   height: '200px',
   objectFit: 'cover' as const,
-  borderRadius: '6px',
-  marginBottom: '12px',
-  backgroundColor: '#f1f5f9',
+  borderRadius: RADIUS.card,
+  marginBottom: SPACING.md,
+  backgroundColor: DRAMS.grayTrack,
 };
 
 const TITLE_STYLE = {
-  fontSize: '16px',
-  fontWeight: '600',
-  color: '#1e293b',
-  margin: '0 0 8px 0',
+  ...TYPOGRAPHY.label,
+  fontWeight: 600,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.sm} 0`,
   lineHeight: '1.4',
 };
 
 const DESCRIPTION_STYLE = {
-  fontSize: '14px',
-  color: '#64748b',
-  margin: '0 0 12px 0',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  margin: `0 0 ${SPACING.md} 0`,
   lineHeight: '1.5',
   display: '-webkit-box',
   WebkitLineClamp: 2,
@@ -100,9 +87,9 @@ const DESCRIPTION_STYLE = {
 };
 
 const PROVIDER_STYLE = {
-  fontSize: '12px',
-  color: '#94a3b8',
-  marginTop: '8px',
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  marginTop: SPACING.sm,
   marginBottom: '0',
 };
 
@@ -122,8 +109,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
   const images = getProductImages(product);
 
   const cardStyle = onClick
-    ? { ...CARD_STYLE, ...(isHovered ? CARD_HOVER_STYLE : {}) }
-    : { ...CARD_STYLE, cursor: 'default' };
+    ? { ...DRAMS_CARD.base, ...(isHovered ? DRAMS_CARD.hover : {}), cursor: 'pointer' }
+    : { ...DRAMS_CARD.base };
 
   return (
     <div

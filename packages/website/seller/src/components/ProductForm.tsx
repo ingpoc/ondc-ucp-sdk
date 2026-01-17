@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { BecknItem } from '@ondc-website/shared';
+import { TEXT_BOX, PILL_BUTTON, SELECT_BOX, SPACING, TYPOGRAPHY, DRAMS, DRAMS_CARD, disabled } from '@ondc-agent/shared/design-system';
 
 export interface ProductFormData {
   id: string;
@@ -22,93 +23,38 @@ const FORM_STYLE = {
 };
 
 const CONTAINER_STYLE = {
-  marginBottom: '16px',
+  marginBottom: SPACING.md,
 };
 
 const LABEL_STYLE = {
+  ...TYPOGRAPHY.label,
   display: 'block',
-  marginBottom: '6px',
-  fontWeight: '500',
-  fontSize: '14px',
-  color: '#475569',
+  marginBottom: SPACING.xs,
+  color: DRAMS.textDark,
 };
 
-const INPUT_STYLE = {
+const INPUT_BASE = {
+  ...TEXT_BOX.track,
   width: '100%',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  fontSize: '14px',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-  backgroundColor: 'white',
 };
 
-const INPUT_DISABLED_STYLE = {
-  backgroundColor: '#f1f5f9',
-  cursor: 'not-allowed',
-  color: '#94a3b8',
-};
-
-const INPUT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-};
-
-const TEXTAREA_STYLE = {
+const TEXTAREA_BASE = {
+  ...TEXT_BOX.track,
   width: '100%',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  fontSize: '14px',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-  backgroundColor: 'white',
   minHeight: '80px',
   resize: 'vertical' as const,
 };
 
 const BUTTON_CONTAINER_STYLE = {
   display: 'flex',
-  gap: '12px',
-  marginTop: '24px',
-};
-
-const BUTTON_STYLE = {
-  padding: '10px 20px',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '14px',
-  fontWeight: '500',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s, transform 0.1s',
-};
-
-const BUTTON_PRIMARY_STYLE = {
-  backgroundColor: '#16a34a',
-};
-
-const BUTTON_PRIMARY_HOVER_STYLE = {
-  backgroundColor: '#15803d',
-};
-
-const BUTTON_SECONDARY_STYLE = {
-  backgroundColor: '#64748b',
-};
-
-const BUTTON_SECONDARY_HOVER_STYLE = {
-  backgroundColor: '#475569',
-};
-
-const BUTTON_LOADING_STYLE = {
-  backgroundColor: '#94a3b8',
-  cursor: 'not-allowed',
+  gap: SPACING.md,
+  marginTop: SPACING.xl,
 };
 
 const HELPER_TEXT_STYLE = {
-  fontSize: '12px',
-  color: '#64748b',
-  marginTop: '4px',
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  marginTop: SPACING.xs,
   marginBottom: '0',
 };
 
@@ -122,9 +68,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
     categoryId: product?.category_id || 'cat-1',
   });
 
-  const [isPrimaryHovered, setIsPrimaryHovered] = useState(false);
-  const [isSecondaryHovered, setIsSecondaryHovered] = useState(false);
-
   const handleInputChange = (field: keyof ProductFormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -133,12 +76,12 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (!e.target.disabled) {
-      Object.assign(e.target.style, INPUT_FOCUS_STYLE);
+      Object.assign(e.target.style, TEXT_BOX.focus);
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+    Object.assign(e.target.style, TEXT_BOX.track);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,8 +103,8 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           disabled={!!product}
           required
           style={{
-            ...INPUT_STYLE,
-            ...(product ? INPUT_DISABLED_STYLE : {}),
+            ...INPUT_BASE,
+            ...(product ? disabled : {}),
           }}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -184,7 +127,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           onChange={handleInputChange('name')}
           required
           placeholder="e.g., Organic Mango"
-          style={INPUT_STYLE}
+          style={INPUT_BASE}
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
@@ -200,7 +143,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           onChange={handleInputChange('description')}
           rows={3}
           placeholder="Short product description"
-          style={TEXTAREA_STYLE}
+          style={TEXTAREA_BASE}
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
@@ -214,7 +157,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           id="product-category"
           value={formData.categoryId}
           onChange={handleInputChange('categoryId')}
-          style={INPUT_STYLE}
+          style={INPUT_BASE}
           onFocus={handleFocus}
           onBlur={handleBlur}
         >
@@ -229,7 +172,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         <label htmlFor="product-price" style={LABEL_STYLE}>
           Price <span style={{ color: '#dc2626' }}>*</span>
         </label>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: SPACING.md }}>
           <div style={{ flex: 1 }}>
             <input
               id="product-price"
@@ -240,7 +183,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
               min="0"
               step="0.01"
               placeholder="100"
-              style={INPUT_STYLE}
+              style={INPUT_BASE}
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
@@ -248,7 +191,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           <select
             value={formData.currency}
             onChange={handleInputChange('currency')}
-            style={{ ...INPUT_STYLE, width: '100px' }}
+            style={{ ...INPUT_BASE, width: '100px' }}
             onFocus={handleFocus}
             onBlur={handleBlur}
           >
@@ -264,12 +207,9 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           type="submit"
           disabled={loading}
           style={{
-            ...BUTTON_STYLE,
-            ...(loading ? BUTTON_LOADING_STYLE : BUTTON_PRIMARY_STYLE),
-            ...(isPrimaryHovered && !loading ? BUTTON_PRIMARY_HOVER_STYLE : {}),
+            ...PILL_BUTTON.orange,
+            ...(loading ? disabled : {}),
           }}
-          onMouseEnter={() => !loading && setIsPrimaryHovered(true)}
-          onMouseLeave={() => !loading && setIsPrimaryHovered(false)}
         >
           {loading ? 'Saving...' : product ? 'Update Product' : 'Add Product'}
         </button>
@@ -278,13 +218,9 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           onClick={onCancel}
           disabled={loading}
           style={{
-            ...BUTTON_STYLE,
-            ...BUTTON_SECONDARY_STYLE,
-            ...(isSecondaryHovered && !loading ? BUTTON_SECONDARY_HOVER_STYLE : {}),
-            ...(loading ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+            ...PILL_BUTTON.gray,
+            ...(loading ? disabled : {}),
           }}
-          onMouseEnter={() => !loading && setIsSecondaryHovered(true)}
-          onMouseLeave={() => !loading && setIsSecondaryHovered(false)}
         >
           Cancel
         </button>

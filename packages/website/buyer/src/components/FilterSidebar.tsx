@@ -1,3 +1,5 @@
+import { TEXT_BOX, SELECT_BOX, SPACING, TYPOGRAPHY, DRAMS_CARD, DRAMS } from '@ondc-agent/shared/design-system';
+
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance' },
   { value: 'price', label: 'Price' },
@@ -6,62 +8,36 @@ const SORT_OPTIONS = [
 ] as const;
 
 const CONTAINER_STYLE = {
-  padding: '16px',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
+  ...DRAMS_CARD.base,
+  padding: SPACING.lg,
   minWidth: '200px',
 };
 
 const HEADER_STYLE = {
-  fontSize: '16px',
-  fontWeight: '600',
-  color: '#1e293b',
-  margin: '0 0 16px 0',
+  ...TYPOGRAPHY.h3,
+  color: DRAMS.textDark,
+  marginBottom: SPACING.md,
 };
 
 const FILTER_SECTION_STYLE = {
-  marginBottom: '16px',
+  marginBottom: SPACING.md,
 };
 
 const LABEL_STYLE = {
+  ...TYPOGRAPHY.label,
   display: 'block',
-  fontSize: '14px',
-  fontWeight: '500',
-  color: '#475569',
-  marginBottom: '6px',
+  marginBottom: SPACING.xs,
+  color: DRAMS.textDark,
 };
 
-const INPUT_STYLE = {
+const INPUT_BASE = {
+  ...TEXT_BOX.track,
   width: '100%',
-  padding: '8px 10px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: 'white',
-  fontSize: '14px',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
 };
 
-const INPUT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-};
-
-const SELECT_STYLE = {
+const SELECT_BASE = {
+  ...SELECT_BOX.base,
   width: '100%',
-  padding: '8px 10px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: 'white',
-  fontSize: '14px',
-  cursor: 'pointer',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-};
-
-const SELECT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
 };
 
 export interface SearchFilters {
@@ -85,19 +61,19 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
   }
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, INPUT_FOCUS_STYLE);
+    Object.assign(e.target.style, TEXT_BOX.focus);
   };
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+    Object.assign(e.target.style, TEXT_BOX.track);
   };
 
   const handleSelectFocus = (e: React.FocusEvent<HTMLSelectElement>) => {
-    Object.assign(e.target.style, SELECT_FOCUS_STYLE);
+    Object.assign(e.target.style, SELECT_BOX.focus);
   };
 
   const handleSelectBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
-    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+    Object.assign(e.target.style, SELECT_BOX.base);
   };
 
   return (
@@ -118,7 +94,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          style={INPUT_STYLE}
+          style={INPUT_BASE}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
         />
@@ -139,7 +115,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('minRating', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          style={INPUT_STYLE}
+          style={INPUT_BASE}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
         />
@@ -153,7 +129,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
           id="sort-by"
           value={filters.sortBy ?? 'relevance'}
           onChange={(e) => handleChange('sortBy', e.target.value)}
-          style={SELECT_STYLE}
+          style={SELECT_BASE}
           onFocus={handleSelectFocus}
           onBlur={handleSelectBlur}
         >

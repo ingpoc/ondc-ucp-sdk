@@ -1,47 +1,49 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { UCPSession } from '@ondc-website/shared';
+import { COLORS, SPACING, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 const STORAGE_KEY = 'ondc-session-id';
 
 const FORM_CONTAINER_STYLE = {
   backgroundColor: 'white',
-  border: '1px solid #e5e7eb',
+  border: `1px solid ${COLORS.border}`,
   borderRadius: '8px',
-  padding: '20px',
-  marginBottom: '20px',
+  padding: SPACING.xl,
+  marginBottom: SPACING.xl,
 } as const;
 
 const INPUT_STYLE = {
   width: '100%',
-  padding: '10px',
-  border: '1px solid #d1d5db',
+  padding: `${SPACING.md} ${SPACING.lg}`,
+  border: `1px solid ${COLORS.border}`,
   borderRadius: '4px',
-  fontSize: '1em',
+  fontSize: TYPOGRAPHY.body.fontSize,
+  color: COLORS.textPrimary,
 } as const;
 
 const LABEL_STYLE = {
   display: 'block' as const,
-  marginBottom: '4px',
-  fontWeight: 'bold' as const,
+  marginBottom: SPACING.xs,
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  color: COLORS.textPrimary,
 };
 
 const BUTTON_STYLE = {
-  padding: '8px 16px',
+  padding: `${SPACING.md} ${SPACING.lg}`,
   border: 'none',
   borderRadius: '4px',
-  fontSize: '0.9em',
+  fontSize: TYPOGRAPHY.body.fontSize,
   cursor: 'pointer' as const,
 } as const;
 
 const SAVED_BADGE_STYLE = {
-  padding: '8px 12px',
-  backgroundColor: '#d1fae5',
-  border: '1px solid #a7f3d0',
+  padding: `${SPACING.md} ${SPACING.lg}`,
+  backgroundColor: COLORS.bgSubtle,
+  border: `1px solid ${COLORS.border}`,
   borderRadius: '4px',
-  color: '#065f46',
-  marginBottom: '16px',
-  fontSize: '0.9em',
+  color: COLORS.textSecondary,
+  marginBottom: SPACING.lg,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
 } as const;
 
 export interface BillingFormProps {
@@ -166,7 +168,7 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
             disabled={saving || !isValid}
             style={{
               ...BUTTON_STYLE,
-              backgroundColor: saving ? '#9ca3af' : '#007bff',
+              backgroundColor: saving ? COLORS.textMuted : COLORS.success,
               color: 'white',
               cursor: saving || !isValid ? 'not-allowed' : 'pointer',
             }}
@@ -221,7 +223,7 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
           placeholder="29ABCDE1234F1Z5"
           maxLength={15}
         />
-        <p style={{ fontSize: '0.85em', color: '#666', marginTop: '-12px' }}>
+        <p style={{ fontSize: TYPOGRAPHY.bodySmall.fontSize, color: COLORS.textMuted, marginTop: '-12px' }}>
           For business purchases and GST invoices
         </p>
       </div>

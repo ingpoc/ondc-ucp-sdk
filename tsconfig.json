@@ -17,5 +17,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
+  "include": ["types.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

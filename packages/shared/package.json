@@ -21,6 +21,10 @@
     "./errors": {
       "import": "./dist/errors/index.js",
       "types": "./dist/errors/index.d.ts"
+    },
+    "./design-system": {
+      "import": "./dist/design-system/index.js",
+      "types": "./dist/design-system/index.d.ts"
     }
   },
   "scripts": {

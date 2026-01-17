@@ -1,6 +1,16 @@
 /**
  * Design System - Dieter Rams Principles
- * Minimal, timeless, clean slate palette with modern typography
+ * @deprecated This file is deprecated. Import from `./tokens` instead.
+ * The values here have been merged into tokens.ts with DRAMS-specific additions.
+ *
+ * Migration guide:
+ * - Replace `import { COLORS } from './styles'` with `import { COLORS, DRAMS } from './tokens'`
+ * - Replace `import { TYPOGRAPHY } from './styles'` with `import { TYPOGRAPHY } from './tokens'`
+ * - Replace `import { SPACING } from './styles'` with `import { SPACING } from './tokens'`
+ * - Replace button/input styles with `PILL_BUTTON`, `TEXT_BOX` from './components'
+ * - Replace pre-built styles (CARD_STYLE, etc.) with patterns from './components'
+ *
+ * This file will be removed in a future version.
  */
 
 // Color Palette - Slate-based

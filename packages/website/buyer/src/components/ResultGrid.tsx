@@ -1,10 +1,11 @@
 import { ProductCard } from '@ondc-website/shared/components';
 import type { UCPItem } from '@ondc-website/shared';
+import { DRAMS_EMPTY_STATE, SPACING, DRAMS, DRAMS_CARD, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
 
 const GRID_STYLE = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-  gap: '20px',
+  gap: SPACING.lg,
 };
 
 const LOADING_CONTAINER_STYLE = {
@@ -12,46 +13,22 @@ const LOADING_CONTAINER_STYLE = {
   flexDirection: 'column' as const,
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '60px 20px',
-  gap: '16px',
+  padding: `${SPACING['3xl']} ${SPACING.lg}`,
+  gap: SPACING.md,
 };
 
 const SPINNER_STYLE = {
   width: '40px',
   height: '40px',
-  border: '4px solid #e2e8f0',
-  borderTopColor: '#3b82f6',
+  border: `4px solid ${DRAMS.grayTrack}`,
+  borderTopColor: DRAMS.orange,
   borderRadius: '50%',
   animation: 'spin 1s linear infinite',
 };
 
 const LOADING_TEXT_STYLE = {
-  fontSize: '16px',
-  color: '#64748b',
-  fontWeight: '500',
-};
-
-const EMPTY_STATE_STYLE = {
-  textAlign: 'center' as const,
-  padding: '60px 20px',
-};
-
-const EMPTY_STATE_ICON_STYLE = {
-  fontSize: '48px',
-  marginBottom: '16px',
-};
-
-const EMPTY_STATE_TITLE_STYLE = {
-  fontSize: '18px',
-  fontWeight: '600',
-  color: '#1e293b',
-  margin: '0 0 8px 0',
-};
-
-const EMPTY_STATE_TEXT_STYLE = {
-  fontSize: '14px',
-  color: '#64748b',
-  margin: '0',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
 };
 
 export interface ResultGridProps {
@@ -77,10 +54,10 @@ export function ResultGrid({ items, onItemClick, loading }: ResultGridProps): JS
 
   if (items.length === 0) {
     return (
-      <div style={EMPTY_STATE_STYLE}>
-        <div style={EMPTY_STATE_ICON_STYLE}>🔍</div>
-        <h3 style={EMPTY_STATE_TITLE_STYLE}>No results found</h3>
-        <p style={EMPTY_STATE_TEXT_STYLE}>
+      <div style={DRAMS_EMPTY_STATE.container}>
+        <div style={DRAMS_EMPTY_STATE.icon}>🔍</div>
+        <h3 style={DRAMS_EMPTY_STATE.title}>No results found</h3>
+        <p style={DRAMS_EMPTY_STATE.message}>
           Try adjusting your search terms or filters to find what you're looking for
         </p>
       </div>

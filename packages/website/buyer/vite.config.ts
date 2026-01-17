@@ -5,12 +5,11 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@ondc-agent/shared': '@ondc-website/shared',
       crypto: 'crypto-browserify',
     },
   },
   optimizeDeps: {
-    exclude: ['@ondc-agent/shared', '@ondc-website/shared'],
+    exclude: ['@ondc-website/shared'],
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify('development'),

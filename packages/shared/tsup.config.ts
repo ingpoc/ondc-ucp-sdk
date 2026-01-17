@@ -6,6 +6,7 @@ export default defineConfig({
     'src/types/index.ts',
     'src/crypto/index.ts',
     'src/errors/index.ts',
+    'src/design-system/index.ts',
   ],
   format: ['esm'],
   dts: true,

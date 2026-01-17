@@ -1,4 +1,5 @@
 import type { UCPSessionItem } from '../types';
+import { QUANTITY_CONTROL, DRAMS_CARD, PILL_BUTTON, SPACING, TYPOGRAPHY, DRAMS, disabled as disabledStyle, RADIUS } from '@ondc-agent/shared/design-system';
 
 export interface CartItemProps {
   item: UCPSessionItem;
@@ -7,34 +8,12 @@ export interface CartItemProps {
   disabled?: boolean;
 }
 
-// Extract static styles
 const CONTAINER_STYLE = {
+  ...DRAMS_CARD.base,
   display: 'flex',
-  gap: '16px',
-  padding: '16px',
-  border: '1px solid #ddd',
-  borderRadius: '8px',
-  marginBottom: '12px',
-};
-
-const QUANTITY_BUTTON_STYLE = {
-  width: '32px',
-  height: '32px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  backgroundColor: 'white',
-  cursor: 'pointer',
-  fontSize: '18px',
-};
-
-const REMOVE_BUTTON_STYLE = {
-  padding: '6px 12px',
-  border: '1px solid #dc2626',
-  borderRadius: '4px',
-  backgroundColor: 'white',
-  color: '#dc2626',
-  cursor: 'pointer',
-  fontSize: '0.9em',
+  gap: SPACING.lg,
+  padding: SPACING.lg,
+  marginBottom: SPACING.md,
 };
 
 export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }: CartItemProps) {
@@ -62,7 +41,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
     <div
       style={{
         ...CONTAINER_STYLE,
-        backgroundColor: disabled ? '#f5f5f5' : 'white',
+        ...(disabled ? disabledStyle : {}),
       }}
     >
       {/* Product Image */}
@@ -74,49 +53,49 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
             width: '100px',
             height: '100px',
             objectFit: 'cover',
-            borderRadius: '4px',
+            borderRadius: RADIUS.card,
           }}
         />
       )}
 
       {/* Product Details */}
       <div style={{ flex: 1 }}>
-        <h3 style={{ margin: '0 0 8px 0' }}>{name}</h3>
+        <h3 style={{ ...TYPOGRAPHY.label, margin: `0 0 ${SPACING.sm} 0`, color: DRAMS.textDark }}>{name}</h3>
         {description && (
-          <p style={{ margin: '0 0 8px 0', fontSize: '0.9em', color: '#666' }}>
+          <p style={{ ...TYPOGRAPHY.body, margin: `0 0 ${SPACING.sm} 0`, color: DRAMS.textLight }}>
             {description}
           </p>
         )}
-        <p style={{ margin: '0', fontSize: '0.9em', color: '#666' }}>
+        <p style={{ ...TYPOGRAPHY.body, margin: '0', color: DRAMS.textLight }}>
           Seller: {providerName}
         </p>
-        <p style={{ margin: '8px 0 0 0', fontWeight: 'bold' }}>
+        <p style={{ ...TYPOGRAPHY.label, margin: `${SPACING.sm} 0 0 0`, fontWeight: 600 }}>
           {currency} {priceValue.toFixed(2)} per item
         </p>
       </div>
 
       {/* Quantity Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: SPACING.md }}>
+        <div style={QUANTITY_CONTROL.container}>
           <button
             onClick={handleDecrement}
             disabled={disabled || item.quantity <= 1}
             style={{
-              ...QUANTITY_BUTTON_STYLE,
-              cursor: disabled || item.quantity <= 1 ? 'not-allowed' : 'pointer',
+              ...QUANTITY_CONTROL.button,
+              ...(disabled || item.quantity <= 1 ? disabledStyle : {}),
             }}
           >
             −
           </button>
-          <span style={{ minWidth: '40px', textAlign: 'center', fontWeight: 'bold' }}>
+          <span style={QUANTITY_CONTROL.value}>
             {item.quantity}
           </span>
           <button
             onClick={handleIncrement}
             disabled={disabled}
             style={{
-              ...QUANTITY_BUTTON_STYLE,
-              cursor: disabled ? 'not-allowed' : 'pointer',
+              ...QUANTITY_CONTROL.button,
+              ...(disabled ? disabledStyle : {}),
             }}
           >
             +
@@ -124,7 +103,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
         </div>
 
         {/* Total Price */}
-        <p style={{ margin: '0', fontWeight: 'bold', fontSize: '1.1em' }}>
+        <p style={{ ...TYPOGRAPHY.label, margin: '0', fontWeight: 600, fontSize: '1.1em' }}>
           {currency} {totalPrice.toFixed(2)}
         </p>
 
@@ -133,8 +112,9 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
           onClick={() => onRemove(item.item.id)}
           disabled={disabled}
           style={{
-            ...REMOVE_BUTTON_STYLE,
-            cursor: disabled ? 'not-allowed' : 'pointer',
+            ...PILL_BUTTON.gray,
+            padding: `${SPACING.xs} ${SPACING.md}`,
+            ...(disabled ? disabledStyle : {}),
           }}
         >
           Remove

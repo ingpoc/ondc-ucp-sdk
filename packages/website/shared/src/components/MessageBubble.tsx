@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DRAMS_CARD, SPACING, TYPOGRAPHY, DRAMS, RADIUS, PILL_BUTTON, QUANTITY_CONTROL } from '@ondc-agent/shared/design-system';
 
 export interface SDKMessage {
   type: 'assistant' | 'user' | 'result' | 'system' | 'tool_progress' | 'auth_status';
@@ -55,11 +56,11 @@ function StarRating({ rating }: { rating: number }): React.ReactElement {
   const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
 
   return (
-    <span className="star-rating" style={{ color: '#f39c12' }}>
+    <span className="star-rating" style={{ color: DRAMS.orange }}>
       {'★'.repeat(fullStars)}
       {hasHalf && '☆'}
       {'☆'.repeat(emptyStars)}
-      <span style={{ color: '#666', marginLeft: '0.25rem' }}>({rating})</span>
+      <span style={{ color: DRAMS.textLight, marginLeft: '0.25rem' }}>({rating})</span>
     </span>
   );
 }
@@ -100,17 +101,13 @@ function ProductCardComponent({
     <div
       className="product-card"
       style={{
-        border: '1px solid #e0e0e0',
-        borderRadius: '0.5rem',
-        padding: '0.75rem',
-        backgroundColor: '#fff',
+        ...DRAMS_CARD.base,
         width: '200px',
         flexShrink: 0,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
       }}
     >
       {/* Header with image and wishlist */}
-      <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+      <div style={{ position: 'relative', marginBottom: SPACING.sm }}>
         <img
           src={card.image || 'https://via.placeholder.com/150?text=No+Image'}
           alt={card.name}
@@ -118,23 +115,23 @@ function ProductCardComponent({
             width: '100%',
             height: '120px',
             objectFit: 'cover',
-            borderRadius: '0.25rem',
-            backgroundColor: '#f5f5f5'
+            borderRadius: RADIUS.card,
+            backgroundColor: DRAMS.grayTrack,
           }}
         />
         <button
           onClick={handleWishlist}
           style={{
             position: 'absolute',
-            top: '0.25rem',
-            right: '0.25rem',
+            top: SPACING.xs,
+            right: SPACING.xs,
             background: 'rgba(255,255,255,0.9)',
             border: 'none',
-            borderRadius: '50%',
+            borderRadius: RADIUS.circle,
             width: '28px',
             height: '28px',
             cursor: 'pointer',
-            fontSize: '1rem'
+            fontSize: '1rem',
           }}
         >
           {isWishlisted ? '❤️' : '♡'}
@@ -144,12 +141,11 @@ function ProductCardComponent({
       {/* Product name */}
       <h4
         style={{
-          margin: '0 0 0.25rem 0',
-          fontSize: '0.9rem',
-          fontWeight: '600',
+          ...TYPOGRAPHY.label,
+          margin: `0 0 ${SPACING.xs} 0`,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
         }}
         title={card.name}
       >
@@ -157,22 +153,22 @@ function ProductCardComponent({
       </h4>
 
       {/* Price and rating */}
-      <div style={{ marginBottom: '0.25rem' }}>
-        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#2c3e50' }}>
+      <div style={{ marginBottom: SPACING.xs }}>
+        <span style={{ ...TYPOGRAPHY.label, fontWeight: 600, fontSize: '1rem', color: DRAMS.textDark }}>
           ₹{card.price}
         </span>
       </div>
 
-      <div style={{ marginBottom: '0.25rem', fontSize: '0.8rem' }}>
+      <div style={{ marginBottom: SPACING.xs, ...TYPOGRAPHY.bodySmall }}>
         <StarRating rating={card.rating} />
       </div>
 
       {/* Provider and delivery */}
       <div
         style={{
-          fontSize: '0.75rem',
-          color: '#666',
-          marginBottom: '0.5rem'
+          ...TYPOGRAPHY.bodySmall,
+          color: DRAMS.textLight,
+          marginBottom: SPACING.sm,
         }}
       >
         {card.provider} | {card.delivery}
@@ -182,9 +178,9 @@ function ProductCardComponent({
       {!card.inStock && (
         <div
           style={{
-            fontSize: '0.75rem',
-            color: '#e74c3c',
-            marginBottom: '0.5rem'
+            ...TYPOGRAPHY.bodySmall,
+            color: DRAMS.orange,
+            marginBottom: SPACING.sm,
           }}
         >
           Out of Stock
@@ -197,42 +193,23 @@ function ProductCardComponent({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '0.5rem'
+            gap: SPACING.sm,
+            marginBottom: SPACING.sm,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              border: '1px solid #ddd',
-              borderRadius: '0.25rem'
-            }}
-          >
+          <div style={QUANTITY_CONTROL.container}>
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              style={{
-                border: 'none',
-                background: 'none',
-                padding: '0.25rem 0.5rem',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}
+              style={QUANTITY_CONTROL.button}
             >
               -
             </button>
-            <span style={{ padding: '0 0.5rem', minWidth: '20px', textAlign: 'center' }}>
+            <span style={QUANTITY_CONTROL.value}>
               {quantity}
             </span>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              style={{
-                border: 'none',
-                background: 'none',
-                padding: '0.25rem 0.5rem',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}
+              style={QUANTITY_CONTROL.button}
             >
               +
             </button>
@@ -241,15 +218,9 @@ function ProductCardComponent({
           <button
             onClick={handleAddToCart}
             style={{
+              ...PILL_BUTTON.orange,
               flex: 1,
-              padding: '0.4rem 0.5rem',
-              backgroundColor: '#27ae60',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '0.25rem',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: '500'
+              padding: `${SPACING.xs} ${SPACING.sm}`,
             }}
           >
             🛒 Add
@@ -263,15 +234,15 @@ function ProductCardComponent({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: '0.75rem'
+          ...TYPOGRAPHY.bodySmall,
         }}
       >
         <label
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.25rem',
-            cursor: 'pointer'
+            gap: SPACING.xs,
+            cursor: 'pointer',
           }}
         >
           <input
@@ -288,10 +259,10 @@ function ProductCardComponent({
           style={{
             background: 'none',
             border: 'none',
-            color: '#3498db',
+            color: DRAMS.orange,
             cursor: 'pointer',
-            fontSize: '0.75rem',
-            textDecoration: 'underline'
+            ...TYPOGRAPHY.bodySmall,
+            textDecoration: 'underline',
           }}
         >
           View Details →
@@ -315,16 +286,16 @@ function ProductCardsGrid({
     <div className="product-cards-container">
       {/* Message header */}
       {response.message && (
-        <p style={{ margin: '0 0 0.75rem 0', color: '#333' }}>{response.message}</p>
+        <p style={{ ...TYPOGRAPHY.body, margin: `0 0 ${SPACING.md} 0`, color: DRAMS.textDark }}>{response.message}</p>
       )}
 
       {/* Cards grid */}
       <div
         style={{
           display: 'flex',
-          gap: '0.75rem',
+          gap: SPACING.md,
           overflowX: 'auto',
-          paddingBottom: '0.5rem'
+          paddingBottom: SPACING.sm,
         }}
       >
         {response.cards.map((card) => (
@@ -336,9 +307,9 @@ function ProductCardsGrid({
       {response.totalCount && response.totalCount > response.cards.length && (
         <p
           style={{
-            margin: '0.5rem 0 0 0',
-            fontSize: '0.8rem',
-            color: '#666'
+            ...TYPOGRAPHY.bodySmall,
+            margin: `${SPACING.sm} 0 0 0`,
+            color: DRAMS.textLight,
           }}
         >
           Showing {response.cards.length} of {response.totalCount} results
@@ -436,8 +407,8 @@ export function MessageBubble({
         display: 'flex',
         flexDirection: 'column',
         alignItems: isUser ? 'flex-end' : 'flex-start',
-        marginBottom: '1rem',
-        maxWidth: productCards ? '100%' : '80%'
+        marginBottom: SPACING.lg,
+        maxWidth: productCards ? '100%' : '80%',
       }}
     >
       {isToolProgress && (
@@ -446,9 +417,9 @@ export function MessageBubble({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.875rem',
-            color: '#666'
+            gap: SPACING.sm,
+            ...TYPOGRAPHY.bodySmall,
+            color: DRAMS.textLight,
           }}
         >
           <span
@@ -457,10 +428,10 @@ export function MessageBubble({
               display: 'inline-block',
               width: '1rem',
               height: '1rem',
-              border: '2px solid #f3f3f3',
-              borderTop: '2px solid #3498db',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
+              border: `2px solid ${DRAMS.grayTrack}`,
+              borderTop: `2px solid ${DRAMS.orange}`,
+              borderRadius: RADIUS.circle,
+              animation: 'spin 1s linear infinite',
             }}
           />
           <span>Searching...</span> {/* Don't expose tool names */}
@@ -471,10 +442,9 @@ export function MessageBubble({
         <div
           className="message-content product-cards"
           style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '0.5rem',
-            backgroundColor: '#f9f9f9',
-            width: '100%'
+            ...DRAMS_CARD.base,
+            padding: `${SPACING.md} ${SPACING.lg}`,
+            width: '100%',
           }}
         >
           <ProductCardsGrid response={productCards} onAction={onCardAction} />
@@ -483,12 +453,12 @@ export function MessageBubble({
         <div
           className="message-content"
           style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '0.5rem',
-            backgroundColor: isUser ? '#3498db' : '#f5f5f5',
-            color: isUser ? '#fff' : '#333',
+            ...DRAMS_CARD.base,
+            padding: `${SPACING.md} ${SPACING.lg}`,
+            backgroundColor: isUser ? DRAMS.orange : DRAMS.grayTrack,
+            color: isUser ? '#fff' : DRAMS.textDark,
             wordBreak: 'break-word',
-            whiteSpace: 'pre-wrap'
+            whiteSpace: 'pre-wrap',
           }}
         >
           {content}

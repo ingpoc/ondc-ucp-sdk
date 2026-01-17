@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { UCPPayment } from '@ondc-website/shared';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@ondc-agent/shared/design-system';
 
 export type PaymentMethod = UCPPayment['type'];
 
@@ -38,38 +38,38 @@ const PAYMENT_METHODS = [
 
 const CONTAINER_STYLE = {
   backgroundColor: 'white',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  padding: '20px',
-  marginBottom: '20px',
+  border: `1px solid ${COLORS.border}`,
+  borderRadius: RADIUS.lg,
+  padding: SPACING.xl,
+  marginBottom: SPACING.xl,
 };
 
 const HEADER_STYLE = {
-  fontSize: '18px',
-  fontWeight: '600',
-  color: '#1e293b',
-  margin: '0 0 16px 0',
+  fontSize: TYPOGRAPHY.h4.fontSize,
+  fontWeight: TYPOGRAPHY.h4.fontWeight,
+  color: COLORS.textPrimary,
+  margin: `0 0 ${SPACING.lg} 0`,
 };
 
 const OPTION_STYLE = {
   display: 'flex',
   alignItems: 'center',
-  padding: '14px 16px',
-  border: '2px solid #e2e8f0',
-  borderRadius: '8px',
+  padding: `${SPACING.md} ${SPACING.lg}`,
+  border: `2px solid ${COLORS.border}`,
+  borderRadius: RADIUS.lg,
   cursor: 'pointer',
-  transition: 'all 0.2s',
+  transition: 'all 0.2s ease',
   backgroundColor: 'white',
 };
 
 const OPTION_HOVER_STYLE = {
-  borderColor: '#cbd5e1',
-  backgroundColor: '#f8fafc',
+  borderColor: COLORS.border,
+  backgroundColor: COLORS.bgHover,
 };
 
 const OPTION_SELECTED_STYLE = {
-  border: '2px solid #16a34a',
-  backgroundColor: '#f0fdf4',
+  border: `2px solid ${COLORS.success}`,
+  backgroundColor: COLORS.bgSubtle,
 };
 
 const RADIO_STYLE = {
@@ -81,7 +81,7 @@ const RADIO_STYLE = {
 
 const ICON_STYLE = {
   fontSize: '24px',
-  marginRight: '12px',
+  marginRight: SPACING.md,
 };
 
 const LABEL_STYLE = {
@@ -89,19 +89,19 @@ const LABEL_STYLE = {
 };
 
 const LABEL_TITLE_STYLE = {
-  fontWeight: '600',
-  fontSize: '15px',
-  color: '#1e293b',
-  marginBottom: '2px',
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  color: COLORS.textPrimary,
+  marginBottom: SPACING.xs,
 };
 
 const LABEL_DESC_STYLE = {
-  fontSize: '13px',
-  color: '#64748b',
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  color: COLORS.textSecondary,
 };
 
 const CHECKMARK_STYLE = {
-  color: '#16a34a',
+  color: COLORS.success,
   fontSize: '20px',
 };
 
@@ -198,7 +198,7 @@ const FORM_LABEL_STYLE = {
 const FORM_INPUT_STYLE = {
   width: '100%',
   padding: '10px 12px',
-  border: '1px solid #cbd5e1',
+  border: `1px solid ${COLORS.border}`,
   borderRadius: '6px',
   fontSize: '14px',
   transition: 'border-color 0.2s, box-shadow 0.2s',

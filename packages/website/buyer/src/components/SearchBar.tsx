@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { PILL_BUTTON, SELECT_BOX, TEXT_BOX, SPACING } from '@ondc-agent/shared/design-system';
 
 const CATEGORY_OPTIONS = [
   { value: 'grocery', label: 'Grocery' },
@@ -9,61 +10,20 @@ const CATEGORY_OPTIONS = [
 
 const FORM_STYLE = {
   display: 'flex',
-  gap: '12px',
+  gap: SPACING.md,
   alignItems: 'center',
   flexWrap: 'wrap' as const,
 };
 
-const SELECT_STYLE = {
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: 'white',
-  fontSize: '14px',
-  cursor: 'pointer',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
+const SELECT_BASE = {
+  ...SELECT_BOX.base,
+  minWidth: '120px',
 };
 
-const SELECT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-};
-
-const INPUT_STYLE = {
+const INPUT_BASE = {
+  ...TEXT_BOX.track,
   flex: '1',
   minWidth: '200px',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  fontSize: '14px',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-};
-
-const INPUT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-};
-
-const BUTTON_STYLE = {
-  padding: '10px 20px',
-  backgroundColor: '#1e293b',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '14px',
-  fontWeight: '500',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s, transform 0.1s',
-};
-
-const BUTTON_HOVER_STYLE = {
-  backgroundColor: '#334155',
-};
-
-const BUTTON_ACTIVE_STYLE = {
-  transform: 'scale(0.98)',
 };
 
 export interface SearchBarProps {
@@ -79,13 +39,19 @@ export function SearchBar({
 }: SearchBarProps): JSX.Element {
   const [category, setCategory] = useState(defaultCategory);
   const [query, setQuery] = useState(defaultQuery);
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
-  const [isButtonActive, setIsButtonActive] = useState(false);
 
   function handleSubmit(e: FormEvent): void {
     e.preventDefault();
     onSearch(category, query);
   }
+
+  const handleFocus = (e: React.FocusEvent<HTMLSelectElement | HTMLInputElement>) => {
+    Object.assign(e.target.style, SELECT_BOX.focus);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLSelectElement | HTMLInputElement>) => {
+    Object.assign(e.target.style, TEXT_BOX.track);
+  };
 
   return (
     <form onSubmit={handleSubmit} style={FORM_STYLE}>
@@ -96,9 +62,9 @@ export function SearchBar({
         id="category-select"
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        style={SELECT_STYLE}
-        onFocus={(e) => Object.assign(e.target.style, SELECT_FOCUS_STYLE)}
-        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' })}
+        style={SELECT_BASE}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       >
         {CATEGORY_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
@@ -116,23 +82,12 @@ export function SearchBar({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search products..."
-        style={INPUT_STYLE}
-        onFocus={(e) => Object.assign(e.target.style, INPUT_FOCUS_STYLE)}
-        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' })}
+        style={INPUT_BASE}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
 
-      <button
-        type="submit"
-        style={{
-          ...BUTTON_STYLE,
-          ...(isButtonHovered ? BUTTON_HOVER_STYLE : {}),
-          ...(isButtonActive ? BUTTON_ACTIVE_STYLE : {}),
-        }}
-        onMouseEnter={() => setIsButtonHovered(true)}
-        onMouseLeave={() => setIsButtonHovered(false)}
-        onMouseDown={() => setIsButtonActive(true)}
-        onMouseUp={() => setIsButtonActive(false)}
-      >
+      <button type="submit" style={PILL_BUTTON.orange}>
         Search
       </button>
 

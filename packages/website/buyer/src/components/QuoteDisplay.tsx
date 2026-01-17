@@ -1,4 +1,5 @@
 import type { UCPQuote } from '@ondc-website/shared';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@ondc-agent/shared/design-system';
 
 const BREAKUP_TITLES: Record<string, string> = {
   item: 'Items',
@@ -11,70 +12,70 @@ const BREAKUP_TITLES: Record<string, string> = {
 
 const CONTAINER_STYLE = {
   backgroundColor: 'white',
-  border: '1px solid #e5e7eb',
+  border: `1px solid ${COLORS.border}`,
   borderRadius: '8px',
-  padding: '20px',
+  padding: SPACING.xl,
 };
 
 const VALIDITY_WARNING_STYLE = {
-  padding: '8px 12px',
+  padding: `${SPACING.md} ${SPACING.lg}`,
   backgroundColor: '#fef3c7',
-  border: '1px solid #fcd34d',
-  borderRadius: '4px',
+  border: `1px solid #fcd34d`,
+  borderRadius: RADIUS.sm,
   color: '#92400e',
-  fontSize: '0.9em',
-  marginBottom: '16px',
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  marginBottom: SPACING.lg,
 };
 
 const GROUP_HEADER_STYLE = {
-  fontWeight: 'bold',
-  fontSize: '0.9em',
-  color: '#666',
-  marginBottom: '4px',
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  color: COLORS.textSecondary,
+  marginBottom: SPACING.xs,
   textTransform: 'uppercase' as const,
 };
 
 const BREAKUP_ITEM_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
-  padding: '6px 0',
-  borderBottom: '1px solid #f3f4f6',
-  fontSize: '0.95em',
+  padding: `${SPACING.xs} 0`,
+  borderBottom: `1px solid ${COLORS.borderSubtle}`,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
 };
 
 const TOTALS_SECTION_STYLE = {
-  borderTop: '2px solid #e5e7eb',
-  paddingTop: '16px',
-  marginTop: '16px',
+  borderTop: `2px solid ${COLORS.border}`,
+  paddingTop: SPACING.lg,
+  marginTop: SPACING.lg,
 };
 
 const TOTAL_ROW_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
-  marginBottom: '8px',
-  fontSize: '0.95em',
+  marginBottom: SPACING.md,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
 };
 
 const FINAL_TOTAL_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  paddingTop: '12px',
-  borderTop: '1px solid #e5e7eb',
-  fontSize: '1.2em',
-  fontWeight: 'bold',
+  paddingTop: SPACING.md,
+  borderTop: `2px solid ${COLORS.border}`,
+  fontSize: TYPOGRAPHY.h4.fontSize,
+  fontWeight: TYPOGRAPHY.h4.fontWeight,
 };
 
 const SAVINGS_BADGE_STYLE = {
-  marginTop: '12px',
-  padding: '8px 12px',
-  backgroundColor: '#d1fae5',
-  border: '1px solid #a7f3d0',
-  borderRadius: '4px',
-  color: '#065f46',
-  fontSize: '0.9em',
+  marginTop: SPACING.md,
+  padding: `${SPACING.md} ${SPACING.lg}`,
+  backgroundColor: COLORS.bgSubtle,
+  border: `1px solid ${COLORS.border}`,
+  borderRadius: RADIUS.sm,
+  color: COLORS.textSecondary,
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
   textAlign: 'center' as const,
-  fontWeight: 'bold',
+  fontWeight: TYPOGRAPHY.label.fontWeight,
 };
 
 export interface QuoteDisplayProps {
@@ -138,29 +139,29 @@ export function QuoteDisplay({ quote, currency }: QuoteDisplayProps): JSX.Elemen
       <div style={TOTALS_SECTION_STYLE}>
         {quote.subtotal && (
           <div style={TOTAL_ROW_STYLE}>
-            <span style={{ color: '#666' }}>Subtotal</span>
+            <span style={{ color: COLORS.textSecondary }}>Subtotal</span>
             <span>{currency} {formatPrice(quote.subtotal)}</span>
           </div>
         )}
 
         {quote.deliveryCost && (
           <div style={TOTAL_ROW_STYLE}>
-            <span style={{ color: '#666' }}>Delivery</span>
+            <span style={{ color: COLORS.textSecondary }}>Delivery</span>
             <span>{currency} {formatPrice(quote.deliveryCost)}</span>
           </div>
         )}
 
         {quote.tax && (
           <div style={TOTAL_ROW_STYLE}>
-            <span style={{ color: '#666' }}>Tax</span>
+            <span style={{ color: COLORS.textSecondary }}>Tax</span>
             <span>{currency} {formatPrice(quote.tax)}</span>
           </div>
         )}
 
         {hasDiscount && (
           <div style={TOTAL_ROW_STYLE}>
-            <span style={{ color: '#16a34a' }}>Discount</span>
-            <span style={{ color: '#16a34a' }}>
+            <span style={{ color: COLORS.success }}>Discount</span>
+            <span style={{ color: COLORS.success }}>
               -{currency} {formatPrice(quote.discount)}
             </span>
           </div>
@@ -168,7 +169,7 @@ export function QuoteDisplay({ quote, currency }: QuoteDisplayProps): JSX.Elemen
 
         <div style={FINAL_TOTAL_STYLE}>
           <span>Total</span>
-          <span style={{ color: '#16a34a', fontSize: '1.4em' }}>
+          <span style={{ color: COLORS.success, fontSize: TYPOGRAPHY.bodySmall.fontSize }}>
             {currency} {formatPrice(quote.total)}
           </span>
         </div>

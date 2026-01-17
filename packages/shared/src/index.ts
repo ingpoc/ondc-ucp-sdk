@@ -7,3 +7,4 @@ export * from './translate';
 export * from './http';
 export * from './errors';
 export * from './scoring';
+export * from './design-system';
