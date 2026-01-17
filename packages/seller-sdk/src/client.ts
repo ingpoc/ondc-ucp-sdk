@@ -18,6 +18,46 @@ import type {
 import { ucpToBecknIntent } from '@ondc-agent/shared';
 import type { UCPSearchQuery } from '@ondc-agent/shared';
 
+const DEFAULT_CONFIG = {
+  domain: 'ONDC:RET10',
+  country: 'IND',
+  city: 'std:080',
+  coreVersion: '1.2.0',
+  ttl: 'PT30S',
+} as const;
+
+function generateUniqueId(prefix: 'txn' | 'msg'): string {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+}
+
+function mapItemsToOrderItems(items: Array<{
+  id: string;
+  quantity?: number;
+  fulfillmentId?: string;
+}>) {
+  return items.map((item) => ({
+    id: item.id,
+    quantity: item.quantity ? { count: item.quantity } : undefined,
+    fulfillment_id: item.fulfillmentId,
+  }));
+}
+
+function mapBillingInfo(billing: {
+  name: string;
+  phone: string;
+  email: string;
+  taxId?: string;
+  address?: string;
+}) {
+  return {
+    name: billing.name,
+    phone: billing.phone,
+    email: billing.email,
+    tax_number: billing.taxId,
+    address: billing.address,
+  };
+}
+
 /**
  * Seller client configuration
  */
@@ -178,9 +218,9 @@ export class SellerClient {
   constructor(config: SellerClientConfig) {
     this.subscriberId = config.subscriberId;
     this.bapUri = config.baseUrl;
-    this.domain = config.domain ?? 'ONDC:RET10';
-    this.country = config.country ?? 'IND';
-    this.city = config.city ?? 'std:080';
+    this.domain = config.domain ?? DEFAULT_CONFIG.domain;
+    this.country = config.country ?? DEFAULT_CONFIG.country;
+    this.city = config.city ?? DEFAULT_CONFIG.city;
 
     const ondcConfig: ONDCClientConfig = {
       baseURL: config.baseUrl,
@@ -193,36 +233,19 @@ export class SellerClient {
     this.client = new ONDCClient(ondcConfig);
   }
 
-  /**
-   * Generate unique transaction ID
-   */
-  private generateTransactionId(): string {
-    return `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  }
-
-  /**
-   * Generate unique message ID
-   */
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  }
-
-  /**
-   * Build Beckn context for search request
-   */
   private buildContext(action: 'search' | 'select' | 'init' | 'confirm'): BecknContext {
     return {
       domain: this.domain,
       action,
       country: this.country,
       city: this.city,
-      core_version: '1.2.0',
+      core_version: DEFAULT_CONFIG.coreVersion,
       bap_id: this.subscriberId,
       bap_uri: this.bapUri,
-      transaction_id: this.generateTransactionId(),
-      message_id: this.generateMessageId(),
+      transaction_id: generateUniqueId('txn'),
+      message_id: generateUniqueId('msg'),
       timestamp: new Date().toISOString(),
-      ttl: 'PT30S',
+      ttl: DEFAULT_CONFIG.ttl,
     };
   }
 
@@ -248,21 +271,14 @@ export class SellerClient {
    * ```
    */
   async search(query: UCPSearchQuery): Promise<SearchResult> {
-    // Build Beckn context
     const context = this.buildContext('search');
-
-    // Translate UCP query to Beckn intent
     const intent = ucpToBecknIntent(query);
 
-    // Build search request
     const searchRequest: BecknSearchRequest = {
       context,
-      message: {
-        intent,
-      },
+      message: { intent },
     };
 
-    // Send request to ONDC gateway
     const response = await this.client.post<BecknOnSearchResponse>('/search', searchRequest);
 
     return {
@@ -289,24 +305,14 @@ export class SellerClient {
    * ```
    */
   async select(params: SelectParams): Promise<SelectResult> {
-    // Build Beckn context for select
     const context = this.buildContext('select');
+    const orderItems = mapItemsToOrderItems(params.items);
 
-    // Build order items
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : undefined,
-      fulfillment_id: item.fulfillmentId,
-    }));
-
-    // Build select request
     const selectRequest: BecknSelectRequest = {
       context,
       message: {
         order: {
-          provider: {
-            id: params.providerId,
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           fulfillments: params.fulfillmentId
             ? [{ id: params.fulfillmentId }]
@@ -315,7 +321,6 @@ export class SellerClient {
       },
     };
 
-    // Send request to ONDC gateway
     const response = await this.client.post<BecknOnSelectResponse>('/select', selectRequest);
 
     return {
@@ -350,33 +355,15 @@ export class SellerClient {
    * ```
    */
   async init(params: InitParams): Promise<InitResult> {
-    // Build Beckn context for init
     const context = this.buildContext('init');
+    const orderItems = mapItemsToOrderItems(params.items);
+    const billing = mapBillingInfo(params.billing);
 
-    // Build order items
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : undefined,
-      fulfillment_id: item.fulfillmentId,
-    }));
-
-    // Build billing object
-    const billing = {
-      name: params.billing.name,
-      phone: params.billing.phone,
-      email: params.billing.email,
-      tax_number: params.billing.taxId,
-      address: params.billing.address,
-    };
-
-    // Build init request
     const initRequest: BecknInitRequest = {
       context,
       message: {
         order: {
-          provider: {
-            id: params.providerId,
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           billing,
           payment: params.payment
@@ -392,7 +379,6 @@ export class SellerClient {
       },
     };
 
-    // Send request to ONDC gateway
     const response = await this.client.post<BecknOnInitResponse>('/init', initRequest);
 
     return {
@@ -428,34 +414,16 @@ export class SellerClient {
    * ```
    */
   async confirm(params: ConfirmParams): Promise<ConfirmResult> {
-    // Build Beckn context for confirm
     const context = this.buildContext('confirm');
+    const orderItems = mapItemsToOrderItems(params.items);
+    const billing = mapBillingInfo(params.billing);
 
-    // Build order items
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : undefined,
-      fulfillment_id: item.fulfillmentId,
-    }));
-
-    // Build billing object
-    const billing = {
-      name: params.billing.name,
-      phone: params.billing.phone,
-      email: params.billing.email,
-      tax_number: params.billing.taxId,
-      address: params.billing.address,
-    };
-
-    // Build confirm request
     const confirmRequest: BecknConfirmRequest = {
       context,
       message: {
         order: {
           id: params.orderId,
-          provider: {
-            id: params.providerId,
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           billing,
           payment: params.payment
@@ -471,7 +439,6 @@ export class SellerClient {
       },
     };
 
-    // Send request to ONDC gateway
     const response = await this.client.post<BecknOnConfirmResponse>('/confirm', confirmRequest);
 
     return {
