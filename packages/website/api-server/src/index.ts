@@ -1,21 +1,26 @@
 import express, { type Express, type Request, type Response } from 'express';
 import cors from 'cors';
-// Direct SDK imports - no MCP (POC website, not part of SDK)
-// Avoid importing from main @ondc-agent/shared to prevent libsodium dependency issues
 import type { BecknOnSearchResponse, UCPSearchPreferences, UCPLocation, BecknItem, BecknCatalog } from '@ondc-agent/shared';
 
-// Import MockGateway for realistic ONDC simulation
 import { MockGateway, type MockGatewayConfig } from '@ondc-agent/gateway';
-
-// Import StateStore and session types for cart management
 import { StateStore } from '@ondc-agent/gateway';
 import type { UCPSession, UCPSessionItem, UCPSessionStatus, UCPQuote } from '@ondc-agent/shared';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-agent/shared';
 
-// Agent service for buyer/seller AI assistants
 import { executeBuyerAgent, executeSellerAgent, messageToSSE } from './agent-service.js';
 
-// Local implementations of SDK functions to avoid libsodium dependency
+const DEFAULT_TIMEOUT = 30000;
+const CART_TTL = 30 * 60 * 1000; // 30 minutes
+const ORDERS_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const DEFAULT_TAX_RATE = 0.18;
+const FREE_DELIVERY_THRESHOLD = 500;
+const STANDARD_DELIVERY_COST = 50;
+
+const DEFAULT_CONFIG: MockGatewayConfig = {
+  callbackDelay: Math.floor(Math.random() * 2000),
+  autoCallback: true,
+};
+
 interface UCPCatalog {
   items: Array<BecknItem & { _provider?: string }>;
   totalCount?: number;
@@ -43,8 +48,7 @@ function becknToUcpCatalog(response: BecknOnSearchResponse): UCPCatalog {
   return { items, totalCount: items.length };
 }
 
-function scoreAndSortItems(items: BecknItem[]) {
-  // Simple scoring: just return items sorted by price (low to high)
+function scoreAndSortItems(items: BecknItem[]): BecknItem[] {
   return [...items].sort((a, b) => {
     const priceA = typeof a.price?.value === 'string' ? parseFloat(a.price.value) : 0;
     const priceB = typeof b.price?.value === 'string' ? parseFloat(b.price.value) : 0;
@@ -55,26 +59,15 @@ function scoreAndSortItems(items: BecknItem[]) {
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
-// Store pending callbacks for async ONDC responses
 const pendingCallbacks = new Map<string, (data: BecknOnSearchResponse) => void>();
 
-// Create MockGateway instance with realistic behavior
-// Configure: 0-2000ms delay, 10-50 items for realistic testing
-const mockGatewayConfig: MockGatewayConfig = {
-  callbackDelay: Math.floor(Math.random() * 2000), // 0-2000ms delay
-  autoCallback: true,
-};
+const mockGateway = new MockGateway(DEFAULT_CONFIG);
 
-const mockGateway = new MockGateway(mockGatewayConfig);
-
-// Start MockGateway when api-server starts
 let mockGatewayPort: number | null = null;
 
-// Create StateStore for cart sessions (TTL: 30 minutes)
-const cartStore = new StateStore({ ttl: 30 * 60 * 1000 });
+const cartStore = new StateStore({ ttl: CART_TTL });
 
-// Create StateStore for orders (TTL: 24 hours)
-const ordersStore = new StateStore({ ttl: 24 * 60 * 60 * 1000 });
+const ordersStore = new StateStore({ ttl: ORDERS_TTL });
 
 // Get catalog from MockGateway (updated dynamically)
 const getMockCatalog = (): BecknCatalog => {
@@ -432,7 +425,6 @@ function getOrCreateSession(sessionId: string): UCPSession {
     return existing.data as UCPSession;
   }
 
-  // Create new session
   const newSession: UCPSession = {
     id: sessionId,
     status: 'created' as UCPSessionStatus,
@@ -446,7 +438,7 @@ function getOrCreateSession(sessionId: string): UCPSession {
     },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min TTL
+    expiresAt: new Date(Date.now() + CART_TTL).toISOString(),
   };
 
   cartStore.set(sessionId, {
@@ -700,7 +692,6 @@ function getItemName(item: any): string {
 function calculateQuote(session: UCPSession): UCPQuote {
   let subtotal = 0;
 
-  // Calculate subtotal from cart items
   for (const sessionItem of session.items) {
     const itemPrice = sessionItem.item.price?.value
       ? parseFloat(sessionItem.item.price.value)
@@ -708,14 +699,8 @@ function calculateQuote(session: UCPSession): UCPQuote {
     subtotal += itemPrice * sessionItem.quantity;
   }
 
-  // Calculate delivery cost (simplified - in real scenario, from provider)
-  const deliveryCost = subtotal >= 500 ? 0 : 50; // Free delivery for orders >= 500
-
-  // Calculate tax (18% GST)
-  const taxRate = 0.18;
-  const tax = subtotal * taxRate;
-
-  // Calculate total
+  const deliveryCost = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : STANDARD_DELIVERY_COST;
+  const tax = subtotal * DEFAULT_TAX_RATE;
   const total = subtotal + deliveryCost + tax;
 
   const quote: UCPQuote = {
@@ -768,7 +753,7 @@ function calculateQuote(session: UCPSession): UCPQuote {
         },
       },
     ],
-    ttl: 'PT10M', // 10 minute validity
+    ttl: 'PT10M',
   };
 
   return quote;
@@ -1531,7 +1516,7 @@ if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
       console.log(`MockGateway running on port ${mockGatewayPort} for realistic testing`);
 
       // Log MockGateway configuration
-      console.log(`MockGateway config: delay=${mockGatewayConfig.callbackDelay}ms, autoCallback=${mockGatewayConfig.autoCallback}`);
+      console.log(`MockGateway config: delay=${DEFAULT_CONFIG.callbackDelay}ms, autoCallback=${DEFAULT_CONFIG.autoCallback}`);
     } catch (error) {
       console.error('Failed to start MockGateway:', error);
     }
