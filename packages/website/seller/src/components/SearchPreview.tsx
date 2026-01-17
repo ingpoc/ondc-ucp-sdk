@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ProductCard } from '@ondc-website/shared/components';
 
 export interface SearchPreviewProps {
@@ -7,21 +7,41 @@ export interface SearchPreviewProps {
   onSearch?: (query: string) => void;
 }
 
+// Extract static styles
+const CONTAINER_STYLE = {
+  marginTop: '20px',
+  padding: '15px',
+  background: '#f8f9fa',
+  borderRadius: '8px',
+};
+
+const BUTTON_STYLE = {
+  padding: '8px 16px',
+  color: 'white',
+  border: 'none' as const,
+  borderRadius: '4px',
+  cursor: 'pointer' as const,
+};
+
+const GRID_STYLE = {
+  display: 'grid' as const,
+  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' as const,
+  gap: '15px',
+};
+
 export function SearchPreview({ query, category, onSearch }: SearchPreviewProps) {
   const [previewResults, setPreviewResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const handlePreviewSearch = async () => {
+  const handlePreviewSearch = useCallback(async () => {
+    if (!query) return;
+
     setLoading(true);
     setShowPreview(true);
 
     try {
-      const params = new URLSearchParams({
-        category,
-        query,
-      });
-
+      const params = new URLSearchParams({ category, query });
       const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
       setPreviewResults(data.items || []);
@@ -30,10 +50,10 @@ export function SearchPreview({ query, category, onSearch }: SearchPreviewProps)
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, query]);
 
   return (
-    <div style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
+    <div style={CONTAINER_STYLE}>
       <h3 style={{ marginBottom: '10px' }}>Search Preview</h3>
       <p style={{ color: '#666', marginBottom: '10px' }}>
         See how your products appear in buyer search results
@@ -43,11 +63,8 @@ export function SearchPreview({ query, category, onSearch }: SearchPreviewProps)
         onClick={handlePreviewSearch}
         disabled={loading || !query}
         style={{
-          padding: '8px 16px',
+          ...BUTTON_STYLE,
           backgroundColor: loading ? '#6c757d' : '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
           cursor: loading || !query ? 'not-allowed' : 'pointer',
         }}
       >
@@ -60,13 +77,7 @@ export function SearchPreview({ query, category, onSearch }: SearchPreviewProps)
           {previewResults.length === 0 ? (
             <p style={{ color: '#999', fontStyle: 'italic' }}>No results found</p>
           ) : (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                gap: '15px',
-              }}
-            >
+            <div style={GRID_STYLE}>
               {previewResults.slice(0, 3).map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}

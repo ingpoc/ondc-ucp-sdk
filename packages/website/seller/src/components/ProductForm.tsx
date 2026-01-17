@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { BecknItem } from '@ondc-website/shared';
 
 export interface ProductFormData {
@@ -17,6 +17,30 @@ export interface ProductFormProps {
   loading?: boolean;
 }
 
+// Extract static styles outside component
+const INPUT_STYLE = {
+  width: '100%',
+  padding: '8px',
+  borderRadius: '4px',
+  border: '1px solid #ccc',
+};
+
+const BUTTON_STYLE = {
+  padding: '10px 20px',
+  color: 'white',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer' as const,
+};
+
+const LABEL_STYLE = {
+  display: 'block' as const,
+  marginBottom: '5px',
+  fontWeight: 'bold' as const,
+};
+
+const CONTAINER_STYLE = { marginBottom: '15px' };
+
 export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     id: product?.id || `item-${Date.now()}`,
@@ -27,6 +51,12 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
     categoryId: product?.category_id || 'cat-1',
   });
 
+  const handleInputChange = (field: keyof ProductFormData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(formData);
@@ -34,59 +64,59 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
 
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: '600px' }}>
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="id" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      <div style={CONTAINER_STYLE}>
+        <label htmlFor="id" style={LABEL_STYLE}>
           Product ID:
         </label>
         <input
           id="id"
           type="text"
           value={formData.id}
-          onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+          onChange={handleInputChange('id')}
           disabled={!!product}
           required
-          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={INPUT_STYLE}
         />
       </div>
 
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="name" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      <div style={CONTAINER_STYLE}>
+        <label htmlFor="name" style={LABEL_STYLE}>
           Product Name: *
         </label>
         <input
           id="name"
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={handleInputChange('name')}
           required
           placeholder="e.g., Organic Mango"
-          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={INPUT_STYLE}
         />
       </div>
 
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="description" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      <div style={CONTAINER_STYLE}>
+        <label htmlFor="description" style={LABEL_STYLE}>
           Description:
         </label>
         <textarea
           id="description"
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={handleInputChange('description')}
           rows={3}
           placeholder="Short product description"
-          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={INPUT_STYLE}
         />
       </div>
 
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="categoryId" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      <div style={CONTAINER_STYLE}>
+        <label htmlFor="categoryId" style={LABEL_STYLE}>
           Category:
         </label>
         <select
           id="categoryId"
           value={formData.categoryId}
-          onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          onChange={handleInputChange('categoryId')}
+          style={INPUT_STYLE}
         >
           <option value="cat-1">Grocery</option>
           <option value="cat-2">Restaurant</option>
@@ -95,8 +125,8 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         </select>
       </div>
 
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="price" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      <div style={CONTAINER_STYLE}>
+        <label htmlFor="price" style={LABEL_STYLE}>
           Price: *
         </label>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -104,17 +134,17 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
             id="price"
             type="number"
             value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            onChange={handleInputChange('price')}
             required
             min="0"
             step="0.01"
             placeholder="100"
-            style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ flex: 1, ...INPUT_STYLE }}
           />
           <select
             value={formData.currency}
-            onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            onChange={handleInputChange('currency')}
+            style={INPUT_STYLE}
           >
             <option value="INR">INR</option>
             <option value="USD">USD</option>
@@ -128,11 +158,8 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           type="submit"
           disabled={loading}
           style={{
-            padding: '10px 20px',
+            ...BUTTON_STYLE,
             backgroundColor: loading ? '#6c757d' : '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
@@ -142,12 +169,8 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           type="button"
           onClick={onCancel}
           style={{
-            padding: '10px 20px',
+            ...BUTTON_STYLE,
             backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
           }}
         >
           Cancel

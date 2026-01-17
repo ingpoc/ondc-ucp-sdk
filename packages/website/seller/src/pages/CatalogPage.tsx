@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@ondc-website/shared/hooks';
 import { InventoryTable } from '../components';
@@ -12,20 +12,25 @@ export function CatalogPage() {
     execute();
   }, [execute]);
 
-  const handleEdit = (item: BecknItem) => {
+  const handleEdit = useCallback((item: BecknItem) => {
     navigate(`/catalog/${item.id}`);
-  };
+  }, [navigate]);
 
-  const handleDelete = async (itemId: string) => {
+  const handleDelete = useCallback(async (itemId: string) => {
     try {
-      await fetch(`/api/catalog/products/${itemId}`, {
+      const response = await fetch(`/api/catalog/products/${itemId}`, {
         method: 'DELETE',
       });
-      execute(); // Refresh catalog
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      execute();
     } catch (err) {
       alert('Failed to delete product');
     }
-  };
+  }, [execute]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -37,12 +42,16 @@ export function CatalogPage() {
 
   const items = data?.['bpp/providers']?.[0]?.items ?? [];
 
+  const handleAddProduct = useCallback(() => {
+    navigate('/catalog/new');
+  }, [navigate]);
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2>Product Catalog ({items.length})</h2>
         <button
-          onClick={() => navigate('/catalog/new')}
+          onClick={handleAddProduct}
           style={{
             padding: '10px 20px',
             backgroundColor: '#28a745',

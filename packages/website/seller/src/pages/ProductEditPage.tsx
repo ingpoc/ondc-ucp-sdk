@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '@ondc-website/shared/hooks';
 import { ProductForm } from '../components';
@@ -15,13 +15,15 @@ export function ProductEditPage() {
   );
 
   useEffect(() => {
-    execute();
-  }, [execute]);
+    if (!isNew) {
+      execute();
+    }
+  }, [execute, isNew]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (data: ProductFormData) => {
+  const handleSubmit = useCallback(async (data: ProductFormData) => {
     setLoading(true);
     setError('');
 
@@ -59,7 +61,11 @@ export function ProductEditPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isNew, id, navigate]);
+
+  const handleCancel = useCallback(() => {
+    navigate('/catalog');
+  }, [navigate]);
 
   return (
     <div style={{ maxWidth: '600px' }}>
@@ -82,7 +88,7 @@ export function ProductEditPage() {
       <ProductForm
         product={existingProduct ?? undefined}
         onSubmit={handleSubmit}
-        onCancel={() => navigate('/catalog')}
+        onCancel={handleCancel}
         loading={loading}
       />
     </div>

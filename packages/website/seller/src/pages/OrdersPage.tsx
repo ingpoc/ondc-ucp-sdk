@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
 
 const API_BASE = 'http://localhost:3001';
@@ -37,6 +37,26 @@ const getStatusColor = (status: UCPOrderStatus): string => {
 };
 
 type StatusFilter = 'all' | 'pending' | 'accepted' | 'dispatched' | 'completed' | 'cancelled';
+
+// Extract filter logic to reuse
+const filterOrders = (orders: UCPOrder[], filter: StatusFilter): UCPOrder[] => {
+  if (filter === 'all') return orders;
+
+  const filterMap: Record<StatusFilter, (status: UCPOrderStatus) => boolean> = {
+    all: () => true,
+    pending: isPendingStatus,
+    accepted: isAcceptedStatus,
+    dispatched: isDispatchedStatus,
+    completed: isCompletedStatus,
+    cancelled: isCancelledStatus,
+  };
+
+  return orders.filter((order) => filterMap[filter](order.status));
+};
+
+const countOrdersByFilter = (orders: UCPOrder[], filter: StatusFilter): number => {
+  return filterOrders(orders, filter).length;
+};
 
 interface OrderCardProps {
   order: UCPOrder;
@@ -205,8 +225,7 @@ export function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
 
-  // Load orders
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -221,14 +240,13 @@ export function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [loadOrders]);
 
-  // Handle accept order
-  const handleAccept = async (orderId: string) => {
+  const handleAccept = useCallback(async (orderId: string) => {
     setProcessing(orderId);
     try {
       const response = await fetch(`${API_BASE}/api/seller/orders/${orderId}/accept`, {
@@ -243,10 +261,9 @@ export function OrdersPage() {
     } finally {
       setProcessing(null);
     }
-  };
+  }, [loadOrders]);
 
-  // Handle reject order
-  const handleReject = async (orderId: string) => {
+  const handleReject = useCallback(async (orderId: string) => {
     if (!confirm('Are you sure you want to reject this order?')) {
       return;
     }
@@ -267,23 +284,13 @@ export function OrdersPage() {
     } finally {
       setProcessing(null);
     }
-  };
+  }, [loadOrders]);
 
-  // Handle view details
-  const handleViewDetails = (orderId: string) => {
+  const handleViewDetails = useCallback((orderId: string) => {
     window.location.href = `/orders/${orderId}`;
-  };
+  }, []);
 
-  // Filter orders based on selected status
-  const filteredOrders = orders.filter((order) => {
-    if (filter === 'all') return true;
-    if (filter === 'pending') return isPendingStatus(order.status);
-    if (filter === 'accepted') return isAcceptedStatus(order.status);
-    if (filter === 'dispatched') return isDispatchedStatus(order.status);
-    if (filter === 'completed') return isCompletedStatus(order.status);
-    if (filter === 'cancelled') return isCancelledStatus(order.status);
-    return true;
-  });
+  const filteredOrders = useMemo(() => filterOrders(orders, filter), [orders, filter]);
 
   if (loading) {
     return (
@@ -315,6 +322,8 @@ export function OrdersPage() {
     );
   }
 
+  const filterOptions: StatusFilter[] = ['all', 'pending', 'accepted', 'dispatched', 'completed', 'cancelled'];
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <h1>Incoming Orders</h1>
@@ -322,8 +331,9 @@ export function OrdersPage() {
       {/* Status Filters */}
       <div style={{ marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ display: 'flex', gap: '24px' }}>
-          {(['all', 'pending', 'accepted', 'dispatched', 'completed', 'cancelled'] as StatusFilter[]).map(
-            (filterOption) => (
+          {filterOptions.map((filterOption) => {
+            const count = countOrdersByFilter(orders, filterOption);
+            return (
               <button
                 key={filterOption}
                 onClick={() => setFilter(filterOption)}
@@ -341,22 +351,10 @@ export function OrdersPage() {
                 }}
               >
                 {filterOption}
-                <span style={{ marginLeft: '8px', color: '#9ca3af' }}>
-                  {
-                    orders.filter((o) => {
-                      if (filterOption === 'all') return true;
-                      if (filterOption === 'pending') return isPendingStatus(o.status);
-                      if (filterOption === 'accepted') return isAcceptedStatus(o.status);
-                      if (filterOption === 'dispatched') return isDispatchedStatus(o.status);
-                      if (filterOption === 'completed') return isCompletedStatus(o.status);
-                      if (filterOption === 'cancelled') return isCancelledStatus(o.status);
-                      return true;
-                    }).length
-                  }
-                </span>
+                <span style={{ marginLeft: '8px', color: '#9ca3af' }}>{count}</span>
               </button>
-            )
-          )}
+            );
+          })}
         </div>
       </div>
 
