@@ -468,11 +468,11 @@ function formatDuration(seconds) {
 
 // src/http/client.ts
 import axios from "axios";
-var isRetryableError = (error) => {
+function isRetryableError(error) {
   if (!error.response) return false;
   const status = error.response.status;
   return status >= 500 && status < 600;
-};
+}
 function calculateBackoff(attempt, baseDelay) {
   const exponentialDelay = baseDelay * Math.pow(2, attempt);
   const jitter = exponentialDelay * 0.25 * (Math.random() * 2 - 1);
@@ -502,8 +502,6 @@ var ONDCClient = class {
   }
   /**
    * Execute request with retry logic
-   * @param fn - Function that returns a Promise with the request
-   * @returns Promise resolving to response data
    */
   async withRetry(fn) {
     let lastError;
@@ -523,21 +521,7 @@ var ONDCClient = class {
     throw lastError;
   }
   /**
-   * Make an authenticated POST request with retry support
-   *
-   * @param path - Request path (e.g., "/search")
-   * @param body - Request body (will be JSON stringified)
-   * @returns Promise resolving to response data
-   *
-   * @example
-   * ```ts
-   * const client = new ONDCClient({
-   *   baseURL: 'https://gateway.ondc.org',
-   *   subscriberId: 'ondc.example.com',
-   *   privateKey: privateKey
-   * });
-   * const response = await client.post('/search', { intent: {...} });
-   * ```
+   * Make authenticated POST request with retry
    */
   async post(path, body) {
     return this.withRetry(async () => {
@@ -563,10 +547,7 @@ var ONDCClient = class {
     });
   }
   /**
-   * Make an authenticated GET request with retry support
-   *
-   * @param path - Request path
-   * @returns Promise resolving to response data
+   * Make authenticated GET request with retry
    */
   async get(path) {
     return this.withRetry(async () => {

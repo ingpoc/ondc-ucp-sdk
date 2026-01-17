@@ -20,6 +20,108 @@ const isCompleteStatus = (status: UCPOrderStatus): boolean =>
 // Mock orders - to be replaced with API call in SDK-BUYER-ORDERS-003
 const mockOrders: UCPOrder[] = [];
 
+const PAGE_CONTAINER_STYLE = {
+  minHeight: '100vh',
+  backgroundColor: '#f8fafc',
+  padding: '0',
+  width: '100%',
+};
+
+const CONTENT_STYLE = {
+  maxWidth: '100%',
+  padding: '0 80px',
+};
+
+const HEADER_STYLE = {
+  marginBottom: '48px',
+  padding: '64px 80px 40px 80px',
+  background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+  borderBottom: '2px solid #e2e8f0',
+};
+
+const PAGE_TITLE_STYLE = {
+  fontSize: '42px',
+  fontWeight: 800,
+  letterSpacing: '-1.5px',
+  color: '#0f172a',
+  margin: '0 0 24px 0',
+};
+
+const FILTERS_STYLE = {
+  display: 'flex',
+  gap: '8px',
+  borderBottom: '1px solid #e2e8f0',
+  paddingBottom: '16px',
+  marginBottom: '32px',
+  overflowX: 'auto' as const,
+};
+
+const FILTER_BUTTON_STYLE = {
+  padding: '10px 20px',
+  border: 'none',
+  borderBottom: '2px solid transparent',
+  backgroundColor: 'transparent',
+  fontSize: '14px',
+  fontWeight: 500,
+  cursor: 'pointer',
+  textTransform: 'capitalize' as const,
+  transition: 'all 0.2s ease',
+  whiteSpace: 'nowrap' as const,
+};
+
+const EMPTY_STATE_STYLE = {
+  textAlign: 'center' as const,
+  padding: '48px 24px',
+  backgroundColor: 'white',
+  borderRadius: '8px',
+  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+};
+
+const EMPTY_TITLE_STYLE = {
+  fontSize: '18px',
+  fontWeight: 600,
+  color: '#0f172a',
+  margin: '0 0 8px 0',
+};
+
+const EMPTY_MESSAGE_STYLE = {
+  fontSize: '14px',
+  color: '#475569',
+  margin: '0 0 24px 0',
+};
+
+const BUTTON_PRIMARY_STYLE = {
+  padding: '12px 24px',
+  border: 'none',
+  borderRadius: '6px',
+  backgroundColor: '#10b981',
+  color: 'white',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease',
+};
+
+const ORDERS_GRID_STYLE = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+  gap: '24px',
+};
+
+const ORDER_CARD_STYLE = {
+  backgroundColor: 'white',
+  border: '1px solid #e2e8f0',
+  borderRadius: '12px',
+  padding: '20px',
+  cursor: 'pointer',
+  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+};
+
+const ORDER_CARD_HOVER_STYLE = {
+  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+  transform: 'translateY(-2px)',
+};
+
 export function OrdersPage() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<StatusFilter>('all');
@@ -61,112 +163,82 @@ export function OrdersPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h1>My Orders</h1>
+    <div style={PAGE_CONTAINER_STYLE}>
+      <div style={CONTENT_STYLE}>
+        <div style={HEADER_STYLE}>
+          <h1 style={PAGE_TITLE_STYLE}>My Orders</h1>
 
-      {/* Status Filters */}
-      <div style={{ marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ display: 'flex', gap: '24px' }}>
-          {(['all', 'pending', 'active', 'complete'] as StatusFilter[]).map(
-            (filterOption) => (
-              <button
-                key={filterOption}
-                onClick={() => setFilter(filterOption)}
-                style={{
-                  padding: '12px 16px',
-                  border: 'none',
-                  borderBottom:
-                    filter === filterOption ? '2px solid #16a34a' : '2px solid transparent',
-                  backgroundColor: 'transparent',
-                  color: filter === filterOption ? '#16a34a' : '#6b7280',
-                  fontSize: '1em',
-                  fontWeight: filter === filterOption ? '600' : '400',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {filterOption}
-                <span style={{ marginLeft: '8px', color: '#9ca3af' }}>
-                  {filterOption === 'all'
-                    ? mockOrders.length
-                    : mockOrders.filter((o) => {
-                        if (filterOption === 'pending') return isPendingStatus(o.status);
-                        if (filterOption === 'active') return isActiveStatus(o.status);
-                        if (filterOption === 'complete') return isCompleteStatus(o.status);
-                        return true;
-                      }).length}
-                </span>
-              </button>
-            )
-          )}
+          <div style={FILTERS_STYLE}>
+            {(['all', 'pending', 'active', 'complete'] as StatusFilter[]).map(
+              (filterOption) => (
+                <button
+                  key={filterOption}
+                  onClick={() => setFilter(filterOption)}
+                  style={{
+                    ...FILTER_BUTTON_STYLE,
+                    borderBottomColor: filter === filterOption ? '#10b981' : 'transparent',
+                    color: filter === filterOption ? '#10b981' : '#475569',
+                    fontWeight: filter === filterOption ? 600 : 500,
+                  }}
+                >
+                  {filterOption}
+                  <span style={{ marginLeft: '8px', color: '#94a3b8' }}>
+                    {filterOption === 'all'
+                      ? mockOrders.length
+                      : mockOrders.filter((o) => {
+                          if (filterOption === 'pending') return isPendingStatus(o.status);
+                          if (filterOption === 'active') return isActiveStatus(o.status);
+                          if (filterOption === 'complete') return isCompleteStatus(o.status);
+                          return true;
+                        }).length}
+                  </span>
+                </button>
+              )
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Orders List */}
-      {filteredOrders.length === 0 ? (
-        <div
-          style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f9fafb' }}
-        >
-          <p style={{ color: '#6b7280', marginBottom: '16px' }}>
-            {filter === 'all'
-              ? "You haven't placed any orders yet"
-              : `No ${filter} orders`}
-          </p>
-          {filter === 'all' && (
-            <button
-              onClick={() => navigate('/search')}
-              style={{
-                padding: '12px 24px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                fontSize: '1em',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-              }}
-            >
-              Start Shopping
-            </button>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              onClick={() => handleOrderClick(order.id)}
-              style={{
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                padding: '20px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                transition: 'box-shadow 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              {/* Order Header */}
+        {filteredOrders.length === 0 ? (
+          <div style={EMPTY_STATE_STYLE}>
+            <p style={EMPTY_TITLE_STYLE}>
+              {filter === 'all'
+                ? "You haven't placed any orders yet"
+                : `No ${filter} orders`}
+            </p>
+            {filter === 'all' && (
+              <>
+                <p style={EMPTY_MESSAGE_STYLE}>
+                  Start shopping to see your orders here
+                </p>
+                <button
+                  onClick={() => navigate('/search')}
+                  style={BUTTON_PRIMARY_STYLE}
+                >
+                  Start Shopping
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div style={ORDERS_GRID_STYLE}>
+            {filteredOrders.map((order) => (
               <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '16px',
-                  paddingBottom: '16px',
-                  borderBottom: '1px solid #f3f4f6',
+                key={order.id}
+                onClick={() => handleOrderClick(order.id)}
+                style={ORDER_CARD_STYLE}
+                onMouseEnter={(e) => {
+                  Object.assign(e.currentTarget.style, ORDER_CARD_HOVER_STYLE);
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'none';
                 }}
               >
-                <div>
-                  <div style={{ fontSize: '0.9em', color: '#6b7280', marginBottom: '4px' }}>
+                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
                     Order #{order.id}
                   </div>
-                  <div style={{ fontSize: '0.85em', color: '#9ca3af' }}>
+                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
                     {new Date(order.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -174,64 +246,55 @@ export function OrdersPage() {
                     })}
                   </div>
                 </div>
-                <div
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: `${getStatusColor(order.status)}15`,
-                    color: getStatusColor(order.status),
-                    fontSize: '0.9em',
-                    fontWeight: '600',
-                    textTransform: 'capitalize',
-                  }}
-                >
+
+                <div style={{ marginBottom: '16px' }}>
+                  {order.items.slice(0, 3).map((item) => (
+                    <div
+                      key={item.id}
+                      style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}
+                    >
+                      <span style={{ color: '#0f172a' }}>
+                        {item.quantity}x {item.name}
+                      </span>
+                      <span style={{ color: '#475569' }}>
+                        {item.price.currency} {item.price.value}
+                      </span>
+                    </div>
+                  ))}
+                  {order.items.length > 3 && (
+                    <div style={{ fontSize: '12px', color: '#475569', marginTop: '8px' }}>
+                      +{order.items.length - 3} more items
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                  <div style={{ fontSize: '12px', color: '#475569' }}>
+                    {order.provider?.name}
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a' }}>
+                    {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: '4px 12px',
+                  borderRadius: '4px',
+                  backgroundColor: `${getStatusColor(order.status)}15`,
+                  color: getStatusColor(order.status),
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textTransform: 'capitalize',
+                  display: 'inline-block',
+                  marginTop: '12px',
+                }}>
                   {getStatusLabel(order.status)}
                 </div>
               </div>
-
-              {/* Order Items */}
-              <div style={{ marginBottom: '16px' }}>
-                {order.items.slice(0, 3).map((item) => (
-                  <div
-                    key={item.id}
-                    style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}
-                  >
-                    <span style={{ color: '#374151' }}>
-                      {item.quantity}x {item.name}
-                    </span>
-                    <span style={{ color: '#6b7280' }}>
-                      {item.price.currency} {item.price.value}
-                    </span>
-                  </div>
-                ))}
-                {order.items.length > 3 && (
-                  <div style={{ fontSize: '0.9em', color: '#6b7280', marginTop: '8px' }}>
-                    +{order.items.length - 3} more items
-                  </div>
-                )}
-              </div>
-
-              {/* Order Footer */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #f3f4f6',
-                }}
-              >
-                <div style={{ fontSize: '0.9em', color: '#6b7280' }}>
-                  {order.provider?.name}
-                </div>
-                <div style={{ fontSize: '1.1em', fontWeight: '600', color: '#374151' }}>
-                  Total: {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

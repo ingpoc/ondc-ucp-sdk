@@ -348,33 +348,14 @@ declare class ONDCClient {
     constructor(config: ONDCClientConfig);
     /**
      * Execute request with retry logic
-     * @param fn - Function that returns a Promise with the request
-     * @returns Promise resolving to response data
      */
     private withRetry;
     /**
-     * Make an authenticated POST request with retry support
-     *
-     * @param path - Request path (e.g., "/search")
-     * @param body - Request body (will be JSON stringified)
-     * @returns Promise resolving to response data
-     *
-     * @example
-     * ```ts
-     * const client = new ONDCClient({
-     *   baseURL: 'https://gateway.ondc.org',
-     *   subscriberId: 'ondc.example.com',
-     *   privateKey: privateKey
-     * });
-     * const response = await client.post('/search', { intent: {...} });
-     * ```
+     * Make authenticated POST request with retry
      */
     post<T = unknown>(path: string, body: unknown): Promise<T>;
     /**
-     * Make an authenticated GET request with retry support
-     *
-     * @param path - Request path
-     * @returns Promise resolving to response data
+     * Make authenticated GET request with retry
      */
     get<T = unknown>(path: string): Promise<T>;
     /**

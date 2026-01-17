@@ -152,17 +152,6 @@ declare class SellerClient {
     private country;
     private city;
     constructor(config: SellerClientConfig);
-    /**
-     * Generate unique transaction ID
-     */
-    private generateTransactionId;
-    /**
-     * Generate unique message ID
-     */
-    private generateMessageId;
-    /**
-     * Build Beckn context for search request
-     */
     private buildContext;
     /**
      * Search ONDC network for products

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { DashboardPage } from './pages/DashboardPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { ProductEditPage } from './pages/ProductEditPage';
@@ -7,14 +7,116 @@ import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
 import { ConfigPage } from './pages/ConfigPage';
 
+const APP_CONTAINER_STYLE = {
+  width: '100%',
+  minHeight: '100vh',
+  backgroundColor: '#f8fafc',
+};
+
+const HEADER_STYLE = {
+  backgroundColor: 'white',
+  borderBottom: '2px solid #e2e8f0',
+  padding: '0 80px',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+};
+
+const HEADER_CONTENT_STYLE = {
+  maxWidth: '100%',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  height: '64px',
+};
+
+const LOGO_STYLE = {
+  fontSize: '20px',
+  fontWeight: 800,
+  letterSpacing: '-0.5px',
+  color: '#0f172a',
+  textDecoration: 'none',
+};
+
+const NAV_STYLE = {
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'center',
+};
+
+const NAV_LINK_STYLE = {
+  padding: '8px 16px',
+  borderRadius: '6px',
+  color: '#475569',
+  textDecoration: 'none',
+  fontSize: '14px',
+  fontWeight: '500',
+  transition: 'all 0.2s ease',
+  whiteSpace: 'nowrap' as const,
+};
+
+const NAV_LINK_ACTIVE_STYLE = {
+  backgroundColor: '#f1f5f9',
+  color: '#0f172a',
+};
+
+const NAV_LINK_HOVER_STYLE = {
+  backgroundColor: '#f8fafc',
+  color: '#0f172a',
+};
+
 export function App() {
+  const location = useLocation();
+
+  const isActivePath = (path: string): boolean => {
+    if (path === '/' || path === '/dashboard') return location.pathname === '/' || location.pathname === '/dashboard';
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <header style={{ marginBottom: '30px' }}>
-        <h1>ONDC Seller POC</h1>
-        <nav>
-          <a href="/">Dashboard</a> | <a href="/catalog">Catalog</a> | <a href="/orders">Orders</a> | <a href="/config">Config</a> | <a href="/agent">Agent</a>
-        </nav>
+    <div style={APP_CONTAINER_STYLE}>
+      <header style={HEADER_STYLE}>
+        <div style={HEADER_CONTENT_STYLE}>
+          <Link to="/" style={LOGO_STYLE}>
+            ONDC Seller
+          </Link>
+          <nav style={NAV_STYLE}>
+            <Link
+              to="/catalog"
+              style={{
+                ...NAV_LINK_STYLE,
+                ...(isActivePath('/catalog') ? NAV_LINK_ACTIVE_STYLE : {}),
+              }}
+            >
+              Catalog
+            </Link>
+            <Link
+              to="/orders"
+              style={{
+                ...NAV_LINK_STYLE,
+                ...(isActivePath('/orders') ? NAV_LINK_ACTIVE_STYLE : {}),
+              }}
+            >
+              Orders
+            </Link>
+            <Link
+              to="/config"
+              style={{
+                ...NAV_LINK_STYLE,
+                ...(isActivePath('/config') ? NAV_LINK_ACTIVE_STYLE : {}),
+              }}
+            >
+              Config
+            </Link>
+            <Link
+              to="/agent"
+              style={{
+                ...NAV_LINK_STYLE,
+                ...(isActivePath('/agent') ? NAV_LINK_ACTIVE_STYLE : {}),
+              }}
+            >
+              Agent
+            </Link>
+          </nav>
+        </div>
       </header>
       <main>
         <Routes>

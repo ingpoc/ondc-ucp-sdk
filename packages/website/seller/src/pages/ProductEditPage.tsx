@@ -5,6 +5,52 @@ import { ProductForm } from '../components';
 import type { BecknItem } from '@ondc-website/shared';
 import type { ProductFormData } from '../components/ProductForm';
 
+const PAGE_CONTAINER_STYLE = {
+  minHeight: '100vh',
+  backgroundColor: '#f8fafc',
+  padding: '24px',
+};
+
+const CONTENT_STYLE = {
+  maxWidth: '700px',
+  margin: '0 auto',
+};
+
+const HEADER_STYLE = {
+  marginBottom: '32px',
+};
+
+const PAGE_TITLE_STYLE = {
+  fontSize: '28px',
+  fontWeight: 700,
+  letterSpacing: '-0.5px',
+  color: '#0f172a',
+  margin: '0 0 8px 0',
+};
+
+const SUBTITLE_STYLE = {
+  fontSize: '14px',
+  color: '#475569',
+  margin: 0,
+};
+
+const ERROR_STYLE = {
+  padding: '16px',
+  borderRadius: '8px',
+  backgroundColor: '#fef2f2',
+  border: '1px solid #fecaca',
+  color: '#dc2626',
+  fontSize: '14px',
+  marginBottom: '24px',
+};
+
+const CARD_STYLE = {
+  backgroundColor: 'white',
+  borderRadius: '8px',
+  padding: '32px',
+  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+};
+
 export function ProductEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -68,29 +114,35 @@ export function ProductEditPage() {
   }, [navigate]);
 
   return (
-    <div style={{ maxWidth: '600px' }}>
-      <h2>{isNew ? 'Add New Product' : 'Edit Product'}</h2>
-
-      {error && (
-        <div
-          style={{
-            padding: '10px',
-            marginBottom: '15px',
-            background: '#f8d7da',
-            color: '#721c24',
-            borderRadius: '4px',
-          }}
-        >
-          {error}
+    <div style={PAGE_CONTAINER_STYLE}>
+      <div style={CONTENT_STYLE}>
+        <div style={HEADER_STYLE}>
+          <h1 style={PAGE_TITLE_STYLE}>
+            {isNew ? 'Add New Product' : 'Edit Product'}
+          </h1>
+          <p style={SUBTITLE_STYLE}>
+            {isNew
+              ? 'Fill in the details to add a new product to your catalog'
+              : 'Update the product information below'}
+          </p>
         </div>
-      )}
 
-      <ProductForm
-        product={existingProduct ?? undefined}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        loading={loading}
-      />
+        {error && (
+          <div style={ERROR_STYLE}>
+            <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
+            <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+          </div>
+        )}
+
+        <div style={CARD_STYLE}>
+          <ProductForm
+            product={existingProduct ?? undefined}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            loading={loading}
+          />
+        </div>
+      </div>
     </div>
   );
 }

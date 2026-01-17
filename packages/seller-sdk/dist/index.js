@@ -1,6 +1,32 @@
 // src/client.ts
 import { ONDCClient } from "@ondc-agent/shared";
 import { ucpToBecknIntent } from "@ondc-agent/shared";
+var DEFAULT_CONFIG = {
+  domain: "ONDC:RET10",
+  country: "IND",
+  city: "std:080",
+  coreVersion: "1.2.0",
+  ttl: "PT30S"
+};
+function generateUniqueId(prefix) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+}
+function mapItemsToOrderItems(items) {
+  return items.map((item) => ({
+    id: item.id,
+    quantity: item.quantity ? { count: item.quantity } : void 0,
+    fulfillment_id: item.fulfillmentId
+  }));
+}
+function mapBillingInfo(billing) {
+  return {
+    name: billing.name,
+    phone: billing.phone,
+    email: billing.email,
+    tax_number: billing.taxId,
+    address: billing.address
+  };
+}
 var SellerClient = class {
   client;
   subscriberId;
@@ -11,9 +37,9 @@ var SellerClient = class {
   constructor(config) {
     this.subscriberId = config.subscriberId;
     this.bapUri = config.baseUrl;
-    this.domain = config.domain ?? "ONDC:RET10";
-    this.country = config.country ?? "IND";
-    this.city = config.city ?? "std:080";
+    this.domain = config.domain ?? DEFAULT_CONFIG.domain;
+    this.country = config.country ?? DEFAULT_CONFIG.country;
+    this.city = config.city ?? DEFAULT_CONFIG.city;
     const ondcConfig = {
       baseURL: config.baseUrl,
       subscriberId: config.subscriberId,
@@ -23,34 +49,19 @@ var SellerClient = class {
     };
     this.client = new ONDCClient(ondcConfig);
   }
-  /**
-   * Generate unique transaction ID
-   */
-  generateTransactionId() {
-    return `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  }
-  /**
-   * Generate unique message ID
-   */
-  generateMessageId() {
-    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  }
-  /**
-   * Build Beckn context for search request
-   */
   buildContext(action) {
     return {
       domain: this.domain,
       action,
       country: this.country,
       city: this.city,
-      core_version: "1.2.0",
+      core_version: DEFAULT_CONFIG.coreVersion,
       bap_id: this.subscriberId,
       bap_uri: this.bapUri,
-      transaction_id: this.generateTransactionId(),
-      message_id: this.generateMessageId(),
+      transaction_id: generateUniqueId("txn"),
+      message_id: generateUniqueId("msg"),
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      ttl: "PT30S"
+      ttl: DEFAULT_CONFIG.ttl
     };
   }
   /**
@@ -79,9 +90,7 @@ var SellerClient = class {
     const intent = ucpToBecknIntent(query);
     const searchRequest = {
       context,
-      message: {
-        intent
-      }
+      message: { intent }
     };
     const response = await this.client.post("/search", searchRequest);
     return {
@@ -108,18 +117,12 @@ var SellerClient = class {
    */
   async select(params) {
     const context = this.buildContext("select");
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : void 0,
-      fulfillment_id: item.fulfillmentId
-    }));
+    const orderItems = mapItemsToOrderItems(params.items);
     const selectRequest = {
       context,
       message: {
         order: {
-          provider: {
-            id: params.providerId
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           fulfillments: params.fulfillmentId ? [{ id: params.fulfillmentId }] : void 0
         }
@@ -158,25 +161,13 @@ var SellerClient = class {
    */
   async init(params) {
     const context = this.buildContext("init");
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : void 0,
-      fulfillment_id: item.fulfillmentId
-    }));
-    const billing = {
-      name: params.billing.name,
-      phone: params.billing.phone,
-      email: params.billing.email,
-      tax_number: params.billing.taxId,
-      address: params.billing.address
-    };
+    const orderItems = mapItemsToOrderItems(params.items);
+    const billing = mapBillingInfo(params.billing);
     const initRequest = {
       context,
       message: {
         order: {
-          provider: {
-            id: params.providerId
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           billing,
           payment: params.payment ? {
@@ -221,26 +212,14 @@ var SellerClient = class {
    */
   async confirm(params) {
     const context = this.buildContext("confirm");
-    const orderItems = params.items.map((item) => ({
-      id: item.id,
-      quantity: item.quantity ? { count: item.quantity } : void 0,
-      fulfillment_id: item.fulfillmentId
-    }));
-    const billing = {
-      name: params.billing.name,
-      phone: params.billing.phone,
-      email: params.billing.email,
-      tax_number: params.billing.taxId,
-      address: params.billing.address
-    };
+    const orderItems = mapItemsToOrderItems(params.items);
+    const billing = mapBillingInfo(params.billing);
     const confirmRequest = {
       context,
       message: {
         order: {
           id: params.orderId,
-          provider: {
-            id: params.providerId
-          },
+          provider: { id: params.providerId },
           items: orderItems,
           billing,
           payment: params.payment ? {

@@ -38,26 +38,71 @@ const PAYMENT_METHODS = [
 
 const CONTAINER_STYLE = {
   backgroundColor: 'white',
-  border: '1px solid #e5e7eb',
+  border: '1px solid #e2e8f0',
   borderRadius: '8px',
   padding: '20px',
   marginBottom: '20px',
 };
 
+const HEADER_STYLE = {
+  fontSize: '18px',
+  fontWeight: '600',
+  color: '#1e293b',
+  margin: '0 0 16px 0',
+};
+
 const OPTION_STYLE = {
   display: 'flex',
   alignItems: 'center',
-  padding: '12px',
-  border: '2px solid #e5e7eb',
-  borderRadius: '6px',
+  padding: '14px 16px',
+  border: '2px solid #e2e8f0',
+  borderRadius: '8px',
   cursor: 'pointer',
   transition: 'all 0.2s',
   backgroundColor: 'white',
 };
 
+const OPTION_HOVER_STYLE = {
+  borderColor: '#cbd5e1',
+  backgroundColor: '#f8fafc',
+};
+
 const OPTION_SELECTED_STYLE = {
   border: '2px solid #16a34a',
   backgroundColor: '#f0fdf4',
+};
+
+const RADIO_STYLE = {
+  marginRight: '12px',
+  width: '20px',
+  height: '20px',
+  cursor: 'pointer',
+};
+
+const ICON_STYLE = {
+  fontSize: '24px',
+  marginRight: '12px',
+};
+
+const LABEL_STYLE = {
+  flex: 1,
+};
+
+const LABEL_TITLE_STYLE = {
+  fontWeight: '600',
+  fontSize: '15px',
+  color: '#1e293b',
+  marginBottom: '2px',
+};
+
+const LABEL_DESC_STYLE = {
+  fontSize: '13px',
+  color: '#64748b',
+};
+
+const CHECKMARK_STYLE = {
+  color: '#16a34a',
+  fontSize: '20px',
 };
 
 export interface PaymentSelectorProps {
@@ -67,27 +112,33 @@ export interface PaymentSelectorProps {
 
 export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps): JSX.Element {
   const [internalSelected, setInternalSelected] = useState<PaymentMethod>('upi');
+  const [hoveredMethod, setHoveredMethod] = useState<PaymentMethod | null>(null);
 
   const currentSelected = selected ?? internalSelected;
   const handleSelect = onSelect ?? setInternalSelected;
 
-  function getOptionStyle(methodType: PaymentMethod) {
+  function getOptionStyle(methodType: PaymentMethod, isHovered: boolean) {
     const base = OPTION_STYLE;
     if (currentSelected === methodType) {
       return { ...base, ...OPTION_SELECTED_STYLE };
+    }
+    if (isHovered && currentSelected !== methodType) {
+      return { ...base, ...OPTION_HOVER_STYLE };
     }
     return base;
   }
 
   return (
     <div style={CONTAINER_STYLE}>
-      <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Payment Method</h2>
+      <h2 style={HEADER_STYLE}>Payment Method</h2>
 
       <div style={{ display: 'grid', gap: '12px' }}>
         {PAYMENT_METHODS.map((method) => (
           <label
             key={method.type}
-            style={getOptionStyle(method.type)}
+            style={getOptionStyle(method.type, hoveredMethod === method.type)}
+            onMouseEnter={() => setHoveredMethod(method.type)}
+            onMouseLeave={() => setHoveredMethod(null)}
           >
             <input
               type="radio"
@@ -95,32 +146,32 @@ export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps): J
               value={method.type}
               checked={currentSelected === method.type}
               onChange={() => handleSelect(method.type)}
-              style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+              style={RADIO_STYLE}
             />
-            <span style={{ fontSize: '1.5em', marginRight: '12px' }}>
+            <span style={ICON_STYLE}>
               {method.icon}
             </span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+            <div style={LABEL_STYLE}>
+              <div style={LABEL_TITLE_STYLE}>
                 {method.label}
               </div>
-              <div style={{ fontSize: '0.9em', color: '#666' }}>
+              <div style={LABEL_DESC_STYLE}>
                 {method.description}
               </div>
             </div>
             {currentSelected === method.type && (
-              <span style={{ color: '#16a34a', fontSize: '1.2em' }}>✓</span>
+              <span style={CHECKMARK_STYLE}>✓</span>
             )}
           </label>
         ))}
       </div>
 
       {currentSelected === 'upi' && (
-        <UPIInputForm style={{ marginTop: '16px' }} />
+        <UPIInputForm style={{ marginTop: '20px' }} />
       )}
 
       {currentSelected === 'card' && (
-        <CardInputForm style={{ marginTop: '16px' }} />
+        <CardInputForm style={{ marginTop: '20px' }} />
       )}
     </div>
   );
@@ -130,37 +181,70 @@ interface FormWrapperProps {
   style?: React.CSSProperties;
 }
 
+const FORM_CONTAINER_STYLE = {
+  padding: '16px',
+  backgroundColor: '#f8fafc',
+  borderRadius: '8px',
+};
+
+const FORM_LABEL_STYLE = {
+  display: 'block',
+  marginBottom: '6px',
+  fontWeight: '500',
+  fontSize: '14px',
+  color: '#475569',
+};
+
+const FORM_INPUT_STYLE = {
+  width: '100%',
+  padding: '10px 12px',
+  border: '1px solid #cbd5e1',
+  borderRadius: '6px',
+  fontSize: '14px',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+};
+
+const FORM_INPUT_FOCUS_STYLE = {
+  outline: 'none',
+  borderColor: '#3b82f6',
+  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+};
+
+const FORM_HELP_TEXT_STYLE = {
+  fontSize: '12px',
+  color: '#64748b',
+  marginTop: '6px',
+  marginBottom: '0',
+};
+
 function UPIInputForm({ style }: FormWrapperProps): JSX.Element {
   const [upiId, setUpiId] = useState('');
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, FORM_INPUT_FOCUS_STYLE);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+  };
+
   return (
-    <div
-      style={{
-        padding: '16px',
-        backgroundColor: '#f9fafb',
-        borderRadius: '6px',
-        ...style,
-      }}
-    >
-      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+    <div style={{ ...FORM_CONTAINER_STYLE, ...style }}>
+      <label htmlFor="upi-id" style={FORM_LABEL_STYLE}>
         UPI ID
       </label>
       <input
+        id="upi-id"
         type="text"
         value={upiId}
         onChange={(e) => setUpiId(e.target.value)}
         placeholder="yourname@upi"
         pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"
-        style={{
-          width: '100%',
-          padding: '10px',
-          border: '1px solid #d1d5db',
-          borderRadius: '4px',
-          fontSize: '1em',
-          marginBottom: '8px',
-        }}
+        style={FORM_INPUT_STYLE}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
-      <p style={{ fontSize: '0.85em', color: '#666' }}>
+      <p style={FORM_HELP_TEXT_STYLE}>
         Enter your UPI ID (e.g., mobile@upi, username@oksbi)
       </p>
     </div>
@@ -182,106 +266,112 @@ function formatExpiry(value: string): string {
   return value;
 }
 
+const GRID_STYLE = {
+  display: 'grid',
+  gap: '12px',
+};
+
+const HALF_GRID_STYLE = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr' as const,
+  gap: '12px',
+};
+
+const SECURITY_TEXT_STYLE = {
+  fontSize: '12px',
+  color: '#64748b',
+  marginTop: '8px',
+  marginBottom: '0',
+};
+
 function CardInputForm({ style }: FormWrapperProps): JSX.Element {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
   const [name, setName] = useState('');
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, FORM_INPUT_FOCUS_STYLE);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+  };
+
   return (
-    <div
-      style={{
-        padding: '16px',
-        backgroundColor: '#f9fafb',
-        borderRadius: '6px',
-        ...style,
-      }}
-    >
-      <div style={{ display: 'grid', gap: '12px' }}>
+    <div style={{ ...FORM_CONTAINER_STYLE, ...style }}>
+      <div style={GRID_STYLE}>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+          <label htmlFor="card-number" style={FORM_LABEL_STYLE}>
             Card Number
           </label>
           <input
+            id="card-number"
             type="text"
             value={cardNumber}
             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
             placeholder="1234 5678 9012 3456"
             maxLength={19}
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '1em',
-            }}
+            style={FORM_INPUT_STYLE}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+          <label htmlFor="cardholder-name" style={FORM_LABEL_STYLE}>
             Cardholder Name
           </label>
           <input
+            id="cardholder-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value.toUpperCase())}
             placeholder="JOHN DOE"
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '1em',
-              textTransform: 'uppercase',
-            }}
+            style={FORM_INPUT_STYLE}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={HALF_GRID_STYLE}>
           <div>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+            <label htmlFor="card-expiry" style={FORM_LABEL_STYLE}>
               Expiry
             </label>
             <input
+              id="card-expiry"
               type="text"
               value={expiry}
               onChange={(e) => setExpiry(formatExpiry(e.target.value.replace(/\D/g, '')))}
               placeholder="MM/YY"
               maxLength={5}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1em',
-              }}
+              style={FORM_INPUT_STYLE}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+            <label htmlFor="card-cvv" style={FORM_LABEL_STYLE}>
               CVV
             </label>
             <input
+              id="card-cvv"
               type="password"
               value={cvv}
               onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
               placeholder="•••"
               maxLength={4}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1em',
-              }}
+              style={FORM_INPUT_STYLE}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
           </div>
         </div>
       </div>
 
-      <p style={{ fontSize: '0.85em', color: '#666', marginTop: '8px' }}>
+      <p style={SECURITY_TEXT_STYLE}>
         🔒 Your card details are secure and encrypted
       </p>
     </div>

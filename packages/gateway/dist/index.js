@@ -1,7 +1,7 @@
 // src/gateway.ts
 var Gateway = class {
+  config;
   constructor(config) {
-    this.config = config;
     this.config = config;
   }
   async start() {
@@ -263,9 +263,7 @@ var WebhookServer = class {
     this.registerEndpoints();
   }
   /**
-   * Register webhook handler for specific action
-   * @param action - Beckn action (e.g., 'on_search', 'on_select')
-   * @param handler - Handler function
+   * Register webhook handler for action
    */
   on(action, handler) {
     if (!this.handlers.has(action)) {
@@ -274,31 +272,24 @@ var WebhookServer = class {
     this.handlers.get(action).push(handler);
   }
   /**
-   * Register a public key for a subscriber
-   * @param subscriberId - Subscriber ID (e.g., "ondc.example.com")
-   * @param publicKey - Base64 encoded Ed25519 public key
+   * Register public key for subscriber
    */
   registerPublicKey(subscriberId, publicKey) {
     this.publicKeys.set(subscriberId, publicKey);
   }
   /**
-   * Remove a public key for a subscriber
-   * @param subscriberId - Subscriber ID
+   * Remove public key for subscriber
    */
   removePublicKey(subscriberId) {
     this.publicKeys.delete(subscriberId);
   }
   /**
-   * Get the registered public key for a subscriber
-   * @param subscriberId - Subscriber ID
-   * @returns Public key or undefined if not registered
+   * Get registered public key for subscriber
    */
   getPublicKey(subscriberId) {
     return this.publicKeys.get(subscriberId);
   }
-  /**
-   * Register webhook endpoints
-   */
+  /** Register webhook endpoints */
   registerEndpoints() {
     this.app.post("/on_search", (req, res) => {
       this.handleCallback("on_search", req, res);
@@ -319,9 +310,7 @@ var WebhookServer = class {
       res.json({ status: "ok", timestamp: (/* @__PURE__ */ new Date()).toISOString() });
     });
   }
-  /**
-   * Handle incoming webhook callback
-   */
+  /** Handle incoming webhook callback */
   async handleCallback(action, req, res) {
     try {
       const body = req.body;
@@ -420,9 +409,7 @@ var WebhookServer = class {
     }
   }
   /**
-   * Start the webhook server
-   * @param port - Port to listen on (overrides config)
-   * @param host - Host to bind to (overrides config)
+   * Start webhook server
    */
   async start(port, host) {
     return new Promise((resolve, reject) => {
@@ -452,9 +439,7 @@ var WebhookServer = class {
       }
     });
   }
-  /**
-   * Stop the webhook server
-   */
+  /** Stop webhook server */
   async stop() {
     return new Promise((resolve, reject) => {
       if (!this.server) {
@@ -474,44 +459,34 @@ var WebhookServer = class {
     });
   }
   /**
-   * Get the actual port the server is listening on
-   * Useful when port 0 is used for random port assignment
+   * Get actual listening port
    */
   getPort() {
     return this.listeningPort;
   }
-  /**
-   * Get the Express app instance
-   * Useful for testing or adding custom middleware
-   */
+  /** Get Express app instance */
   getApp() {
     return this.app;
   }
-  /**
-   * Get registered handler count for an action
-   * @param action - Beckn action
-   */
+  /** Get registered handler count for action */
   handlerCount(action) {
     return this.handlers.get(action)?.length ?? 0;
   }
 };
 
 // src/state/store.ts
+var DEFAULT_TTL = 5 * 60 * 1e3;
+var CLEANUP_INTERVAL = 60 * 1e3;
 var StateStore = class {
   store;
   ttl;
   cleanupTimer;
   constructor(config = {}) {
     this.store = /* @__PURE__ */ new Map();
-    this.ttl = config.ttl ?? 5 * 60 * 1e3;
+    this.ttl = config.ttl ?? DEFAULT_TTL;
     this.cleanupTimer = null;
     this.startCleanup();
   }
-  /**
-   * Store state for a transaction
-   * @param transactionId - Transaction ID
-   * @param state - State to store
-   */
   set(transactionId, state) {
     const pendingRequest = {
       transactionId,
@@ -520,70 +495,35 @@ var StateStore = class {
     };
     this.store.set(transactionId, pendingRequest);
   }
-  /**
-   * Get state for a transaction
-   * @param transactionId - Transaction ID
-   * @returns Pending request or undefined if not found
-   */
   get(transactionId) {
     return this.store.get(transactionId);
   }
-  /**
-   * Remove state for a transaction
-   * @param transactionId - Transaction ID
-   * @returns true if found and removed, false otherwise
-   */
   delete(transactionId) {
     return this.store.delete(transactionId);
   }
-  /**
-   * Check if transaction exists
-   * @param transactionId - Transaction ID
-   * @returns true if exists, false otherwise
-   */
   has(transactionId) {
     return this.store.has(transactionId);
   }
-  /**
-   * Get all transaction IDs
-   * @returns Array of transaction IDs
-   */
   keys() {
     return Array.from(this.store.keys());
   }
-  /**
-   * Get count of pending requests
-   * @returns Number of pending requests
-   */
   size() {
     return this.store.size;
   }
-  /**
-   * Clear all pending requests
-   */
   clear() {
     this.store.clear();
   }
-  /**
-   * Start periodic cleanup of expired entries
-   */
-  startCleanup() {
-    this.cleanupTimer = setInterval(() => {
-      this.cleanup();
-    }, 60 * 1e3);
-  }
-  /**
-   * Stop periodic cleanup
-   */
   stopCleanup() {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
     }
   }
-  /**
-   * Remove expired entries
-   */
+  startCleanup() {
+    this.cleanupTimer = setInterval(() => {
+      this.cleanup();
+    }, CLEANUP_INTERVAL);
+  }
   cleanup() {
     const now = Date.now();
     const expiredKeys = [];
@@ -600,10 +540,6 @@ var StateStore = class {
       console.log(`State store: cleaned up ${expiredKeys.length} expired entries`);
     }
   }
-  /**
-   * Get statistics about the state store
-   * @returns Statistics object
-   */
   getStats() {
     return {
       size: this.store.size,
@@ -614,83 +550,68 @@ var StateStore = class {
 };
 
 // src/state/poller.ts
+var DEFAULT_POLL_INTERVAL = 100;
+var DEFAULT_TIMEOUT = 5e3;
 var AsyncPoller = class {
   stateStore;
   pollInterval;
   defaultTimeout;
   constructor(config) {
     this.stateStore = config.stateStore;
-    this.pollInterval = config.pollInterval ?? 100;
-    this.defaultTimeout = config.defaultTimeout ?? 5e3;
+    this.pollInterval = config.pollInterval ?? DEFAULT_POLL_INTERVAL;
+    this.defaultTimeout = config.defaultTimeout ?? DEFAULT_TIMEOUT;
   }
-  /**
-   * Wait for callback result
-   * @param transactionId - Transaction ID to wait for
-   * @param timeout - Timeout in milliseconds (uses default if not provided)
-   * @returns Promise resolving to result or rejecting on timeout
-   */
   async waitForCallback(transactionId, timeout) {
     const actualTimeout = timeout ?? this.defaultTimeout;
     const startTime = Date.now();
     return new Promise((resolve, reject) => {
-      const poll = () => {
-        const elapsed = Date.now() - startTime;
-        if (elapsed >= actualTimeout) {
-          reject(new Error(`Timeout waiting for callback: ${transactionId}`));
-          return;
-        }
+      const checkCallback = () => {
         const state = this.stateStore.get(transactionId);
         if (state && state.data && typeof state.data === "object") {
           const result = state.data;
           if (result.error) {
             reject(new Error(result.error));
-            return;
+            return true;
           }
           if (result.result !== void 0) {
             resolve(result.result);
-            return;
+            return true;
           }
         }
-        setTimeout(poll, this.pollInterval);
+        return false;
       };
-      poll();
+      this.poll(checkCallback, actualTimeout, startTime, `Timeout waiting for callback: ${transactionId}`, resolve, reject);
     });
   }
-  /**
-   * Wait with custom check function
-   * @param check - Function to check if condition is met
-   * @param timeout - Timeout in milliseconds
-   * @returns Promise resolving when condition is met or rejecting on timeout
-   */
   async waitUntil(check, timeout) {
     const actualTimeout = timeout ?? this.defaultTimeout;
     const startTime = Date.now();
     return new Promise((resolve, reject) => {
-      const poll = () => {
-        const elapsed = Date.now() - startTime;
-        if (elapsed >= actualTimeout) {
-          reject(new Error("Timeout waiting for condition"));
-          return;
-        }
+      const checkCondition = () => {
         const result = check();
         if (result !== null && result !== void 0) {
           resolve(result);
-          return;
+          return true;
         }
-        setTimeout(poll, this.pollInterval);
+        return false;
       };
-      poll();
+      this.poll(checkCondition, actualTimeout, startTime, "Timeout waiting for condition", resolve, reject);
     });
   }
-  /**
-   * Get the poll interval
-   */
+  poll(check, timeout, startTime, timeoutMessage, resolve, reject) {
+    const elapsed = Date.now() - startTime;
+    if (elapsed >= timeout) {
+      reject(new Error(timeoutMessage));
+      return;
+    }
+    if (check()) {
+      return;
+    }
+    setTimeout(() => this.poll(check, timeout, startTime, timeoutMessage, resolve, reject), this.pollInterval);
+  }
   getPollInterval() {
     return this.pollInterval;
   }
-  /**
-   * Get the default timeout
-   */
   getDefaultTimeout() {
     return this.defaultTimeout;
   }
@@ -713,26 +634,19 @@ var CallbackManager = class {
     this.pendingCallbacks = /* @__PURE__ */ new Map();
   }
   /**
-   * Register a pending request
-   * @param transactionId - Transaction ID
-   * @param type - Request type (e.g., 'search', 'select')
-   * @param data - Additional request data
+   * Register pending request
    */
   registerRequest(transactionId, type, data) {
     this.stateStore.set(transactionId, { type, data });
   }
   /**
    * Wait for callback result
-   * @param transactionId - Transaction ID to wait for
-   * @param timeout - Timeout in milliseconds (optional)
-   * @returns Promise resolving to callback message
    */
   async waitForCallback(transactionId, timeout) {
     return this.poller.waitForCallback(transactionId, timeout);
   }
   /**
    * Handle incoming callback and route to waiting promise
-   * @param message - Beckn callback message
    */
   handleCallback(message) {
     const transactionId = message.context?.transaction_id;
@@ -760,9 +674,7 @@ var CallbackManager = class {
     this.pendingCallbacks.delete(transactionId);
   }
   /**
-   * Register a one-time handler for a specific transaction
-   * @param transactionId - Transaction ID
-   * @param handler - Handler function
+   * Register one-time handler for transaction
    */
   onTransaction(transactionId, handler) {
     if (!this.pendingCallbacks.has(transactionId)) {
@@ -771,9 +683,7 @@ var CallbackManager = class {
     this.pendingCallbacks.get(transactionId).push(handler);
   }
   /**
-   * Complete a request with an error
-   * @param transactionId - Transaction ID
-   * @param error - Error message
+   * Complete request with error
    */
   completeWithError(transactionId, error) {
     const pendingRequest = this.stateStore.get(transactionId);
@@ -785,9 +695,7 @@ var CallbackManager = class {
     }
   }
   /**
-   * Complete a request with a result
-   * @param transactionId - Transaction ID
-   * @param result - Result data
+   * Complete request with result
    */
   completeWithResult(transactionId, result) {
     const pendingRequest = this.stateStore.get(transactionId);
@@ -799,8 +707,7 @@ var CallbackManager = class {
     }
   }
   /**
-   * Remove a pending request
-   * @param transactionId - Transaction ID
+   * Remove pending request
    */
   removeRequest(transactionId) {
     this.stateStore.delete(transactionId);
@@ -808,7 +715,6 @@ var CallbackManager = class {
   }
   /**
    * Get statistics about pending requests
-   * @returns Statistics object
    */
   getStats() {
     return {

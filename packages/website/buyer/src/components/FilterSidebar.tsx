@@ -6,24 +6,62 @@ const SORT_OPTIONS = [
 ] as const;
 
 const CONTAINER_STYLE = {
-  padding: '15px',
-  background: '#f8f9fa',
+  padding: '16px',
+  backgroundColor: '#f8fafc',
   borderRadius: '8px',
   minWidth: '200px',
 };
 
+const HEADER_STYLE = {
+  fontSize: '16px',
+  fontWeight: '600',
+  color: '#1e293b',
+  margin: '0 0 16px 0',
+};
+
+const FILTER_SECTION_STYLE = {
+  marginBottom: '16px',
+};
+
 const LABEL_STYLE = {
   display: 'block',
-  marginBottom: '5px',
+  fontSize: '14px',
+  fontWeight: '500',
+  color: '#475569',
+  marginBottom: '6px',
 };
 
 const INPUT_STYLE = {
   width: '100%',
-  padding: '5px',
+  padding: '8px 10px',
+  borderRadius: '6px',
+  border: '1px solid #cbd5e1',
+  backgroundColor: 'white',
+  fontSize: '14px',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
 };
 
-const FILTER_SECTION_STYLE = {
-  marginBottom: '15px',
+const INPUT_FOCUS_STYLE = {
+  outline: 'none',
+  borderColor: '#3b82f6',
+  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+};
+
+const SELECT_STYLE = {
+  width: '100%',
+  padding: '8px 10px',
+  borderRadius: '6px',
+  border: '1px solid #cbd5e1',
+  backgroundColor: 'white',
+  fontSize: '14px',
+  cursor: 'pointer',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+};
+
+const SELECT_FOCUS_STYLE = {
+  outline: 'none',
+  borderColor: '#3b82f6',
+  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
 };
 
 export interface SearchFilters {
@@ -46,26 +84,52 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
     return value?.toString() ?? '';
   }
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, INPUT_FOCUS_STYLE);
+  };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+  };
+
+  const handleSelectFocus = (e: React.FocusEvent<HTMLSelectElement>) => {
+    Object.assign(e.target.style, SELECT_FOCUS_STYLE);
+  };
+
+  const handleSelectBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
+    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+  };
+
   return (
     <div style={CONTAINER_STYLE}>
-      <h3>Filters</h3>
+      <h3 style={HEADER_STYLE}>Filters</h3>
 
       <div style={FILTER_SECTION_STYLE}>
-        <label style={LABEL_STYLE}>Max Price:</label>
+        <label htmlFor="max-price" style={LABEL_STYLE}>
+          Max Price
+        </label>
         <input
+          id="max-price"
           type="number"
+          min="0"
+          step="0.01"
           value={formatValue(filters.maxPrice)}
           onChange={(e) =>
             handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
           style={INPUT_STYLE}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
         />
       </div>
 
       <div style={FILTER_SECTION_STYLE}>
-        <label style={LABEL_STYLE}>Min Rating:</label>
+        <label htmlFor="min-rating" style={LABEL_STYLE}>
+          Min Rating
+        </label>
         <input
+          id="min-rating"
           type="number"
           min="0"
           max="5"
@@ -76,15 +140,22 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
           }
           placeholder="Any"
           style={INPUT_STYLE}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
         />
       </div>
 
       <div style={FILTER_SECTION_STYLE}>
-        <label style={LABEL_STYLE}>Sort By:</label>
+        <label htmlFor="sort-by" style={LABEL_STYLE}>
+          Sort By
+        </label>
         <select
+          id="sort-by"
           value={filters.sortBy ?? 'relevance'}
           onChange={(e) => handleChange('sortBy', e.target.value)}
-          style={INPUT_STYLE}
+          style={SELECT_STYLE}
+          onFocus={handleSelectFocus}
+          onBlur={handleSelectBlur}
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>

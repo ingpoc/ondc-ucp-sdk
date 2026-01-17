@@ -8,6 +8,132 @@ import { QuoteDisplay } from '../components/QuoteDisplay';
 
 const API_BASE = 'http://localhost:3001';
 
+const PAGE_CONTAINER_STYLE = {
+  minHeight: '100vh',
+  backgroundColor: '#f8fafc',
+  padding: '24px',
+};
+
+const CONTENT_STYLE = {
+  maxWidth: '1200px',
+  margin: '0 auto',
+};
+
+const HEADER_STYLE = {
+  marginBottom: '24px',
+};
+
+const PAGE_TITLE_STYLE = {
+  fontSize: '28px',
+  fontWeight: 700,
+  letterSpacing: '-0.5px',
+  color: '#0f172a',
+  margin: '0 0 8px 0',
+};
+
+const ERROR_ALERT_STYLE = {
+  padding: '16px',
+  borderRadius: '8px',
+  backgroundColor: '#fef2f2',
+  border: '1px solid #fecaca',
+  color: '#dc2626',
+  fontSize: '14px',
+  marginBottom: '24px',
+  position: 'relative' as const,
+};
+
+const ERROR_CLOSE_STYLE = {
+  position: 'absolute' as const,
+  top: '12px',
+  right: '12px',
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  fontSize: '20px',
+  color: '#dc2626',
+  padding: '0',
+  width: '24px',
+  height: '24px',
+};
+
+const FORM_LAYOUT_STYLE = {
+  display: 'grid',
+  gridTemplateColumns: '2fr 1fr',
+  gap: '24px',
+};
+
+const FORMS_SECTION_STYLE = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '24px',
+};
+
+const SIDEBAR_STYLE = {
+  position: 'sticky' as const,
+  top: '24px',
+  alignSelf: 'start' as const,
+};
+
+const BUTTON_PRIMARY_STYLE = {
+  width: '100%',
+  padding: '14px',
+  border: 'none',
+  borderRadius: '6px',
+  backgroundColor: '#10b981',
+  color: 'white',
+  fontSize: '16px',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease',
+  marginTop: '16px',
+};
+
+const BUTTON_DISABLED_STYLE = {
+  ...BUTTON_PRIMARY_STYLE,
+  backgroundColor: '#94a3b8',
+  cursor: 'not-allowed',
+};
+
+const VALIDATION_MESSAGE_STYLE = {
+  color: '#dc2626',
+  fontSize: '12px',
+  marginTop: '8px',
+};
+
+const BUTTON_SECONDARY_STYLE = {
+  padding: '10px 20px',
+  border: '1px solid #e2e8f0',
+  borderRadius: '6px',
+  backgroundColor: 'white',
+  color: '#0f172a',
+  fontSize: '14px',
+  fontWeight: 500,
+  cursor: 'pointer',
+};
+
+const LOADING_STYLE = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '48px',
+  color: '#475569',
+  fontSize: '14px',
+};
+
+const ERROR_STYLE = {
+  padding: '16px',
+  borderRadius: '8px',
+  backgroundColor: '#fef2f2',
+  border: '1px solid #fecaca',
+  color: '#dc2626',
+  fontSize: '14px',
+  textAlign: 'center' as const,
+};
+
+const FOOTER_STYLE = {
+  marginTop: '24px',
+};
+
 export function CheckoutPage() {
   const navigate = useNavigate();
   const { session, loading, error, itemCount, clearError } = useCart();
@@ -72,28 +198,30 @@ export function CheckoutPage() {
 
   if (loading && !session) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p>Loading checkout...</p>
+      <div style={PAGE_CONTAINER_STYLE}>
+        <div style={LOADING_STYLE}>
+          Loading checkout...
+        </div>
       </div>
     );
   }
 
   if (error && !session) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p style={{ color: '#dc2626', marginBottom: '16px' }}>Error: {error}</p>
-        <button
-          onClick={() => navigate('/cart')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
-        >
-          Back to Cart
-        </button>
+      <div style={PAGE_CONTAINER_STYLE}>
+        <div style={ERROR_STYLE}>
+          <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
+          <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+          <button
+            onClick={() => navigate('/cart')}
+            style={{
+              ...BUTTON_SECONDARY_STYLE,
+              marginTop: '16px',
+            }}
+          >
+            Back to Cart
+          </button>
+        </div>
       </div>
     );
   }
@@ -101,99 +229,68 @@ export function CheckoutPage() {
   const currency = session?.items[0]?.item.price?.currency || 'INR';
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h1>Checkout</h1>
+    <div style={PAGE_CONTAINER_STYLE}>
+      <div style={CONTENT_STYLE}>
+        <div style={HEADER_STYLE}>
+          <h1 style={PAGE_TITLE_STYLE}>Checkout</h1>
+        </div>
 
-      {submitError && (
-        <div
-          style={{
-            padding: '12px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '4px',
-            color: '#dc2626',
-            marginBottom: '20px',
-          }}
-        >
-          {submitError}
+        {submitError && (
+          <div style={ERROR_ALERT_STYLE}>
+            {submitError}
+            <button
+              onClick={() => setSubmitError(null)}
+              style={ERROR_CLOSE_STYLE}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={FORM_LAYOUT_STYLE}>
+            <div style={FORMS_SECTION_STYLE}>
+              <BillingForm session={session} />
+              <DeliveryAddressForm
+                address={deliveryAddress}
+                onChange={setDeliveryAddress}
+              />
+              <PaymentSelector />
+            </div>
+
+            <div style={SIDEBAR_STYLE}>
+              {quote ? (
+                <QuoteDisplay quote={quote} currency={currency} />
+              ) : (
+                <CartSummary currency={currency} />
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting || !session?.buyer?.name || !session?.buyer?.email}
+                style={submitting ? BUTTON_DISABLED_STYLE : BUTTON_PRIMARY_STYLE}
+              >
+                {submitting ? 'Processing...' : quote ? 'Place Order' : 'Get Quote'}
+              </button>
+
+              {!session?.buyer?.name && (
+                <p style={VALIDATION_MESSAGE_STYLE}>
+                  Please complete billing information to continue
+                </p>
+              )}
+            </div>
+          </div>
+        </form>
+
+        <div style={FOOTER_STYLE}>
           <button
-            onClick={() => setSubmitError(null)}
-            style={{
-              float: 'right',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              fontSize: '1.2em',
-            }}
+            type="button"
+            onClick={() => navigate('/cart')}
+            style={BUTTON_SECONDARY_STYLE}
           >
-            ×
+            ← Back to Cart
           </button>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-          {/* Left Column: Forms */}
-          <div>
-            <BillingForm session={session} />
-            <DeliveryAddressForm
-              address={deliveryAddress}
-              onChange={setDeliveryAddress}
-            />
-            <PaymentSelector />
-          </div>
-
-          {/* Right Column: Quote/Summary */}
-          <div style={{ position: 'sticky', top: '20px', alignSelf: 'start' }}>
-            {quote ? (
-              <QuoteDisplay quote={quote} currency={currency} />
-            ) : (
-              <CartSummary currency={currency} />
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting || !session?.buyer?.name || !session?.buyer?.email}
-              style={{
-                width: '100%',
-                padding: '14px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: submitting ? '#9ca3af' : '#16a34a',
-                color: 'white',
-                fontSize: '1.1em',
-                fontWeight: 'bold',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                marginTop: '16px',
-              }}
-            >
-              {submitting ? 'Processing...' : quote ? 'Place Order' : 'Get Quote'}
-            </button>
-
-            {!session?.buyer?.name && (
-              <p style={{ color: '#dc2626', fontSize: '0.9em', marginTop: '8px' }}>
-                Please complete billing information to continue
-              </p>
-            )}
-          </div>
-        </div>
-      </form>
-
-      {/* Back to Cart */}
-      <div style={{ marginTop: '24px' }}>
-        <button
-          type="button"
-          onClick={() => navigate('/cart')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
-        >
-          ← Back to Cart
-        </button>
       </div>
     </div>
   );
@@ -209,21 +306,54 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
     onChange({ ...address, [field]: value });
   };
 
-  return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Delivery Address</h2>
+  const SECTION_STYLE = {
+    backgroundColor: 'white',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    padding: '24px',
+  };
 
-      <div style={{ display: 'grid', gap: '16px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+  const SECTION_TITLE_STYLE = {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: '#0f172a',
+    margin: '0 0 16px 0',
+  };
+
+  const LABEL_STYLE = {
+    display: 'block',
+    marginBottom: '8px',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#0f172a',
+  };
+
+  const INPUT_STYLE = {
+    width: '100%',
+    padding: '10px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '6px',
+    fontSize: '14px',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  };
+
+  const INPUT_GRID_STYLE = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '16px',
+  };
+
+  const FORM_GROUP_STYLE = {
+    marginBottom: '16px',
+  };
+
+  return (
+    <div style={SECTION_STYLE}>
+      <h2 style={SECTION_TITLE_STYLE}>Delivery Address</h2>
+
+      <div>
+        <div style={FORM_GROUP_STYLE}>
+          <label style={LABEL_STYLE}>
             Street Address *
           </label>
           <input
@@ -232,19 +362,13 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
             value={address.line1}
             onChange={(e) => handleChange('line1', e.target.value)}
             placeholder="123 Main Street, Apt 4B"
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '1em',
-            }}
+            style={INPUT_STYLE}
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+        <div style={INPUT_GRID_STYLE}>
+          <div style={FORM_GROUP_STYLE}>
+            <label style={LABEL_STYLE}>
               City *
             </label>
             <input
@@ -253,18 +377,12 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
               value={address.city}
               onChange={(e) => handleChange('city', e.target.value)}
               placeholder="Bangalore"
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1em',
-              }}
+              style={INPUT_STYLE}
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+          <div style={FORM_GROUP_STYLE}>
+            <label style={LABEL_STYLE}>
               State *
             </label>
             <input
@@ -273,19 +391,13 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
               value={address.state}
               onChange={(e) => handleChange('state', e.target.value)}
               placeholder="Karnataka"
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '1em',
-              }}
+              style={INPUT_STYLE}
             />
           </div>
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+        <div style={FORM_GROUP_STYLE}>
+          <label style={LABEL_STYLE}>
             Postal Code *
           </label>
           <input
@@ -295,13 +407,7 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
             onChange={(e) => handleChange('postalCode', e.target.value)}
             placeholder="560001"
             pattern="[0-9]{6}"
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontSize: '1em',
-            }}
+            style={INPUT_STYLE}
           />
         </div>
       </div>
@@ -318,32 +424,61 @@ function CartSummary({ currency }: CartSummaryProps) {
 
   if (!session) return null;
 
+  const CARD_STYLE = {
+    backgroundColor: 'white',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    padding: '24px',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  };
+
+  const TITLE_STYLE = {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: '#0f172a',
+    margin: '0 0 16px 0',
+  };
+
+  const ITEM_ROW_STYLE = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '8px 0',
+    borderBottom: '1px solid #f1f5f9',
+  };
+
+  const SUMMARY_SECTION_STYLE = {
+    borderTop: '1px solid #e2e8f0',
+    paddingTop: '16px',
+  };
+
+  const TOTAL_ROW_STYLE = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '8px',
+    fontSize: '14px',
+  };
+
+  const NOTE_STYLE = {
+    fontSize: '12px',
+    color: '#475569',
+    marginTop: '12px',
+    lineHeight: 1.5,
+  };
+
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '20px',
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: '16px' }}>Order Summary</h2>
+    <div style={CARD_STYLE}>
+      <h2 style={TITLE_STYLE}>Order Summary</h2>
 
       <div style={{ marginBottom: '16px' }}>
         {session.items.map((item: any) => (
           <div
             key={item.item.id}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '8px 0',
-              borderBottom: '1px solid #f3f4f6',
-            }}
+            style={ITEM_ROW_STYLE}
           >
-            <span>
+            <span style={{ fontSize: '14px', color: '#0f172a' }}>
               {item.item.descriptor?.name || item.item.id} × {item.quantity}
             </span>
-            <span>
+            <span style={{ fontSize: '14px', fontWeight: 500, color: '#0f172a' }}>
               {currency}{' '}
               {((parseFloat(item.item.price?.value || '0') * item.quantity).toFixed(2))}
             </span>
@@ -351,14 +486,14 @@ function CartSummary({ currency }: CartSummaryProps) {
         ))}
       </div>
 
-      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <span>Subtotal</span>
-          <span>
+      <div style={SUMMARY_SECTION_STYLE}>
+        <div style={TOTAL_ROW_STYLE}>
+          <span style={{ color: '#475569' }}>Subtotal</span>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>
             {currency} {subtotal.toFixed(2)}
           </span>
         </div>
-        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '12px' }}>
+        <p style={NOTE_STYLE}>
           Complete the form to get final pricing with delivery and tax
         </p>
       </div>

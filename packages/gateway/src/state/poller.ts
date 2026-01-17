@@ -54,7 +54,7 @@ export class AsyncPoller {
         return false;
       };
 
-      this.poll(checkCallback, actualTimeout, startTime, `Timeout waiting for callback: ${transactionId}`, resolve, reject);
+      this.poll<T>(checkCallback, actualTimeout, startTime, `Timeout waiting for callback: ${transactionId}`, resolve, reject);
     });
   }
 
@@ -77,16 +77,16 @@ export class AsyncPoller {
         return false;
       };
 
-      this.poll(checkCondition, actualTimeout, startTime, 'Timeout waiting for condition', resolve, reject);
+      this.poll<T>(checkCondition, actualTimeout, startTime, 'Timeout waiting for condition', resolve, reject);
     });
   }
 
-  private poll(
+  private poll<T>(
     check: () => boolean,
     timeout: number,
     startTime: number,
     timeoutMessage: string,
-    resolve: (value: unknown) => void,
+    resolve: (value: T) => void,
     reject: (reason?: Error) => void
   ): void {
     const elapsed = Date.now() - startTime;
@@ -100,7 +100,7 @@ export class AsyncPoller {
       return;
     }
 
-    setTimeout(() => this.poll(check, timeout, startTime, timeoutMessage, resolve, reject), this.pollInterval);
+    setTimeout(() => this.poll<T>(check, timeout, startTime, timeoutMessage, resolve, reject), this.pollInterval);
   }
 
   getPollInterval(): number {
