@@ -6,12 +6,11 @@ import {
   COLORS,
   SPACING,
   TYPOGRAPHY,
-  TEXT_BOX,
   BUTTON,
-  PILL_BUTTON,
-  BADGE,
   DRAMS,
+  GRID,
 } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsButton } from '@ondc-agent/shared/design-system';
 
 // Seller client configuration interface
 interface SellerClientConfig {
@@ -56,6 +55,20 @@ const validateSubscriberId = (id: string): boolean => {
   const trimmed = id.trim();
   if (trimmed.length < 3) return false;
   return /^[a-zA-Z0-9.-]+$/.test(trimmed);
+};
+
+const HELPER_TEXT_STYLE = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+};
+
+const ERROR_STYLE = {
+  ...CARD.base,
+  backgroundColor: '#fef2f2',
+  borderColor: '#fecaca',
+  color: COLORS.error,
+  padding: SPACING.md,
+  marginBottom: SPACING.md,
 };
 
 export function ConfigPage() {
@@ -159,7 +172,7 @@ export function ConfigPage() {
       const response = await fetch(`${API_BASE}/api/seller/config/generate-keys`, {
         method: 'POST',
       });
-      if (!response.ok) {
+      if (response.ok) {
         throw new Error('Failed to generate key pair');
       }
       const data = await response.json();
@@ -240,23 +253,24 @@ export function ConfigPage() {
       {testResult && (
         <div
           style={{
-            ...BADGE.base,
-            ...(testResult.success ? BADGE.success : BADGE.error),
+            ...CARD.base,
+            backgroundColor: testResult.success ? '#f0fdf4' : '#fef2f2',
+            borderColor: testResult.success ? '#86efac' : '#fecaca',
             marginBottom: SPACING.xl,
+            padding: SPACING.lg,
           }}
         >
-          {testResult.message}
+          <p style={{ margin: 0, ...TYPOGRAPHY.label, color: testResult.success ? '#166534' : '#dc2626' }}>
+            {testResult.success ? '✓' : '✕'} {testResult.message}
+          </p>
         </div>
       )}
 
       {/* Configuration Form */}
-      <div
-        style={{
-          ...CARD.base,
-          marginBottom: SPACING.xl,
-        }}
-      >
-        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>ONDC Credentials</h2>
+      <div style={{ ...CARD.base, marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>
+          ONDC Credentials
+        </h2>
 
         {/* Gateway URL */}
         <div style={{ marginBottom: SPACING.xl }}>
@@ -265,23 +279,20 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Gateway URL *
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.baseUrl}
             onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
             placeholder="https://gateway.ondc.org"
-            style={{
-              ...TEXT_BOX.track,
-              ...(getFieldError('baseUrl') ? TEXT_BOX.error : {}),
-            }}
+            error={!!getFieldError('baseUrl')}
           />
           {getFieldError('baseUrl') && (
-            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
+            <p style={{ marginTop: SPACING.xs, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('baseUrl')}
             </p>
           )}
@@ -294,27 +305,24 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Subscriber ID *
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.subscriberId}
             onChange={(e) => setConfig({ ...config, subscriberId: e.target.value })}
             placeholder="ondc.example.com"
-            style={{
-              ...TEXT_BOX.track,
-              ...(getFieldError('subscriberId') ? TEXT_BOX.error : {}),
-            }}
+            error={!!getFieldError('subscriberId')}
           />
           {getFieldError('subscriberId') && (
-            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
+            <p style={{ marginTop: SPACING.xs, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('subscriberId')}
             </p>
           )}
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             Your unique ONDC subscriber identifier (e.g., ondc.example.com)
           </p>
         </div>
@@ -326,53 +334,39 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Private Key *
           </label>
-          <div style={{ display: 'flex', gap: SPACING.sm }}>
-            <input
+          <div style={{ display: 'flex', gap: SPACING.md }}>
+            <DramsInput
               type={showPrivateKey ? 'text' : 'password'}
               value={config.privateKey}
               onChange={(e) => setConfig({ ...config, privateKey: e.target.value })}
               placeholder="Base64 encoded Ed25519 private key"
-              style={{
-                flex: 1,
-                ...TEXT_BOX.track,
-                fontFamily: 'monospace',
-                ...(getFieldError('privateKey') ? TEXT_BOX.error : {}),
-              }}
+              error={!!getFieldError('privateKey')}
+              style={{ flex: 1, fontFamily: 'monospace' } as React.CSSProperties}
             />
-            <button
+            <DramsButton
               type="button"
               onClick={() => setShowPrivateKey(!showPrivateKey)}
-              style={{
-                ...BUTTON.secondary,
-                fontSize: TYPOGRAPHY.body.fontSize,
-              }}
+              variant="gray"
             >
               {showPrivateKey ? 'Hide' : 'Show'}
-            </button>
+            </DramsButton>
           </div>
           {getFieldError('privateKey') && (
-            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
+            <p style={{ marginTop: SPACING.xs, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('privateKey')}
             </p>
           )}
-          <div style={{ marginTop: SPACING.sm, display: 'flex', gap: SPACING.sm }}>
-            <button
-              type="button"
-              onClick={handleGenerateKeyPair}
-              style={{
-                ...BUTTON.primary,
-                fontSize: TYPOGRAPHY.body.fontSize,
-              }}
-            >
+          <div style={{ display: 'flex', gap: SPACING.md }}>
+            <DramsButton type="button" onClick={handleGenerateKeyPair} variant="gray">
               Generate New Key Pair
-            </button>
+            </DramsButton>
           </div>
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             Ed25519 private key for signing ONDC requests
           </p>
         </div>
@@ -384,32 +378,28 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Key ID
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.keyId}
             onChange={(e) => setConfig({ ...config, keyId: e.target.value })}
             placeholder="ondc.example.com-1234567890"
-            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             Unique identifier for this key (auto-generated when using Generate Key Pair)
           </p>
         </div>
       </div>
 
       {/* Location Settings */}
-      <div
-        style={{
-          ...CARD.base,
-          marginBottom: SPACING.xl,
-        }}
-      >
-        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>Location Settings</h2>
+      <div style={{ ...CARD.base, marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>
+          Location Settings
+        </h2>
 
         {/* Domain */}
         <div style={{ marginBottom: SPACING.xl }}>
@@ -418,19 +408,18 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Domain
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.domain}
             onChange={(e) => setConfig({ ...config, domain: e.target.value })}
             placeholder="nic2004:52110"
-            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             ONDC domain code (default: nic2004:52110 for Retail)
           </p>
         </div>
@@ -442,19 +431,18 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             City
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.city}
             onChange={(e) => setConfig({ ...config, city: e.target.value })}
             placeholder="std:080"
-            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             City code (e.g., std:080 for Bangalore)
           </p>
         </div>
@@ -466,20 +454,19 @@ export function ConfigPage() {
               display: 'block',
               marginBottom: SPACING.sm,
               ...TYPOGRAPHY.label,
-              color: COLORS.textPrimary,
+              color: DRAMS.textDark,
             }}
           >
             Country
           </label>
-          <input
+          <DramsInput
             type="text"
             value={config.country}
             onChange={(e) => setConfig({ ...config, country: e.target.value })}
             placeholder="IND"
             maxLength={3}
-            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
+          <p style={HELPER_TEXT_STYLE}>
             ISO 3166-1 alpha-2 country code (default: IND for India)
           </p>
         </div>
@@ -487,66 +474,51 @@ export function ConfigPage() {
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: SPACING.md, flexWrap: 'wrap' }}>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          style={{
-            ...BUTTON.primary,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
+        <DramsButton type="button" onClick={handleSave} disabled={loading} loading={loading}>
           {loading ? 'Saving...' : 'Save Configuration'}
-        </button>
+        </DramsButton>
 
-        <button
+        <DramsButton
+          type="button"
           onClick={handleTestConnection}
           disabled={testing}
-          style={{
-            ...PILL_BUTTON.gray,
-            cursor: testing ? 'not-allowed' : 'pointer',
-            opacity: testing ? 0.6 : 1,
-          }}
+          loading={testing}
+          variant="gray"
         >
           {testing ? 'Testing...' : 'Test Connection'}
-        </button>
+        </DramsButton>
 
         {testResult && (
-          <button
+          <DramsButton
+            type="button"
             onClick={() => {
               setTestResult(null);
               setErrors([]);
             }}
-            style={{
-              ...BUTTON.secondary,
-            }}
+            variant="gray"
           >
             Clear Messages
-          </button>
+          </DramsButton>
         )}
       </div>
 
       {/* Info Section */}
-      <div
-        style={{
-          marginTop: SPACING.xl,
-          ...BADGE.info,
-        }}
-      >
-        <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label, color: DRAMS.textDark }}>
+      <div style={{ marginTop: SPACING.xl, ...CARD.base, padding: SPACING.lg }}>
+        <h3 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.md }}>
           Configuration Help
-        </p>
+        </h3>
         <ul style={{ margin: 0, paddingLeft: SPACING.xl, ...TYPOGRAPHY.body }}>
-          <li>
-            <strong>Generate New Key Pair:</strong> Creates a new Ed25519 key pair for signing
-            ONDC requests
+          <li style={{ marginBottom: SPACING.sm }}>
+            <span style={{ ...TYPOGRAPHY.label, color: DRAMS.orange }}>Generate New Key Pair:</span>{' '}
+            Creates a new Ed25519 key pair for signing ONDC requests
+          </li>
+          <li style={{ marginBottom: SPACING.sm }}>
+            <span style={{ ...TYPOGRAPHY.label, color: DRAMS.orange }}>Save Configuration:</span>{' '}
+            Stores your configuration securely on the server
           </li>
           <li>
-            <strong>Save Configuration:</strong> Stores your configuration securely on the server
-          </li>
-          <li>
-            <strong>Test Connection:</strong> Verifies your credentials and tests connectivity to
-            the ONDC gateway
+            <span style={{ ...TYPOGRAPHY.label, color: DRAMS.orange }}>Test Connection:</span>{' '}
+            Verifies your credentials and tests connectivity to the ONDC gateway
           </li>
         </ul>
       </div>

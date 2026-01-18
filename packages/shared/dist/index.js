@@ -1528,7 +1528,8 @@ var PILL_BUTTON = {
     color: DRAMS.textDark,
     border: "none",
     cursor: "pointer",
-    transition: TRANSITIONS.hover
+    transition: TRANSITIONS.hover,
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
   }
 };
 var TEXT_BOX = {
@@ -3173,16 +3174,7 @@ import { Fragment as Fragment2, jsx as jsx10, jsxs as jsxs10 } from "react/jsx-r
 var BUTTON_UNIQUE_ID = "drams-button-";
 var BUTTON_STYLES = {
   primary: PILL_BUTTON.orange,
-  secondary: {
-    background: DRAMS.grayTrack,
-    color: DRAMS.textDark,
-    border: "none",
-    borderRadius: RADIUS.pill,
-    padding: `${SPACING.md} ${SPACING.xl}`,
-    fontSize: TYPOGRAPHY.label.fontSize,
-    fontWeight: TYPOGRAPHY.label.fontWeight,
-    cursor: "pointer"
-  },
+  secondary: PILL_BUTTON.gray,
   danger: {
     background: COLORS.error,
     color: "white",
@@ -3191,7 +3183,8 @@ var BUTTON_STYLES = {
     padding: `${SPACING.md} ${SPACING.xl}`,
     fontSize: TYPOGRAPHY.label.fontSize,
     fontWeight: TYPOGRAPHY.label.fontWeight,
-    cursor: "pointer"
+    cursor: "pointer",
+    boxShadow: "0 2px 6px rgba(220, 38, 38, 0.25)"
   },
   gray: PILL_BUTTON.gray
 };
@@ -3241,6 +3234,7 @@ var DramsButton = forwardRef2(
       (variant === "secondary" || variant === "gray") && /* @__PURE__ */ jsx10("style", { children: `
             button[data-hovered="true"]#${uniqueId} {
               background: ${DRAMS.grayHover} !important;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
             }
           ` })
     ] });

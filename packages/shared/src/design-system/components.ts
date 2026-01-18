@@ -26,6 +26,7 @@ export const PILL_BUTTON = {
     border: 'none',
     cursor: 'pointer',
     transition: TRANSITIONS.hover,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
   },
 } as const;
 
