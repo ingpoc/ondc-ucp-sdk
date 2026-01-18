@@ -1,14 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
-import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON, CARD, COLORS } from '@ondc-agent/shared/design-system';
+import {
+  PageLayout,
+  PageHeader,
+  DRAMS,
+  SPACING,
+  TYPOGRAPHY,
+  RADIUS,
+  BUTTON,
+  CARD,
+  COLORS,
+} from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 
 const canAcceptOrder = (status: UCPOrderStatus): boolean => status === 'created';
 const canRejectOrder = (status: UCPOrderStatus): boolean => status === 'created';
-const canDispatchOrder = (status: UCPOrderStatus): boolean =>
-  ['accepted', 'packed'].includes(status);
+const canDispatchOrder = (status: UCPOrderStatus): boolean => ['accepted', 'packed'].includes(status);
 
 const getStatusLabel = (status: UCPOrderStatus): string => {
   const labels: Record<UCPOrderStatus, string> = {
@@ -86,36 +95,20 @@ const getOrderTimeline = (order: UCPOrder): TimelineEvent[] => {
   return events;
 };
 
-const PAGE_STYLE = {
-  maxWidth: '800px',
-  margin: '0 auto',
-  padding: SPACING.xl,
-};
-
-const BACK_BUTTON_STYLE = {
+const BACK_BUTTON_STYLE: CSSProperties = {
   ...BUTTON.secondary,
   padding: `${SPACING.sm} ${SPACING.lg}`,
-  marginBottom: SPACING.xl,
+  marginBottom: SPACING.md,
 };
 
-const ORDER_HEADER_STYLE = {
-  ...CARD.base,
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  marginBottom: SPACING.xl,
-  paddingBottom: SPACING.xl,
-  borderBottom: `1px solid ${DRAMS.grayTrack}`,
-};
-
-const STATUS_BADGE_STYLE = {
+const STATUS_BADGE_STYLE: CSSProperties = {
   padding: `${SPACING.sm} ${SPACING.lg}`,
   borderRadius: RADIUS.md,
   ...TYPOGRAPHY.label,
   textTransform: 'capitalize' as const,
 };
 
-const ACTIONS_CARD_STYLE = {
+const ACTIONS_CARD_STYLE: CSSProperties = {
   ...CARD.base,
   marginBottom: SPACING.xl,
   display: 'flex',
@@ -123,17 +116,17 @@ const ACTIONS_CARD_STYLE = {
   flexWrap: 'wrap' as const,
 };
 
-const SECTION_CARD_STYLE = {
+const SECTION_CARD_STYLE: CSSProperties = {
   ...CARD.base,
   marginBottom: SPACING.xl,
 };
 
-const SECTION_TITLE_STYLE = {
+const SECTION_TITLE_STYLE: CSSProperties = {
   ...TYPOGRAPHY.h3,
   margin: `0 0 ${SPACING.md} 0`,
 };
 
-const ITEM_ROW_STYLE = {
+const ITEM_ROW_STYLE: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   padding: SPACING.md,
@@ -143,11 +136,11 @@ const ITEM_ROW_STYLE = {
   marginBottom: SPACING.sm,
 };
 
-const TIMELINE_STYLE = {
+const TIMELINE_STYLE: CSSProperties = {
   position: 'relative' as const,
 };
 
-const TIMELINE_LINE_STYLE = {
+const TIMELINE_LINE_STYLE: CSSProperties = {
   position: 'absolute' as const,
   left: '8px',
   top: 0,
@@ -156,13 +149,13 @@ const TIMELINE_LINE_STYLE = {
   backgroundColor: DRAMS.grayTrack,
 };
 
-const TIMELINE_EVENT_STYLE = {
+const TIMELINE_EVENT_STYLE: CSSProperties = {
   position: 'relative' as const,
   paddingLeft: SPACING['3xl'],
   paddingBottom: SPACING.xl,
 };
 
-const TIMELINE_DOT_STYLE = {
+const TIMELINE_DOT_STYLE: CSSProperties = {
   position: 'absolute' as const,
   left: 0,
   top: '4px',
@@ -263,31 +256,31 @@ export function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div style={PAGE_STYLE}>
+      <PageLayout>
         <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight }}>Loading order details...</p>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div style={PAGE_STYLE}>
-        <p style={{ color: COLORS.error, marginBottom: SPACING.md }}>Error: {error}</p>
+      <PageLayout>
+        <PageHeader title="Error" subtitle={error} />
         <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
           Back to Orders
         </button>
-      </div>
+      </PageLayout>
     );
   }
 
   if (!order) {
     return (
-      <div style={PAGE_STYLE}>
-        <p style={{ ...TYPOGRAPHY.body }}>Order not found</p>
+      <PageLayout>
+        <PageHeader title="Not Found" subtitle="Order not found" />
         <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
           Back to Orders
         </button>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -295,16 +288,17 @@ export function OrderDetailPage() {
   const statusColor = getStatusColor(order.status);
 
   return (
-    <div style={PAGE_STYLE}>
+    <PageLayout>
       <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
         ← Back to Orders
       </button>
 
-      <div style={ORDER_HEADER_STYLE}>
+      <div style={{ ...CARD.base, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING.lg, paddingBottom: SPACING.lg, borderBottom: `1px solid ${DRAMS.grayTrack}` }}>
         <div>
           <h1 style={{ ...TYPOGRAPHY.h2, margin: `0 0 ${SPACING.sm} 0` }}>Order #{order.id}</h1>
           <p style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, margin: 0 }}>
-            Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
+            Placed on{' '}
+            {new Date(order.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -482,6 +476,6 @@ export function OrderDetailPage() {
           )}
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

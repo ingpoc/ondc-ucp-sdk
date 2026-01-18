@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
-import { CARD, COLORS, SPACING, TYPOGRAPHY, TEXT_BOX, BUTTON, PILL_BUTTON, BADGE, DRAMS } from '@ondc-agent/shared/design-system';
+import {
+  PageLayout,
+  PageHeader,
+  CARD,
+  COLORS,
+  SPACING,
+  TYPOGRAPHY,
+  TEXT_BOX,
+  BUTTON,
+  PILL_BUTTON,
+  BADGE,
+  DRAMS,
+} from '@ondc-agent/shared/design-system';
 
 // Seller client configuration interface
 interface SellerClientConfig {
@@ -211,19 +223,18 @@ export function ConfigPage() {
 
   if (loading && !config.subscriberId) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
-        <h1>Seller Configuration</h1>
-        <p>Loading configuration...</p>
-      </div>
+      <PageLayout>
+        <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight }}>Loading configuration...</p>
+      </PageLayout>
     );
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl, backgroundColor: '#ffffff', minHeight: '100vh' }}>
-      <h1 style={{ ...TYPOGRAPHY.h1, color: DRAMS.textDark, margin: `0 0 ${SPACING.md} 0` }}>Seller Configuration</h1>
-      <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, marginBottom: SPACING.xl }}>
-        Configure your ONDC seller credentials and connection settings
-      </p>
+    <PageLayout>
+      <PageHeader
+        title="Seller Configuration"
+        subtitle="Configure your ONDC seller credentials and connection settings"
+      />
 
       {/* Result Message */}
       {testResult && (
@@ -539,6 +550,6 @@ export function ConfigPage() {
           </li>
         </ul>
       </div>
-    </div>
+    </PageLayout>
   );
 }

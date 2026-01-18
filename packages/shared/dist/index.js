@@ -2124,9 +2124,287 @@ function DramsAddButton({
   );
 }
 
-// src/design-system/components/RollingSearch.tsx
-import { useState as useState4, useRef, useEffect } from "react";
+// src/design-system/components/AgentChat.tsx
+import { useState as useState4, useRef, useEffect, useCallback } from "react";
 import { jsx as jsx4, jsxs as jsxs4 } from "react/jsx-runtime";
+var STORAGE_KEY = "ondc-session-id";
+var CHAT_CONTAINER_STYLE = (height) => ({
+  ...CARD.base,
+  padding: 0,
+  display: "flex",
+  flexDirection: "column",
+  height: height || "600px",
+  overflow: "hidden"
+});
+var HEADER_STYLE = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  borderBottom: `1px solid ${DRAMS.grayTrack}`,
+  backgroundColor: "#ffffff"
+};
+var HEADER_TITLE_STYLE = {
+  ...TYPOGRAPHY.label,
+  color: DRAMS.textDark,
+  margin: 0
+};
+var SESSION_ID_STYLE = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight
+};
+var MESSAGES_CONTAINER_STYLE = {
+  flex: 1,
+  overflowY: "auto",
+  padding: SPACING.xl,
+  display: "flex",
+  flexDirection: "column",
+  gap: SPACING.md
+};
+var USER_MESSAGE_STYLE = {
+  alignSelf: "flex-end",
+  maxWidth: "70%"
+};
+var USER_BUBBLE_STYLE = {
+  backgroundColor: DRAMS.orange,
+  color: "white",
+  padding: `${SPACING.sm} ${SPACING.lg}`,
+  borderRadius: RADIUS.lg,
+  ...TYPOGRAPHY.body
+};
+var ASSISTANT_MESSAGE_STYLE = {
+  alignSelf: "flex-start",
+  maxWidth: "70%"
+};
+var ASSISTANT_BUBBLE_STYLE = {
+  backgroundColor: DRAMS.grayTrack,
+  color: DRAMS.textDark,
+  padding: `${SPACING.sm} ${SPACING.lg}`,
+  borderRadius: RADIUS.lg,
+  ...TYPOGRAPHY.body
+};
+var TYPING_INDICATOR_STYLE = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  padding: `${SPACING.sm} ${SPACING.md}`,
+  backgroundColor: DRAMS.grayTrack,
+  borderRadius: RADIUS.pill,
+  alignSelf: "flex-start"
+};
+var INPUT_CONTAINER_STYLE = {
+  padding: SPACING.lg,
+  borderTop: `1px solid ${DRAMS.grayTrack}`,
+  display: "flex",
+  gap: SPACING.md,
+  alignItems: "center"
+};
+var INPUT_STYLE = {
+  flex: 1,
+  border: "none",
+  borderRadius: RADIUS.pill,
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  fontSize: TYPOGRAPHY.body.fontSize,
+  color: DRAMS.textDark,
+  backgroundColor: DRAMS.grayTrack,
+  fontFamily: DRAMS.fontFamily,
+  transition: TRANSITIONS.standard
+};
+var SEND_BUTTON_STYLE = (disabled2) => ({
+  ...BUTTON.primary,
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  opacity: disabled2 ? 0.5 : 1,
+  cursor: disabled2 ? "not-allowed" : "pointer"
+});
+var EMPTY_STATE_STYLE = {
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  textAlign: "center",
+  padding: SPACING["3xl"]
+};
+var ERROR_MESSAGE_STYLE = {
+  backgroundColor: "#fef2f2",
+  border: "1px solid #fecaca",
+  color: "#dc2626",
+  padding: `${SPACING.sm} ${SPACING.md}`,
+  borderRadius: RADIUS.md,
+  ...TYPOGRAPHY.bodySmall,
+  alignSelf: "flex-start"
+};
+function getSharedSessionId() {
+  let sessionId = localStorage.getItem(STORAGE_KEY);
+  if (!sessionId) {
+    sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem(STORAGE_KEY, sessionId);
+  }
+  return sessionId;
+}
+function MessageBubble({ message }) {
+  if (message.type === "user") {
+    return /* @__PURE__ */ jsx4("div", { style: USER_MESSAGE_STYLE, children: /* @__PURE__ */ jsx4("div", { style: USER_BUBBLE_STYLE, children: message.content }) });
+  }
+  if (message.type === "result" && message.subtype === "error_during_execution") {
+    return /* @__PURE__ */ jsx4("div", { style: ERROR_MESSAGE_STYLE, children: message.errors?.join(", ") || message.error || "An error occurred" });
+  }
+  return /* @__PURE__ */ jsx4("div", { style: ASSISTANT_MESSAGE_STYLE, children: /* @__PURE__ */ jsx4("div", { style: ASSISTANT_BUBBLE_STYLE, children: message.content || message.data?.text || JSON.stringify(message.data) }) });
+}
+async function processStream(reader, onMessage, onComplete, onError) {
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      try {
+        const data = JSON.parse(line.slice(6));
+        if (data.type === "result" && data.subtype === "success") {
+          onComplete();
+        } else if (data.type === "result" && data.subtype === "error_during_execution") {
+          onError(data);
+          break;
+        } else {
+          onMessage(data);
+        }
+      } catch (e) {
+        console.error("Failed to parse SSE data:", e);
+      }
+    }
+  }
+}
+var API_BASE = "http://localhost:3001";
+function AgentChat({
+  endpoint,
+  placeholder = "Type your message...",
+  title = "Agent Chat",
+  sessionId: initialSessionId = "",
+  onMessage,
+  height,
+  showEmptyState = true,
+  emptyStateMessage = "Start a conversation with the AI agent"
+}) {
+  const [messages, setMessages] = useState4([]);
+  const [input, setInput] = useState4("");
+  const [isLoading, setIsLoading] = useState4(false);
+  const [sessionId] = useState4(initialSessionId || getSharedSessionId());
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+  const sendMessageWithPrompt = useCallback(
+    async (prompt) => {
+      if (!prompt.trim() || isLoading) return;
+      const userMessage = {
+        type: "user",
+        content: prompt,
+        timestamp: Date.now()
+      };
+      setMessages((prev) => [...prev, userMessage]);
+      setInput("");
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, sessionId, context: {} })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No response body");
+        await processStream(
+          reader,
+          (data) => {
+            setMessages((prev) => [...prev, data]);
+            onMessage?.(data);
+          },
+          () => {
+            setIsLoading(false);
+          },
+          (error) => {
+            setMessages((prev) => [...prev, error]);
+            setIsLoading(false);
+          }
+        );
+      } catch (error) {
+        const errorMessage = {
+          type: "result",
+          subtype: "error_during_execution",
+          errors: [error instanceof Error ? error.message : "Unknown error"]
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        onMessage?.(errorMessage);
+        setIsLoading(false);
+      }
+    },
+    [endpoint, isLoading, sessionId, onMessage]
+  );
+  const sendMessage = useCallback(async () => {
+    if (!input.trim() || isLoading) return;
+    await sendMessageWithPrompt(input);
+  }, [input, isLoading, sendMessageWithPrompt]);
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+  const isInputDisabled = isLoading || !input.trim();
+  return /* @__PURE__ */ jsxs4("div", { className: "agent-chat", style: CHAT_CONTAINER_STYLE(height), children: [
+    /* @__PURE__ */ jsxs4("div", { className: "chat-header", style: HEADER_STYLE, children: [
+      /* @__PURE__ */ jsx4("span", { style: HEADER_TITLE_STYLE, children: title }),
+      sessionId && /* @__PURE__ */ jsxs4("span", { style: SESSION_ID_STYLE, children: [
+        "Session: ",
+        sessionId.slice(0, 8)
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs4("div", { className: "chat-messages", style: MESSAGES_CONTAINER_STYLE, children: [
+      showEmptyState && messages.length === 0 && /* @__PURE__ */ jsx4("div", { style: EMPTY_STATE_STYLE, children: emptyStateMessage }),
+      messages.map((message, index) => /* @__PURE__ */ jsx4(
+        MessageBubble,
+        {
+          message
+        },
+        `${message.type}-${index}-${message.timestamp || Date.now()}`
+      )),
+      isLoading && /* @__PURE__ */ jsx4("div", { className: "typing-indicator", style: TYPING_INDICATOR_STYLE, children: "Agent is thinking..." }),
+      /* @__PURE__ */ jsx4("div", { ref: messagesEndRef })
+    ] }),
+    /* @__PURE__ */ jsxs4("div", { className: "chat-input", style: INPUT_CONTAINER_STYLE, children: [
+      /* @__PURE__ */ jsx4(
+        "input",
+        {
+          type: "text",
+          value: input,
+          onChange: (e) => setInput(e.target.value),
+          onKeyPress: handleKeyPress,
+          placeholder,
+          disabled: isLoading,
+          style: INPUT_STYLE
+        }
+      ),
+      /* @__PURE__ */ jsx4(
+        "button",
+        {
+          onClick: sendMessage,
+          disabled: isInputDisabled,
+          style: SEND_BUTTON_STYLE(isInputDisabled),
+          children: "Send"
+        }
+      )
+    ] })
+  ] });
+}
+
+// src/design-system/components/RollingSearch.tsx
+import { useState as useState5, useRef as useRef2, useEffect as useEffect2 } from "react";
+import { jsx as jsx5, jsxs as jsxs5 } from "react/jsx-runtime";
 var CONTAINER_STYLE2 = {
   position: "relative",
   width: "234px",
@@ -2148,7 +2426,7 @@ var GRAY_TRACK_EXPANDED = {
   top: "0",
   left: "0"
 };
-var INPUT_STYLE = {
+var INPUT_STYLE2 = {
   position: "absolute",
   left: "52px",
   top: "50%",
@@ -2225,10 +2503,10 @@ var ICON_STYLE = {
   pointerEvents: "none"
 };
 function RollingSearch({ onSearch, placeholder = "Search products..." }) {
-  const [isExpanded, setIsExpanded] = useState4(false);
-  const [query, setQuery] = useState4("");
-  const inputRef = useRef(null);
-  useEffect(() => {
+  const [isExpanded, setIsExpanded] = useState5(false);
+  const [query, setQuery] = useState5("");
+  const inputRef = useRef2(null);
+  useEffect2(() => {
     if (isExpanded && inputRef.current) {
       inputRef.current.focus();
     }
@@ -2265,8 +2543,8 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
   const handleInputChange = (e) => {
     setQuery(e.currentTarget.value);
   };
-  return /* @__PURE__ */ jsxs4("div", { style: { ...CONTAINER_STYLE2 }, children: [
-    /* @__PURE__ */ jsx4(
+  return /* @__PURE__ */ jsxs5("div", { style: { ...CONTAINER_STYLE2 }, children: [
+    /* @__PURE__ */ jsx5(
       "div",
       {
         style: {
@@ -2275,7 +2553,7 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
         }
       }
     ),
-    /* @__PURE__ */ jsx4(
+    /* @__PURE__ */ jsx5(
       "div",
       {
         style: {
@@ -2284,7 +2562,7 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
         }
       }
     ),
-    /* @__PURE__ */ jsx4(
+    /* @__PURE__ */ jsx5(
       "div",
       {
         style: {
@@ -2293,7 +2571,7 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
         }
       }
     ),
-    /* @__PURE__ */ jsx4(
+    /* @__PURE__ */ jsx5(
       "input",
       {
         ref: inputRef,
@@ -2304,12 +2582,12 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
         onKeyDown: handleKeyDown,
         placeholder,
         style: {
-          ...INPUT_STYLE,
+          ...INPUT_STYLE2,
           ...isExpanded ? INPUT_VISIBLE : {}
         }
       }
     ),
-    /* @__PURE__ */ jsxs4(
+    /* @__PURE__ */ jsxs5(
       "div",
       {
         onClick: handleToggle,
@@ -2319,20 +2597,20 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
           zIndex: 1
         },
         children: [
-          /* @__PURE__ */ jsx4(
+          /* @__PURE__ */ jsx5(
             "svg",
             {
               style: { ...ICON_STYLE, opacity: isExpanded ? 0 : 1 },
               viewBox: "0 0 256 256",
-              children: /* @__PURE__ */ jsx4("path", { d: "M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" })
+              children: /* @__PURE__ */ jsx5("path", { d: "M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" })
             }
           ),
-          /* @__PURE__ */ jsx4(
+          /* @__PURE__ */ jsx5(
             "svg",
             {
               style: { ...ICON_STYLE, opacity: isExpanded ? 1 : 0 },
               viewBox: "0 0 256 256",
-              children: /* @__PURE__ */ jsx4("path", { d: "M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z" })
+              children: /* @__PURE__ */ jsx5("path", { d: "M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z" })
             }
           )
         ]
@@ -2342,7 +2620,7 @@ function RollingSearch({ onSearch, placeholder = "Search products..." }) {
 }
 
 // src/design-system/components/PageLayout.tsx
-import { jsx as jsx5, jsxs as jsxs5 } from "react/jsx-runtime";
+import { jsx as jsx6, jsxs as jsxs6 } from "react/jsx-runtime";
 var PAGE_STYLES = {
   default: {
     ...LAYOUT.page
@@ -2400,31 +2678,393 @@ function PageLayout({
 }) {
   const pageStyle = PAGE_STYLES[variant];
   const contentStyle = CONTENT_STYLES[variant];
-  return /* @__PURE__ */ jsxs5("div", { style: pageStyle, children: [
-    (showHeader || title || subtitle) && /* @__PURE__ */ jsxs5("div", { style: HEADER_STYLES, children: [
-      title && /* @__PURE__ */ jsx5("h1", { style: TITLE_STYLE, children: title }),
-      subtitle && /* @__PURE__ */ jsx5("p", { style: SUBTITLE_STYLE, children: subtitle })
+  return /* @__PURE__ */ jsxs6("div", { style: pageStyle, children: [
+    (showHeader || title || subtitle) && /* @__PURE__ */ jsxs6("div", { style: HEADER_STYLES, children: [
+      title && /* @__PURE__ */ jsx6("h1", { style: TITLE_STYLE, children: title }),
+      subtitle && /* @__PURE__ */ jsx6("p", { style: SUBTITLE_STYLE, children: subtitle })
     ] }),
-    /* @__PURE__ */ jsx5("div", { style: contentStyle, children })
+    /* @__PURE__ */ jsx6("div", { style: contentStyle, children })
   ] });
 }
 function PageHeader({ title, subtitle, actions }) {
-  return /* @__PURE__ */ jsxs5("div", { style: {
+  return /* @__PURE__ */ jsxs6("div", { style: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: SPACING.xl
   }, children: [
-    /* @__PURE__ */ jsxs5("div", { children: [
-      /* @__PURE__ */ jsx5("h1", { style: TITLE_STYLE, children: title }),
-      subtitle && /* @__PURE__ */ jsx5("p", { style: SUBTITLE_STYLE, children: subtitle })
+    /* @__PURE__ */ jsxs6("div", { children: [
+      /* @__PURE__ */ jsx6("h1", { style: TITLE_STYLE, children: title }),
+      subtitle && /* @__PURE__ */ jsx6("p", { style: SUBTITLE_STYLE, children: subtitle })
     ] }),
-    actions && /* @__PURE__ */ jsx5("div", { children: actions })
+    actions && /* @__PURE__ */ jsx6("div", { children: actions })
   ] });
 }
 
 // src/design-system/components/DramsInput.tsx
-import { forwardRef, useState as useState5 } from "react";
+import { forwardRef, useRef as useRef3, useEffect as useEffect3, useState as useState6 } from "react";
+import { jsx as jsx7, jsxs as jsxs7 } from "react/jsx-runtime";
+var TEXT_BOX_STYLE = {
+  position: "relative",
+  width: "100%"
+};
+var TEXT_BOX_TRACK_STYLE = {
+  height: "48px",
+  background: "rgb(238, 238, 238)",
+  borderRadius: "48px",
+  padding: "0 20px",
+  display: "flex",
+  alignItems: "center",
+  transition: "all 0.3s ease"
+};
+var TEXT_BOX_TRACK_FOCUSED = {
+  background: "rgb(230, 230, 230)",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+};
+var INPUT_BASE_STYLE = {
+  flex: 1,
+  border: "none",
+  background: "transparent",
+  fontSize: "15px",
+  color: "#333",
+  outline: "none",
+  caretColor: "rgb(255, 97, 26)",
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+};
+var INDICATOR_STYLE = {
+  width: "12px",
+  height: "12px",
+  borderRadius: "50%",
+  background: "rgb(255, 97, 26)",
+  opacity: "0",
+  transition: "opacity 0.3s ease"
+};
+var ERROR_STYLE = {
+  background: "#fef2f2",
+  boxShadow: "none"
+};
+var ERROR_BORDER_STYLE = {
+  boxShadow: "inset 0 0 0 1px #fecaca"
+};
+var DramsInput = forwardRef(
+  ({ id, error = false, disabled: disabled2 = false, className, style, placeholder, ...rest }, ref) => {
+    const inputRef = useRef3(null);
+    const [isFocused, setIsFocused] = useState6(false);
+    useEffect3(() => {
+      if (ref) {
+        if (typeof ref === "function") {
+          ref(inputRef.current);
+        } else {
+          ref.current = inputRef.current;
+        }
+      }
+    }, [ref]);
+    const trackStyle = {
+      ...TEXT_BOX_TRACK_STYLE,
+      ...isFocused ? TEXT_BOX_TRACK_FOCUSED : {},
+      ...error ? ERROR_STYLE : {},
+      ...error && isFocused ? ERROR_BORDER_STYLE : {},
+      ...disabled2 ? { opacity: 0.5, pointerEvents: "none" } : {},
+      ...style || {}
+    };
+    return /* @__PURE__ */ jsx7("div", { style: TEXT_BOX_STYLE, className, children: /* @__PURE__ */ jsxs7("div", { style: trackStyle, children: [
+      /* @__PURE__ */ jsx7(
+        "input",
+        {
+          ref: inputRef,
+          id,
+          disabled: disabled2,
+          placeholder,
+          style: INPUT_BASE_STYLE,
+          onFocus: (e) => {
+            setIsFocused(true);
+            rest.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            rest.onBlur?.(e);
+          },
+          ...rest
+        }
+      ),
+      /* @__PURE__ */ jsx7("div", { style: { ...INDICATOR_STYLE, opacity: isFocused ? 1 : 0 } })
+    ] }) });
+  }
+);
+DramsInput.displayName = "DramsInput";
+
+// src/design-system/components/DramsDropdown.tsx
+import { useState as useState7, useRef as useRef4, useEffect as useEffect4 } from "react";
+import { jsx as jsx8, jsxs as jsxs8 } from "react/jsx-runtime";
+var DROPDOWN_STYLE = {
+  position: "relative",
+  width: "100%"
+};
+var DROPDOWN_TRACK_STYLE = {
+  height: "48px",
+  background: "rgb(238, 238, 238)",
+  borderRadius: "48px",
+  padding: "0 20px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  cursor: "pointer",
+  transition: "all 0.3s ease"
+};
+var DROPDOWN_TRACK_HOVER = {
+  background: "rgb(232, 232, 232)"
+};
+var LABEL_STYLE = {
+  fontSize: "15px",
+  color: "#333"
+};
+var PLACEHOLDER_STYLE2 = {
+  color: "#999"
+};
+var BALL_STYLE = {
+  width: "32px",
+  height: "32px",
+  borderRadius: "50%",
+  background: "radial-gradient(50% 50% at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
+  boxShadow: "rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, rgba(0, 0, 0, 0.2) -2px -1px 3px 0px inset",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "transform 0.3s ease"
+};
+var MENU_STYLE = {
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  left: "0",
+  right: "0",
+  background: "white",
+  borderRadius: "16px",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+  overflow: "hidden",
+  opacity: "0",
+  visibility: "hidden",
+  transform: "translateY(-10px)",
+  transition: "all 0.3s ease",
+  zIndex: 10
+};
+var MENU_OPEN_STYLE = {
+  opacity: "1",
+  visibility: "visible",
+  transform: "translateY(0)"
+};
+var ITEM_STYLE = {
+  padding: "14px 20px",
+  cursor: "pointer",
+  transition: "background 0.2s ease",
+  fontSize: "15px",
+  color: "#333"
+};
+var ITEM_HOVER_STYLE = {
+  background: "rgb(238, 238, 238)"
+};
+var ITEM_SELECTED_STYLE = {
+  color: "rgb(255, 97, 26)"
+};
+var ARROW_SVG = /* @__PURE__ */ jsx8(
+  "svg",
+  {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 256 256",
+    style: { fill: "rgb(252, 252, 250)" },
+    children: /* @__PURE__ */ jsx8("path", { d: "M128,168l-72-72a12,12,0,0,1,17-17l55,55,55-55a12,12,0,0,1,17,17Z" })
+  }
+);
+function DramsDropdown({
+  options,
+  value,
+  onChange,
+  placeholder = "Select...",
+  disabled: disabled2 = false,
+  className,
+  style
+}) {
+  const [isOpen, setIsOpen] = useState7(false);
+  const [highlightedIndex, setHighlightedIndex] = useState7(null);
+  const containerRef = useRef4(null);
+  const selectedOption = options.find((opt) => opt.value === value);
+  const displayLabel = selectedOption?.label || placeholder;
+  const isPlaceholder = !selectedOption;
+  useEffect4(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isOpen]);
+  useEffect4(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setHighlightedIndex(null);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isOpen]);
+  const handleToggle = () => {
+    if (!disabled2) {
+      setIsOpen(!isOpen);
+      setHighlightedIndex(null);
+    }
+  };
+  const handleSelect = (option) => {
+    onChange?.(option.value);
+    setIsOpen(false);
+    setHighlightedIndex(null);
+  };
+  const handleMouseEnter = (index) => {
+    setHighlightedIndex(index);
+  };
+  const trackStyle = {
+    ...DROPDOWN_TRACK_STYLE,
+    ...isOpen || highlightedIndex !== null ? DROPDOWN_TRACK_HOVER : {},
+    ...disabled2 ? { opacity: 0.5, pointerEvents: "none" } : {}
+  };
+  const ballStyle = {
+    ...BALL_STYLE,
+    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
+  };
+  const labelStyle = {
+    ...LABEL_STYLE,
+    ...isPlaceholder ? PLACEHOLDER_STYLE2 : {}
+  };
+  return /* @__PURE__ */ jsxs8("div", { ref: containerRef, style: { ...DROPDOWN_STYLE, ...style || {} }, className, children: [
+    /* @__PURE__ */ jsxs8("div", { style: trackStyle, onClick: handleToggle, onMouseDown: (e) => e.preventDefault(), children: [
+      /* @__PURE__ */ jsx8("span", { style: labelStyle, children: displayLabel }),
+      /* @__PURE__ */ jsx8("div", { style: ballStyle, children: ARROW_SVG })
+    ] }),
+    /* @__PURE__ */ jsx8(
+      "div",
+      {
+        style: {
+          ...MENU_STYLE,
+          ...isOpen ? MENU_OPEN_STYLE : {}
+        },
+        children: options.map((option, index) => {
+          const isSelected = option.value === value;
+          const isHighlighted = highlightedIndex === index;
+          return /* @__PURE__ */ jsx8(
+            "div",
+            {
+              style: {
+                ...ITEM_STYLE,
+                ...isHighlighted ? ITEM_HOVER_STYLE : {},
+                ...isSelected ? ITEM_SELECTED_STYLE : {}
+              },
+              onMouseEnter: () => handleMouseEnter(index),
+              onClick: () => handleSelect(option),
+              children: option.label
+            },
+            option.value
+          );
+        })
+      }
+    )
+  ] });
+}
+
+// src/design-system/components/DramsToggle.tsx
+import { jsx as jsx9, jsxs as jsxs9 } from "react/jsx-runtime";
+var CONTAINER_STYLE3 = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px"
+};
+var LABEL_STYLE2 = {
+  fontSize: "15px",
+  color: "#333"
+};
+var SWITCH_STYLE = {
+  width: "56px",
+  height: "32px",
+  background: "rgb(238, 238, 238)",
+  borderRadius: "48px",
+  position: "relative",
+  cursor: "pointer",
+  transition: "background 0.3s ease"
+};
+var SWITCH_ACTIVE = {
+  background: "rgb(255, 97, 26)"
+};
+var BALL_STYLE2 = {
+  position: "absolute",
+  width: "26px",
+  height: "26px",
+  background: "white",
+  borderRadius: "50%",
+  top: "3px",
+  left: "3px",
+  transition: "left 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+};
+var BALL_ACTIVE = {
+  left: "27px"
+};
+var DISABLED_STYLE = {
+  opacity: 0.5,
+  pointerEvents: "none"
+};
+function DramsToggle({
+  checked = false,
+  onChange,
+  disabled: disabled2 = false,
+  label,
+  className,
+  style,
+  id
+}) {
+  const handleClick = () => {
+    if (!disabled2 && onChange) {
+      onChange(!checked);
+    }
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+  const switchStyle = {
+    ...SWITCH_STYLE,
+    ...checked ? SWITCH_ACTIVE : {},
+    ...disabled2 ? DISABLED_STYLE : {}
+  };
+  const ballStyle = {
+    ...BALL_STYLE2,
+    ...checked ? BALL_ACTIVE : {}
+  };
+  return /* @__PURE__ */ jsxs9("div", { style: { ...CONTAINER_STYLE3, ...style || {} }, className, children: [
+    label && /* @__PURE__ */ jsx9("label", { style: LABEL_STYLE2, children: label }),
+    /* @__PURE__ */ jsx9(
+      "div",
+      {
+        id,
+        role: "switch",
+        "aria-checked": checked,
+        tabIndex: disabled2 ? -1 : 0,
+        style: switchStyle,
+        onClick: handleClick,
+        onKeyDown: handleKeyDown,
+        children: /* @__PURE__ */ jsx9("div", { style: ballStyle })
+      }
+    )
+  ] });
+}
+
+// src/design-system/components/DramsButton.tsx
+import { forwardRef as forwardRef2, useState as useState8 } from "react";
 
 // src/design-system/tactile.ts
 var orangeBall = {
@@ -2508,105 +3148,8 @@ var active = {
   press: "translateY(1px)"
 };
 
-// src/design-system/components/DramsInput.tsx
-import { Fragment as Fragment2, jsx as jsx6, jsxs as jsxs6 } from "react/jsx-runtime";
-var INPUT_UNIQUE_ID = "drams-input-";
-var DramsInput = forwardRef(
-  ({ id, error = false, disabled: disabled2 = false, fullWidth = false, className, style, ...rest }, ref) => {
-    const [isFocused, setIsFocused] = useState5(false);
-    const uniqueId = id || `${INPUT_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
-    const baseStyle = {
-      ...TEXT_BOX.track,
-      ...fullWidth ? { width: "100%" } : {},
-      ...disabled2 ? disabled : {},
-      ...error ? TEXT_BOX.error : {},
-      ...style || {}
-    };
-    return /* @__PURE__ */ jsxs6(Fragment2, { children: [
-      /* @__PURE__ */ jsx6(
-        "input",
-        {
-          ref,
-          id: uniqueId,
-          disabled: disabled2,
-          className,
-          ...rest,
-          "data-focused": isFocused,
-          "data-error": error,
-          style: baseStyle,
-          onFocus: (e) => {
-            setIsFocused(true);
-            rest.onFocus?.(e);
-          },
-          onBlur: (e) => {
-            setIsFocused(false);
-            rest.onBlur?.(e);
-          }
-        }
-      ),
-      /* @__PURE__ */ jsx6("style", { children: `
-          input[data-focused="true"]#${uniqueId} {
-            background: ${DRAMS.grayHover} !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-            outline: none;
-          }
-        ` })
-    ] });
-  }
-);
-DramsInput.displayName = "DramsInput";
-
-// src/design-system/components/DramsSelect.tsx
-import { forwardRef as forwardRef2, useState as useState6 } from "react";
-import { Fragment as Fragment3, jsx as jsx7, jsxs as jsxs7 } from "react/jsx-runtime";
-var SELECT_UNIQUE_ID = "drams-select-";
-var DramsSelect = forwardRef2(
-  ({ id, error = false, disabled: disabled2 = false, fullWidth = false, options, className, style, ...rest }, ref) => {
-    const [isFocused, setIsFocused] = useState6(false);
-    const uniqueId = id || `${SELECT_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
-    const baseStyle = {
-      ...SELECT_BOX.base,
-      ...fullWidth ? { width: "100%" } : {},
-      ...style || {}
-    };
-    return /* @__PURE__ */ jsxs7(Fragment3, { children: [
-      /* @__PURE__ */ jsx7(
-        "select",
-        {
-          ref,
-          id: uniqueId,
-          disabled: disabled2,
-          className,
-          ...rest,
-          "data-focused": isFocused,
-          "data-error": error,
-          style: baseStyle,
-          onFocus: (e) => {
-            setIsFocused(true);
-            rest.onFocus?.(e);
-          },
-          onBlur: (e) => {
-            setIsFocused(false);
-            rest.onBlur?.(e);
-          },
-          children: options.map((option) => /* @__PURE__ */ jsx7("option", { value: option.value, children: option.label }, option.value))
-        }
-      ),
-      /* @__PURE__ */ jsx7("style", { children: `
-          select[data-focused="true"]#${uniqueId} {
-            background: ${DRAMS.grayHover} !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-            outline: none;
-          }
-        ` })
-    ] });
-  }
-);
-DramsSelect.displayName = "DramsSelect";
-
 // src/design-system/components/DramsButton.tsx
-import { forwardRef as forwardRef3, useState as useState7 } from "react";
-import { Fragment as Fragment4, jsx as jsx8, jsxs as jsxs8 } from "react/jsx-runtime";
+import { Fragment as Fragment2, jsx as jsx10, jsxs as jsxs10 } from "react/jsx-runtime";
 var BUTTON_UNIQUE_ID = "drams-button-";
 var BUTTON_STYLES = {
   primary: PILL_BUTTON.orange,
@@ -2632,7 +3175,7 @@ var BUTTON_STYLES = {
   },
   gray: PILL_BUTTON.gray
 };
-var DramsButton = forwardRef3(
+var DramsButton = forwardRef2(
   ({
     id,
     variant = "primary",
@@ -2643,8 +3186,8 @@ var DramsButton = forwardRef3(
     children,
     ...rest
   }, ref) => {
-    const [isHovered, setIsHovered] = useState7(false);
-    const [isPressed, setIsPressed] = useState7(false);
+    const [isHovered, setIsHovered] = useState8(false);
+    const [isPressed, setIsPressed] = useState8(false);
     const uniqueId = id || `${BUTTON_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
     const isDisabled = disabled2 || loading;
     const baseStyle = {
@@ -2653,8 +3196,8 @@ var DramsButton = forwardRef3(
       ...isDisabled ? disabled : {},
       ...isPressed && !isDisabled ? { transform: "translateY(1px)" } : {}
     };
-    return /* @__PURE__ */ jsxs8(Fragment4, { children: [
-      /* @__PURE__ */ jsx8(
+    return /* @__PURE__ */ jsxs10(Fragment2, { children: [
+      /* @__PURE__ */ jsx10(
         "button",
         {
           ref,
@@ -2675,7 +3218,7 @@ var DramsButton = forwardRef3(
           children: loading ? "..." : children
         }
       ),
-      (variant === "secondary" || variant === "gray") && /* @__PURE__ */ jsx8("style", { children: `
+      (variant === "secondary" || variant === "gray") && /* @__PURE__ */ jsx10("style", { children: `
             button[data-hovered="true"]#${uniqueId} {
               background: ${DRAMS.grayHover} !important;
             }
@@ -2686,6 +3229,7 @@ var DramsButton = forwardRef3(
 DramsButton.displayName = "DramsButton";
 export {
   APP,
+  AgentChat,
   BADGE,
   BUTTON,
   CARD,
@@ -2696,10 +3240,11 @@ export {
   DRAMS_EMPTY_STATE,
   DramsAddButton,
   DramsButton,
+  DramsDropdown,
   DramsFlipCard,
   DramsInput,
   DramsProductCard,
-  DramsSelect,
+  DramsToggle,
   EMPTY_STATE,
   ERROR,
   EnvVars,

@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
-import { DramsInput, DramsSelect, DramsButton } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsDropdown, DramsButton } from '@ondc-agent/shared/design-system';
 
 const CATEGORY_OPTIONS = [
   { value: 'grocery', label: 'Grocery' },
@@ -49,15 +49,16 @@ export function SearchBar({
 
   return (
     <form onSubmit={handleSubmit} style={FORM_STYLE}>
-      <label htmlFor="category-select" style={LABEL_STYLE}>
+      <label htmlFor="category-dropdown" style={LABEL_STYLE}>
         Category
       </label>
-      <DramsSelect
-        id="category-select"
+      <DramsDropdown
+        id="category-dropdown"
         options={CATEGORY_OPTIONS}
         value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        style={{ minWidth: '120px' } as React.CSSProperties}
+        onChange={setCategory}
+        placeholder="Select category"
+        style={{ minWidth: '140px' } as React.CSSProperties}
       />
 
       <label htmlFor="search-input" style={LABEL_STYLE}>
@@ -69,7 +70,6 @@ export function SearchBar({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search products..."
-        fullWidth
         style={{ flex: 1, minWidth: '200px' } as React.CSSProperties}
       />
 

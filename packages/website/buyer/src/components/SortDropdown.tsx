@@ -1,5 +1,5 @@
 import { SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
-import { DramsSelect } from '@ondc-agent/shared/design-system';
+import { DramsDropdown } from '@ondc-agent/shared/design-system';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance' },
@@ -27,14 +27,14 @@ export interface SortDropdownProps {
 export function SortDropdown({ value, onChange }: SortDropdownProps): JSX.Element {
   return (
     <div style={CONTAINER_STYLE}>
-      <label htmlFor="sort-select" style={LABEL_STYLE}>
+      <label htmlFor="sort-dropdown" style={LABEL_STYLE}>
         Sort by:
       </label>
-      <DramsSelect
-        id="sort-select"
+      <DramsDropdown
+        id="sort-dropdown"
         options={SORT_OPTIONS}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
       />
     </div>
   );

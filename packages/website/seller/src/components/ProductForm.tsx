@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { BecknItem } from '@ondc-website/shared';
 import { SPACING, TYPOGRAPHY, DRAMS, disabled } from '@ondc-agent/shared/design-system';
-import { DramsInput, DramsSelect, DramsButton } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsDropdown, DramsButton } from '@ondc-agent/shared/design-system';
 
 export interface ProductFormData {
   id: string;
@@ -96,7 +96,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           onChange={handleInputChange('id')}
           disabled={!!product}
           required
-          fullWidth
           style={product ? (disabled as React.CSSProperties) : undefined}
         />
         {product && (
@@ -117,7 +116,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           onChange={handleInputChange('name')}
           required
           placeholder="e.g., Organic Mango"
-          fullWidth
         />
       </div>
 
@@ -131,7 +129,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
           value={formData.description}
           onChange={handleInputChange('description')}
           placeholder="Short product description"
-          fullWidth
           style={{ minHeight: '80px' } as React.CSSProperties}
         />
       </div>
@@ -140,12 +137,11 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         <label htmlFor="product-category" style={LABEL_STYLE}>
           Category
         </label>
-        <DramsSelect
+        <DramsDropdown
           id="product-category"
           options={CATEGORY_OPTIONS}
           value={formData.categoryId}
-          onChange={handleInputChange('categoryId')}
-          fullWidth
+          onChange={(value) => setFormData({ ...formData, categoryId: value })}
         />
       </div>
 
@@ -164,14 +160,13 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
               min="0"
               step="0.01"
               placeholder="100"
-              fullWidth
-            />
+                />
           </div>
-          <DramsSelect
+          <DramsDropdown
             value={formData.currency}
-            onChange={handleInputChange('currency')}
+            onChange={(value) => setFormData({ ...formData, currency: value })}
             options={CURRENCY_OPTIONS}
-            style={{ width: '100px' } as React.CSSProperties}
+            style={{ width: '120px' } as React.CSSProperties}
           />
         </div>
       </div>

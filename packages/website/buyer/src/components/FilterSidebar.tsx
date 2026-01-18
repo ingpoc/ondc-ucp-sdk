@@ -1,5 +1,5 @@
 import { SPACING, TYPOGRAPHY, DRAMS, CARD } from '@ondc-agent/shared/design-system';
-import { DramsInput, DramsSelect } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsDropdown } from '@ondc-agent/shared/design-system';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance' },
@@ -69,7 +69,6 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          fullWidth
         />
       </div>
 
@@ -88,7 +87,6 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('minRating', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          fullWidth
         />
       </div>
 
@@ -96,11 +94,11 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
         <label htmlFor="sort-by" style={LABEL_STYLE}>
           Sort By
         </label>
-        <DramsSelect
+        <DramsDropdown
           id="sort-by"
           options={SORT_OPTIONS}
           value={filters.sortBy ?? 'relevance'}
-          onChange={(e) => handleChange('sortBy', e.target.value)}
+          onChange={(value) => handleChange('sortBy', value)}
           fullWidth
         />
       </div>

@@ -1,12 +1,5 @@
-import { AgentChat } from '@ondc-website/shared/components';
+import { AgentChat } from '@ondc-agent/shared/design-system';
 import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
-
-const DESCRIPTION_STYLE = {
-  ...TYPOGRAPHY.body,
-  color: DRAMS.textLight,
-  margin: '0',
-  lineHeight: 1.6,
-};
 
 export function AgentChatPage(): JSX.Element {
   return (

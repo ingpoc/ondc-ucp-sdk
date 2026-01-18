@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
-import { CARD, COLORS, SPACING, TYPOGRAPHY, BUTTON, BADGE, DRAMS, RADIUS, TRANSITIONS } from '@ondc-agent/shared/design-system';
+import {
+  PageLayout,
+  PageHeader,
+  CARD,
+  COLORS,
+  SPACING,
+  TYPOGRAPHY,
+  BUTTON,
+  BADGE,
+  DRAMS,
+  RADIUS,
+  TRANSITIONS,
+} from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 
@@ -211,6 +224,7 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
 }
 
 export function OrdersPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<UCPOrder[]>([]);
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [loading, setLoading] = useState(true);
@@ -278,63 +292,53 @@ export function OrdersPage() {
     }
   }, [loadOrders]);
 
-  const handleViewDetails = useCallback((orderId: string) => {
-    window.location.href = `/orders/${orderId}`;
-  }, []);
+  const handleViewDetails = useCallback(
+    (orderId: string) => {
+      navigate(`/orders/${orderId}`);
+    },
+    [navigate]
+  );
 
   const filteredOrders = useMemo(() => filterOrders(orders, filter), [orders, filter]);
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: COLORS.bgPage, padding: SPACING.xl }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: SPACING['3xl'], color: COLORS.textSecondary, ...TYPOGRAPHY.body }}>
+      <PageLayout>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: SPACING['3xl'],
+            color: DRAMS.textLight,
+            ...TYPOGRAPHY.body,
+          }}
+        >
           Loading orders...
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: COLORS.bgPage, padding: SPACING.xl }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ ...TYPOGRAPHY.h2, color: COLORS.textPrimary, margin: `0 0 ${SPACING.xl} 0` }}>Incoming Orders</h1>
-          <div style={{ ...BADGE.error, padding: SPACING.lg }}>
-            <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
-            <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
-            <button
-              onClick={loadOrders}
-              style={{ marginTop: SPACING.lg, ...BUTTON.secondary, ...TYPOGRAPHY.body }}
-            >
-              Retry
-            </button>
-          </div>
+      <PageLayout>
+        <PageHeader
+          title="Incoming Orders"
+          subtitle="Manage and track all your customer orders"
+        />
+        <div style={{ ...BADGE.error, padding: SPACING.lg }}>
+          <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
+          <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
+          <button onClick={loadOrders} style={{ marginTop: SPACING.lg, ...BUTTON.secondary, ...TYPOGRAPHY.body }}>
+            Retry
+          </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const filterOptions: StatusFilter[] = ['all', 'pending', 'accepted', 'dispatched', 'completed', 'cancelled'];
-
-  // DRAMS: Clean white background
-  const PAGE_CONTAINER_STYLE = {
-    minHeight: '100vh',
-    backgroundColor: '#ffffff',
-    padding: '0',
-    width: '100%',
-  };
-
-  const CONTENT_STYLE = {
-    maxWidth: '100%',
-    padding: '0 80px',
-  };
-
-  // DRAMS: Minimal header with gray track background
-  const HEADER_STYLE = {
-    marginBottom: SPACING['2xl'],
-    padding: `64px 80px ${SPACING.xl} 80px`,
-    background: DRAMS.grayTrack,
-  };
 
   // DRAMS: Pill-style filter tabs
   const FILTERS_STYLE = {
@@ -358,60 +362,55 @@ export function OrdersPage() {
   };
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={CONTENT_STYLE}>
-        <div style={HEADER_STYLE}>
-          <h1 style={{ ...TYPOGRAPHY.h1, color: DRAMS.textDark, margin: `0 0 ${SPACING.xl} 0` }}>Incoming Orders</h1>
+    <PageLayout>
+      <PageHeader
+        title="Incoming Orders"
+        subtitle="Manage and track all your customer orders"
+      />
 
-          <div style={FILTERS_STYLE}>
-            {filterOptions.map((filterOption) => {
-              const count = countOrdersByFilter(orders, filterOption);
-              return (
-                <button
-                  key={filterOption}
-                  onClick={() => setFilter(filterOption)}
-                  style={{
-                    ...FILTER_BUTTON_STYLE,
-                    background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
-                    color: filter === filterOption ? 'white' : DRAMS.textDark,
-                    fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
-                  }}
-                >
-                  {filterOption}
-                  <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>{count}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {filteredOrders.length === 0 ? (
-          <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
-            <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
-              {filter === 'all'
-                ? "No incoming orders yet"
-                : `No ${filter} orders`}
-            </p>
-            <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: 0 }}>
-              {filter === 'all'
-                ? 'Orders will appear here when customers place them'
-                : `There are no ${filter} orders at the moment`}
-            </p>
-          </div>
-        ) : (
-          <div>
-            {filteredOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                onAccept={handleAccept}
-                onReject={handleReject}
-                onViewDetails={handleViewDetails}
-              />
-            ))}
-          </div>
-        )}
+      <div style={FILTERS_STYLE}>
+        {filterOptions.map((filterOption) => {
+          const count = countOrdersByFilter(orders, filterOption);
+          return (
+            <button
+              key={filterOption}
+              onClick={() => setFilter(filterOption)}
+              style={{
+                ...FILTER_BUTTON_STYLE,
+                background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
+                color: filter === filterOption ? 'white' : DRAMS.textDark,
+                fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
+              }}
+            >
+              {filterOption}
+              <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>{count}</span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+
+      {filteredOrders.length === 0 ? (
+        <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
+          <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
+            {filter === 'all' ? 'No incoming orders yet' : `No ${filter} orders`}
+          </p>
+          <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: 0 }}>
+            {filter === 'all'
+              ? 'Orders will appear here when customers place them'
+              : `There are no ${filter} orders at the moment`}
+          </p>
+        </div>
+      ) : (
+        filteredOrders.map((order) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onViewDetails={handleViewDetails}
+          />
+        ))
+      )}
+    </PageLayout>
   );
 }

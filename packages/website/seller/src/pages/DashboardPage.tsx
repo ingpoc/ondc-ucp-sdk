@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useApi } from '@ondc-website/shared/hooks';
-import { CARD, SPACING, TYPOGRAPHY, PILL_BUTTON, DRAMS } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, CARD, SPACING, TYPOGRAPHY, PILL_BUTTON, DRAMS } from '@ondc-agent/shared/design-system';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardStats {
   totalProducts: number;
@@ -10,10 +10,15 @@ interface DashboardStats {
 
 export function DashboardPage() {
   const { data } = useApi<DashboardStats>('/api/catalog');
+  const navigate = useNavigate();
+  const itemCount = (data as any)?.['bpp/providers']?.[0]?.items?.length ?? 0;
 
   return (
-    <div style={{ padding: SPACING.xl, backgroundColor: '#ffffff', minHeight: '100vh' }}>
-      <h2 style={{ ...TYPOGRAPHY.h2, marginBottom: SPACING.xl, color: DRAMS.textDark }}>Seller Dashboard</h2>
+    <PageLayout>
+      <PageHeader
+        title="Seller Dashboard"
+        subtitle="Manage your products and track your business performance"
+      />
       <div
         style={{
           display: 'grid',
@@ -22,26 +27,16 @@ export function DashboardPage() {
           marginBottom: SPACING['2xl'],
         }}
       >
-        <div
-          style={{
-            ...CARD.base,
-            textAlign: 'center',
-          }}
-        >
+        <div style={{ ...CARD.base, textAlign: 'center' }}>
           <h3 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark }}>Total Products</h3>
           <p style={{ fontSize: TYPOGRAPHY.h1.fontSize, margin: `${SPACING.md} 0`, color: DRAMS.textDark }}>
-            {(data as any)?.['bpp/providers']?.[0]?.items?.length ?? 0}
+            {itemCount}
           </p>
         </div>
-        <div
-          style={{
-            ...CARD.base,
-            textAlign: 'center',
-          }}
-        >
+        <div style={{ ...CARD.base, textAlign: 'center' }}>
           <h3 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark }}>Active Listings</h3>
           <p style={{ fontSize: TYPOGRAPHY.h1.fontSize, margin: `${SPACING.md} 0`, color: DRAMS.orange }}>
-            {(data as any)?.['bpp/providers']?.[0]?.items?.length ?? 0}
+            {itemCount}
           </p>
         </div>
         <div
@@ -58,24 +53,14 @@ export function DashboardPage() {
       <div style={{ marginTop: SPACING['2xl'] }}>
         <h3 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.md, color: DRAMS.textDark }}>Quick Actions</h3>
         <div style={{ display: 'flex', gap: SPACING.md }}>
-          <button
-            onClick={() => (window.location.href = '/catalog/new')}
-            style={{
-              ...PILL_BUTTON.orange,
-            }}
-          >
+          <button onClick={() => navigate('/catalog/new')} style={PILL_BUTTON.orange}>
             Add New Product
           </button>
-          <button
-            onClick={() => (window.location.href = '/catalog')}
-            style={{
-              ...PILL_BUTTON.gray,
-            }}
-          >
+          <button onClick={() => navigate('/catalog')} style={PILL_BUTTON.gray}>
             Manage Catalog
           </button>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
