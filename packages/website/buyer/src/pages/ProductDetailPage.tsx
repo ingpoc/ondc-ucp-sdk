@@ -2,19 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi, useCart } from '@ondc-website/shared/hooks';
 import { RatingStars } from '@ondc-website/shared/components';
-import { DramsFlipCard, FlipCardFront, FlipCardBack, DramsAddButton, PageLayout, DRAMS, SPACING, TYPOGRAPHY, BUTTON, CARD, TRANSITIONS, COLORS, LAYOUT } from '@ondc-agent/shared/design-system';
+import { DramsFlipCard, FlipCardFront, FlipCardBack, DramsAddButton, PageLayout, DRAMS, SPACING, TYPOGRAPHY, BUTTON, CARD, TRANSITIONS, COLORS, GRID } from '@ondc-agent/shared/design-system';
 import type { UCPItem } from '@ondc-website/shared';
 
 const BACK_BUTTON_STYLE = {
   ...BUTTON.secondary,
   marginBottom: SPACING.xl,
-};
-
-const LAYOUT_STYLE = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: SPACING['3xl'],
-  alignItems: 'start',
 };
 
 const IMAGE_SECTION_STYLE = {
@@ -170,7 +163,7 @@ export function ProductDetailPage(): JSX.Element {
         ← Back
       </button>
 
-      <div style={LAYOUT_STYLE}>
+      <div style={GRID.twoColumns}>
         {/* Left: Product Image */}
         <div style={IMAGE_SECTION_STYLE}>
           <div style={IMAGE_CARD_STYLE}>

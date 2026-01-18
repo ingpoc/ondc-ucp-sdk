@@ -13,6 +13,7 @@ import {
   DRAMS,
   RADIUS,
   TRANSITIONS,
+  GRID,
 } from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
@@ -135,7 +136,7 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
   };
 
   return (
-    <div style={{ ...CARD.base, marginBottom: SPACING.lg }}>
+    <div style={CARD.base}>
       <div style={HEADER_STYLE}>
         <div>
           <div style={ORDER_ID_STYLE}>
@@ -401,15 +402,17 @@ export function OrdersPage() {
           </p>
         </div>
       ) : (
-        filteredOrders.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            onAccept={handleAccept}
-            onReject={handleReject}
-            onViewDetails={handleViewDetails}
-          />
-        ))
+        <div style={GRID.autoFill}>
+          {filteredOrders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              onAccept={handleAccept}
+              onReject={handleReject}
+              onViewDetails={handleViewDetails}
+            />
+          ))}
+        </div>
       )}
     </PageLayout>
   );

@@ -11,9 +11,12 @@ export interface DramsInputProps extends Omit<React.InputHTMLAttributes<HTMLInpu
 const TEXT_BOX_STYLE: CSSProperties = {
   position: 'relative',
   width: '100%',
+  display: 'flex',
+  alignItems: 'center',
 };
 
 const TEXT_BOX_TRACK_STYLE: CSSProperties = {
+  width: '100%',
   height: '48px',
   background: 'rgb(238, 238, 238)',
   borderRadius: '48px',
@@ -73,17 +76,36 @@ export const DramsInput = forwardRef<HTMLInputElement, DramsInputProps>(
       }
     }, [ref]);
 
+    // Separate layout styles (flex, width, etc.) from visual styles
+    const {
+      flex,
+      minWidth,
+      maxWidth,
+      width,
+      height,
+      ...visualStyles
+    } = (style || {}) as CSSProperties;
+
+    const wrapperStyle: CSSProperties = {
+      ...TEXT_BOX_STYLE,
+      ...(flex !== undefined && { flex }),
+      ...(minWidth !== undefined && { minWidth }),
+      ...(maxWidth !== undefined && { maxWidth }),
+      ...(width !== undefined && { width }),
+      ...(height !== undefined && { height }),
+    };
+
     const trackStyle: CSSProperties = {
       ...TEXT_BOX_TRACK_STYLE,
       ...(isFocused ? TEXT_BOX_TRACK_FOCUSED : {}),
       ...(error ? ERROR_STYLE : {}),
       ...(error && isFocused ? ERROR_BORDER_STYLE : {}),
       ...(disabled ? { opacity: 0.5, pointerEvents: 'none' as const } : {}),
-      ...(style || {}),
+      ...visualStyles,
     };
 
     return (
-      <div style={TEXT_BOX_STYLE} className={className}>
+      <div style={wrapperStyle} className={className}>
         <div style={trackStyle}>
           <input
             ref={inputRef}

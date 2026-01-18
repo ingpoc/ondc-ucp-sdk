@@ -1504,7 +1504,8 @@ var LAYOUT = {
   gridFilters: {
     display: "flex",
     gap: SPACING["2xl"],
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    padding: `${SPACING.xl} 0`
   }
 };
 
@@ -2706,9 +2707,12 @@ import { forwardRef, useRef as useRef3, useEffect as useEffect3, useState as use
 import { jsx as jsx7, jsxs as jsxs7 } from "react/jsx-runtime";
 var TEXT_BOX_STYLE = {
   position: "relative",
-  width: "100%"
+  width: "100%",
+  display: "flex",
+  alignItems: "center"
 };
 var TEXT_BOX_TRACK_STYLE = {
+  width: "100%",
   height: "48px",
   background: "rgb(238, 238, 238)",
   borderRadius: "48px",
@@ -2759,15 +2763,31 @@ var DramsInput = forwardRef(
         }
       }
     }, [ref]);
+    const {
+      flex,
+      minWidth,
+      maxWidth,
+      width,
+      height,
+      ...visualStyles
+    } = style || {};
+    const wrapperStyle = {
+      ...TEXT_BOX_STYLE,
+      ...flex !== void 0 && { flex },
+      ...minWidth !== void 0 && { minWidth },
+      ...maxWidth !== void 0 && { maxWidth },
+      ...width !== void 0 && { width },
+      ...height !== void 0 && { height }
+    };
     const trackStyle = {
       ...TEXT_BOX_TRACK_STYLE,
       ...isFocused ? TEXT_BOX_TRACK_FOCUSED : {},
       ...error ? ERROR_STYLE : {},
       ...error && isFocused ? ERROR_BORDER_STYLE : {},
       ...disabled2 ? { opacity: 0.5, pointerEvents: "none" } : {},
-      ...style || {}
+      ...visualStyles
     };
-    return /* @__PURE__ */ jsx7("div", { style: TEXT_BOX_STYLE, className, children: /* @__PURE__ */ jsxs7("div", { style: trackStyle, children: [
+    return /* @__PURE__ */ jsx7("div", { style: wrapperStyle, className, children: /* @__PURE__ */ jsxs7("div", { style: trackStyle, children: [
       /* @__PURE__ */ jsx7(
         "input",
         {

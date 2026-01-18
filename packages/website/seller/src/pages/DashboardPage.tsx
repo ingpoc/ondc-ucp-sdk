@@ -1,5 +1,5 @@
 import { useApi } from '@ondc-website/shared/hooks';
-import { PageLayout, PageHeader, CARD, SPACING, TYPOGRAPHY, PILL_BUTTON, DRAMS } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, CARD, SPACING, TYPOGRAPHY, PILL_BUTTON, DRAMS, GRID } from '@ondc-agent/shared/design-system';
 import { useNavigate } from 'react-router-dom';
 
 interface DashboardStats {
@@ -19,14 +19,7 @@ export function DashboardPage() {
         title="Seller Dashboard"
         subtitle="Manage your products and track your business performance"
       />
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: SPACING.xl,
-          marginBottom: SPACING['2xl'],
-        }}
-      >
+      <div style={{ ...GRID.threeColumns, marginBottom: SPACING['2xl'] }}>
         <div style={{ ...CARD.base, textAlign: 'center' }}>
           <h3 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark }}>Total Products</h3>
           <p style={{ fontSize: TYPOGRAPHY.h1.fontSize, margin: `${SPACING.md} 0`, color: DRAMS.textDark }}>

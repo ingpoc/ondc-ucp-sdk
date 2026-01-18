@@ -1,16 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
-import { PageLayout } from '@ondc-agent/shared/design-system';
+import { PageLayout, TYPOGRAPHY, DRAMS, SPACING, APP, LAYOUT } from '@ondc-agent/shared/design-system';
 
 const HERO_STYLE = {
-  maxWidth: '800px',
-  width: '100%',
+  ...LAYOUT.centered,
   textAlign: 'center' as const,
-};
-
-const SEARCH_WRAPPER_STYLE = {
-  maxWidth: '600px',
-  width: '100%',
+  padding: `${SPACING['3xl']} ${SPACING.xl}`,
 };
 
 export function SearchPage(): JSX.Element {
@@ -21,17 +16,15 @@ export function SearchPage(): JSX.Element {
   }
 
   return (
-    <PageLayout variant="gray">
+    <PageLayout>
       <div style={HERO_STYLE}>
-        <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#333', margin: '0 0 16px 0' }}>
+        <h1 style={TYPOGRAPHY.h1}>
           Find What You Need
         </h1>
-        <p style={{ fontSize: '15px', color: '#999', margin: '0 0 32px 0', lineHeight: 1.6 }}>
+        <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
           Search across thousands of products from verified sellers. Get the best prices and fastest delivery.
         </p>
-        <div style={SEARCH_WRAPPER_STYLE}>
-          <SearchBar onSearch={handleSearch} />
-        </div>
+        <SearchBar onSearch={handleSearch} />
       </div>
     </PageLayout>
   );

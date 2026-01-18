@@ -1,28 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useSearch, useCart } from '@ondc-website/shared/hooks';
-import { SearchBar, FilterSidebar, SortDropdown, ResultGrid } from '../components';
+import { SearchBar, FilterSidebar, ResultGrid } from '../components';
 import type { UCPItem } from '@ondc-website/shared';
 import type { SearchFilters } from '../components/FilterSidebar';
-import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, BUTTON, GRID, CARD, COLORS, RADIUS } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, BUTTON, LAYOUT, CARD } from '@ondc-agent/shared/design-system';
 
 interface SearchResponse {
   items: UCPItem[];
   totalCount: number;
 }
 
-const FILTERS_STYLE = {
-  width: '320px',
-  flexShrink: 0,
-};
-
-const RESULTS_STYLE = {
-  flex: 1,
-  minWidth: 0,
-};
-
 const LOADING_STYLE = {
-  display: 'flex',
+  ...LAYOUT.gridFilters,
+  display: 'flex' as const,
   alignItems: 'center',
   justifyContent: 'center',
   padding: SPACING['3xl'],
@@ -61,10 +52,6 @@ export function ResultsPage(): JSX.Element {
 
   function handleSearch(cat: string, q: string): void {
     navigate(`/results?category=${cat}&q=${encodeURIComponent(q)}`);
-  }
-
-  function handleSortChange(value: string): void {
-    setFilters({ ...filters, sortBy: value });
   }
 
   function handleItemClick(item: UCPItem): void {
@@ -111,12 +98,7 @@ export function ResultsPage(): JSX.Element {
   return (
     <PageLayout>
       {/* Search Bar Section */}
-      <div style={{
-        background: DRAMS.grayTrack,
-        margin: `0 -80px`,
-        padding: `${SPACING.xl} 80px`,
-        marginBottom: SPACING.xl,
-      }}>
+      <div style={{ marginBottom: SPACING.xl }}>
         <SearchBar
           onSearch={handleSearch}
           defaultCategory={category}
@@ -124,20 +106,13 @@ export function ResultsPage(): JSX.Element {
         />
       </div>
 
-      {/* Results Section */}
-      <div style={{
-        display: 'flex',
-        gap: SPACING['2xl'],
-        alignItems: 'flex-start',
-      }}>
-        <div style={FILTERS_STYLE}>
-          <FilterSidebar filters={filters} onChange={setFilters} />
-        </div>
+      {/* Results Section using GRID system */}
+      <div style={LAYOUT.gridFilters}>
+        <FilterSidebar filters={filters} onChange={setFilters} />
 
-        <div style={RESULTS_STYLE}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <PageHeader
             title={`Results for "${query || category}" (${items.length} items)`}
-            actions={<SortDropdown value={filters.sortBy ?? 'relevance'} onChange={handleSortChange} />}
           />
           <ResultGrid
             items={items}

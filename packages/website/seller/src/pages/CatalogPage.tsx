@@ -11,6 +11,7 @@ import {
   SPACING,
   TYPOGRAPHY,
   DRAMS,
+  GRID,
 } from '@ondc-agent/shared/design-system';
 import type { BecknItem } from '@ondc-website/shared';
 
@@ -90,13 +91,7 @@ export function CatalogPage() {
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-              gap: SPACING.lg,
-            }}
-          >
+          <div style={GRID.autoFill}>
             {items.map((item) => (
               <div
                 key={item.id}

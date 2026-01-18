@@ -533,7 +533,7 @@ export function ConfigPage() {
           ...BADGE.info,
         }}
       >
-        <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label, color: COLORS.info }}>
+        <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label, color: DRAMS.textDark }}>
           Configuration Help
         </p>
         <ul style={{ margin: 0, paddingLeft: SPACING.xl, ...TYPOGRAPHY.body }}>

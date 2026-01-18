@@ -99,7 +99,6 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
           options={SORT_OPTIONS}
           value={filters.sortBy ?? 'relevance'}
           onChange={(value) => handleChange('sortBy', value)}
-          fullWidth
         />
       </div>
     </div>

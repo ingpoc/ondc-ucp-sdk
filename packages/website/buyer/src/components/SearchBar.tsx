@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
+import { SPACING, TYPOGRAPHY, DRAMS, GRID } from '@ondc-agent/shared/design-system';
 import { DramsInput, DramsDropdown, DramsButton } from '@ondc-agent/shared/design-system';
 
 const CATEGORY_OPTIONS = [
@@ -10,10 +10,10 @@ const CATEGORY_OPTIONS = [
 ] as const;
 
 const FORM_STYLE = {
-  display: 'flex',
-  gap: SPACING.md,
+  display: 'grid',
+  gridTemplateColumns: '240px 1fr auto',
+  gap: GRID.gap.lg,
   alignItems: 'center',
-  flexWrap: 'wrap' as const,
 };
 
 const LABEL_STYLE = {
@@ -58,7 +58,6 @@ export function SearchBar({
         value={category}
         onChange={setCategory}
         placeholder="Select category"
-        style={{ minWidth: '140px' } as React.CSSProperties}
       />
 
       <label htmlFor="search-input" style={LABEL_STYLE}>
@@ -70,7 +69,6 @@ export function SearchBar({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search products..."
-        style={{ flex: 1, minWidth: '200px' } as React.CSSProperties}
       />
 
       <DramsButton type="submit">

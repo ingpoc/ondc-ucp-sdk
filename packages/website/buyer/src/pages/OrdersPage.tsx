@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
-import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, CARD, PILL_BUTTON, RADIUS, TRANSITIONS, BADGE, LAYOUT } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, CARD, PILL_BUTTON, RADIUS, TRANSITIONS, BADGE, GRID } from '@ondc-agent/shared/design-system';
 
 type StatusFilter = 'all' | 'pending' | 'active' | 'complete';
 
@@ -40,12 +40,6 @@ const FILTER_BUTTON_STYLE = {
   textTransform: 'capitalize' as const,
   whiteSpace: 'nowrap' as const,
   transition: TRANSITIONS.hover,
-};
-
-const ORDERS_GRID_STYLE = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-  gap: SPACING.xl,
 };
 
 const ORDER_CARD_STYLE = {
@@ -152,7 +146,7 @@ export function OrdersPage() {
           )}
         </div>
       ) : (
-        <div style={ORDERS_GRID_STYLE}>
+        <div style={GRID.autoFill}>
           {filteredOrders.map((order) => (
             <div
               key={order.id}

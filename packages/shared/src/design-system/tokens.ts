@@ -393,5 +393,6 @@ export const LAYOUT = {
     display: 'flex',
     gap: SPACING['2xl'],
     alignItems: 'flex-start',
+    padding: `${SPACING.xl} 0`,
   },
 } as const;
