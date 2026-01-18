@@ -1,43 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useCart, CartItem, CartSummary } from '@ondc-website/shared';
-import { DRAMS, SPACING, TYPOGRAPHY, BUTTON, CARD, BADGE, PILL_BUTTON } from '@ondc-agent/shared/design-system';
-
-// DRAMS: Clean white background
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: '#ffffff',
-  padding: '0',
-  width: '100%',
-};
-
-const CONTENT_STYLE = {
-  maxWidth: '100%',
-  padding: '0 80px',
-};
-
-// DRAMS: Minimal header - white with subtle gray track background
-const HEADER_STYLE = {
-  marginBottom: SPACING.xl,
-  padding: `64px 80px ${SPACING.xl} 80px`,
-  background: DRAMS.grayTrack,
-};
-
-const PAGE_TITLE_STYLE = {
-  ...TYPOGRAPHY.h1,
-  color: DRAMS.textDark,
-  margin: `0 0 ${SPACING.md} 0`,
-};
-
-const SUBTITLE_STYLE = {
-  ...TYPOGRAPHY.body,
-  color: DRAMS.textLight,
-  margin: 0,
-};
+import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, BUTTON, CARD, PILL_BUTTON, GRID } from '@ondc-agent/shared/design-system';
 
 const GRID_LAYOUT_STYLE = {
-  display: 'grid',
-  gridTemplateColumns: '2fr 1fr',
-  gap: SPACING.xl,
+  ...GRID.twoColumnsWide,
   marginBottom: SPACING.xl,
 };
 
@@ -51,23 +17,6 @@ const SUMMARY_SECTION_STYLE = {
   position: 'sticky' as const,
   top: SPACING.xl,
   alignSelf: 'start' as const,
-};
-
-const LOADING_STYLE = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: SPACING['3xl'],
-  color: DRAMS.textLight,
-  ...TYPOGRAPHY.body,
-};
-
-const ERROR_STYLE = {
-  ...BADGE.error,
-  padding: SPACING.lg,
-  textAlign: 'center' as const,
-  maxWidth: '600px',
-  margin: '0 auto',
 };
 
 const EMPTY_STATE_STYLE = {
@@ -99,52 +48,41 @@ export function CartPage(): JSX.Element {
 
   if (loading && !session) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
-        <div style={LOADING_STYLE}>
+      <PageLayout>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: SPACING['3xl'] }}>
           Loading cart...
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
-        <div style={ERROR_STYLE}>
+      <PageLayout>
+        <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
           <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
           <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
-          <button
-            onClick={clearError}
-            style={{
-              ...BUTTON.secondary,
-              marginTop: SPACING.lg,
-            }}
-          >
+          <button onClick={clearError} style={BUTTON.secondary}>
             Dismiss
           </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (!session || itemCount === 0) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
-        <div style={CONTENT_STYLE}>
-          <div style={EMPTY_STATE_STYLE}>
-            <h2 style={{ ...TYPOGRAPHY.h2, color: DRAMS.textDark, margin: `0 0 ${SPACING.md} 0` }}>Your Cart is Empty</h2>
-            <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
-              Add some items to get started!
-            </p>
-            <button
-              onClick={() => navigate('/search')}
-              style={PILL_BUTTON.orange}
-            >
-              Start Shopping
-            </button>
-          </div>
+      <PageLayout>
+        <div style={EMPTY_STATE_STYLE}>
+          <h2 style={{ ...TYPOGRAPHY.h2, color: DRAMS.textDark, margin: `0 0 ${SPACING.md} 0` }}>Your Cart is Empty</h2>
+          <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
+            Add some items to get started!
+          </p>
+          <button onClick={() => navigate('/search')} style={PILL_BUTTON.orange}>
+            Start Shopping
+          </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -152,47 +90,40 @@ export function CartPage(): JSX.Element {
   const itemLabel = itemCount === 1 ? 'item' : 'items';
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={CONTENT_STYLE}>
-        <div style={HEADER_STYLE}>
-          <h1 style={PAGE_TITLE_STYLE}>Shopping Cart</h1>
-          <p style={SUBTITLE_STYLE}>
-            {itemCount} {itemLabel} in your cart
-          </p>
-        </div>
+    <PageLayout>
+      <PageHeader
+        title="Shopping Cart"
+        subtitle={`${itemCount} ${itemLabel} in your cart`}
+      />
 
-        <div style={GRID_LAYOUT_STYLE}>
-          <div style={ITEMS_SECTION_STYLE}>
-            {session.items.map((item: any) => (
-              <CartItem
-                key={item.item.id}
-                item={item}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeFromCart}
-                disabled={loading}
-              />
-            ))}
-          </div>
-
-          <div style={SUMMARY_SECTION_STYLE}>
-            <CartSummary
-              subtotal={subtotal}
-              currency={currency}
-              onCheckout={handleCheckout}
-              checkoutDisabled={loading || itemCount === 0}
+      <div style={GRID_LAYOUT_STYLE}>
+        <div style={ITEMS_SECTION_STYLE}>
+          {session.items.map((item: any) => (
+            <CartItem
+              key={item.item.id}
+              item={item}
+              onUpdateQuantity={updateQuantity}
+              onRemove={removeFromCart}
+              disabled={loading}
             />
-          </div>
+          ))}
         </div>
 
-        <div style={FOOTER_STYLE}>
-          <button
-            onClick={() => navigate('/search')}
-            style={BUTTON.secondary}
-          >
-            ← Continue Shopping
-          </button>
+        <div style={SUMMARY_SECTION_STYLE}>
+          <CartSummary
+            subtotal={subtotal}
+            currency={currency}
+            onCheckout={handleCheckout}
+            checkoutDisabled={loading || itemCount === 0}
+          />
         </div>
       </div>
-    </div>
+
+      <div style={FOOTER_STYLE}>
+        <button onClick={() => navigate('/search')} style={BUTTON.secondary}>
+          ← Continue Shopping
+        </button>
+      </div>
+    </PageLayout>
   );
 }

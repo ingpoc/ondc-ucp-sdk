@@ -274,3 +274,124 @@ export type ShadowKey = keyof typeof SHADOWS;
 export type RadiusKey = keyof typeof RADIUS;
 export type DramsColorKey = keyof typeof DRAMS;
 export type TransitionKey = keyof typeof TRANSITIONS;
+
+// ========== LAYOUT TOKENS ==========
+// Application dimensions (Thorough, Consistent)
+export const APP = {
+  headerHeight: '64px',
+  maxWidth: '1400px',
+  contentMaxWidth: '1200px',
+} as const;
+
+// ========== GRID SYSTEM ==========
+// 12-column grid system for consistent layouts (Thorough, Aesthetic)
+export const GRID = {
+  // Container with max-width and horizontal centering
+  container: {
+    width: '100%',
+    maxWidth: APP.maxWidth,
+    margin: '0 auto',
+    paddingLeft: SPACING.xl,
+    paddingRight: SPACING.xl,
+  },
+
+  // Container with wider padding for desktop
+  containerWide: {
+    width: '100%',
+    maxWidth: APP.maxWidth,
+    margin: '0 auto',
+    paddingLeft: '80px',
+    paddingRight: '80px',
+  },
+
+  // Grid gaps using SPACING scale
+  gap: {
+    xs: SPACING.xs,
+    sm: SPACING.sm,
+    md: SPACING.md,
+    lg: SPACING.lg,
+    xl: SPACING.xl,
+    '2xl': SPACING['2xl'],
+    '3xl': SPACING['3xl'],
+  } as const,
+
+  // Common grid patterns
+  twoColumns: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: SPACING.xl,
+  },
+
+  twoColumnsWide: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr',
+    gap: SPACING.xl,
+  },
+
+  threeColumns: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: SPACING.xl,
+  },
+
+  fourColumns: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: SPACING.xl,
+  },
+
+  // Auto-fill grid for responsive cards
+  autoFill: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: SPACING.xl,
+  },
+} as const;
+
+// Page Layout Patterns (Aesthetic, Consistent)
+export const LAYOUT = {
+  // Full page container
+  page: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#ffffff',
+  },
+  // Page with gray background
+  pageGray: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: DRAMS.grayTrack,
+  },
+  // Content container with horizontal padding
+  content: {
+    padding: `0 ${SPACING.xl}`,
+    maxWidth: '100%',
+  },
+  // Content with wide padding
+  contentWide: {
+    padding: `0 80px`,
+    maxWidth: '100%',
+  },
+  // Centered content container
+  centered: {
+    maxWidth: APP.contentMaxWidth,
+    margin: '0 auto',
+  },
+  // Page header section
+  pageHeader: {
+    padding: `${SPACING.xl} 0`,
+    marginBottom: SPACING.xl,
+    background: DRAMS.grayTrack,
+  },
+  // Grid layouts
+  gridTwoColumns: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr',
+    gap: SPACING.xl,
+  },
+  gridFilters: {
+    display: 'flex',
+    gap: SPACING['2xl'],
+    alignItems: 'flex-start',
+  },
+} as const;

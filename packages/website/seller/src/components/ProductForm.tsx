@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { BecknItem } from '@ondc-website/shared';
-import { TEXT_BOX, PILL_BUTTON, SELECT_BOX, SPACING, TYPOGRAPHY, DRAMS, DRAMS_CARD, disabled } from '@ondc-agent/shared/design-system';
+import { SPACING, TYPOGRAPHY, DRAMS, disabled } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsSelect, DramsButton } from '@ondc-agent/shared/design-system';
 
 export interface ProductFormData {
   id: string;
@@ -18,6 +19,19 @@ export interface ProductFormProps {
   loading?: boolean;
 }
 
+const CATEGORY_OPTIONS = [
+  { value: 'cat-1', label: 'Grocery' },
+  { value: 'cat-2', label: 'Restaurant' },
+  { value: 'cat-3', label: 'Fashion' },
+  { value: 'cat-4', label: 'Electronics' },
+] as const;
+
+const CURRENCY_OPTIONS = [
+  { value: 'INR', label: 'INR' },
+  { value: 'USD', label: 'USD' },
+  { value: 'EUR', label: 'EUR' },
+] as const;
+
 const FORM_STYLE = {
   maxWidth: '600px',
 };
@@ -33,18 +47,6 @@ const LABEL_STYLE = {
   color: DRAMS.textDark,
 };
 
-const INPUT_BASE = {
-  ...TEXT_BOX.track,
-  width: '100%',
-};
-
-const TEXTAREA_BASE = {
-  ...TEXT_BOX.track,
-  width: '100%',
-  minHeight: '80px',
-  resize: 'vertical' as const,
-};
-
 const BUTTON_CONTAINER_STYLE = {
   display: 'flex',
   gap: SPACING.md,
@@ -57,6 +59,8 @@ const HELPER_TEXT_STYLE = {
   marginTop: SPACING.xs,
   marginBottom: '0',
 };
+
+const REQUIRED_STYLE = { color: '#dc2626' };
 
 export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
@@ -74,16 +78,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
     setFormData({ ...formData, [field]: e.target.value });
   };
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (!e.target.disabled) {
-      Object.assign(e.target.style, TEXT_BOX.focus);
-    }
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    Object.assign(e.target.style, TEXT_BOX.track);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(formData);
@@ -95,19 +89,15 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         <label htmlFor="product-id" style={LABEL_STYLE}>
           Product ID
         </label>
-        <input
+        <DramsInput
           id="product-id"
           type="text"
           value={formData.id}
           onChange={handleInputChange('id')}
           disabled={!!product}
           required
-          style={{
-            ...INPUT_BASE,
-            ...(product ? disabled : {}),
-          }}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          fullWidth
+          style={product ? (disabled as React.CSSProperties) : undefined}
         />
         {product && (
           <p style={HELPER_TEXT_STYLE}>
@@ -118,18 +108,16 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
 
       <div style={CONTAINER_STYLE}>
         <label htmlFor="product-name" style={LABEL_STYLE}>
-          Product Name <span style={{ color: '#dc2626' }}>*</span>
+          Product Name <span style={REQUIRED_STYLE}>*</span>
         </label>
-        <input
+        <DramsInput
           id="product-name"
           type="text"
           value={formData.name}
           onChange={handleInputChange('name')}
           required
           placeholder="e.g., Organic Mango"
-          style={INPUT_BASE}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          fullWidth
         />
       </div>
 
@@ -137,15 +125,14 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         <label htmlFor="product-description" style={LABEL_STYLE}>
           Description
         </label>
-        <textarea
+        <DramsInput
           id="product-description"
+          type="text"
           value={formData.description}
           onChange={handleInputChange('description')}
-          rows={3}
           placeholder="Short product description"
-          style={TEXTAREA_BASE}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          fullWidth
+          style={{ minHeight: '80px' } as React.CSSProperties}
         />
       </div>
 
@@ -153,28 +140,22 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
         <label htmlFor="product-category" style={LABEL_STYLE}>
           Category
         </label>
-        <select
+        <DramsSelect
           id="product-category"
+          options={CATEGORY_OPTIONS}
           value={formData.categoryId}
           onChange={handleInputChange('categoryId')}
-          style={INPUT_BASE}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-        >
-          <option value="cat-1">Grocery</option>
-          <option value="cat-2">Restaurant</option>
-          <option value="cat-3">Fashion</option>
-          <option value="cat-4">Electronics</option>
-        </select>
+          fullWidth
+        />
       </div>
 
       <div style={CONTAINER_STYLE}>
         <label htmlFor="product-price" style={LABEL_STYLE}>
-          Price <span style={{ color: '#dc2626' }}>*</span>
+          Price <span style={REQUIRED_STYLE}>*</span>
         </label>
         <div style={{ display: 'flex', gap: SPACING.md }}>
           <div style={{ flex: 1 }}>
-            <input
+            <DramsInput
               id="product-price"
               type="number"
               value={formData.price}
@@ -183,47 +164,30 @@ export function ProductForm({ product, onSubmit, onCancel, loading }: ProductFor
               min="0"
               step="0.01"
               placeholder="100"
-              style={INPUT_BASE}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
+              fullWidth
             />
           </div>
-          <select
+          <DramsSelect
             value={formData.currency}
             onChange={handleInputChange('currency')}
-            style={{ ...INPUT_BASE, width: '100px' }}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-          >
-            <option value="INR">INR</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
+            options={CURRENCY_OPTIONS}
+            style={{ width: '100px' } as React.CSSProperties}
+          />
         </div>
       </div>
 
       <div style={BUTTON_CONTAINER_STYLE}>
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            ...PILL_BUTTON.orange,
-            ...(loading ? disabled : {}),
-          }}
-        >
+        <DramsButton type="submit" loading={loading} variant="primary">
           {loading ? 'Saving...' : product ? 'Update Product' : 'Add Product'}
-        </button>
-        <button
+        </DramsButton>
+        <DramsButton
           type="button"
           onClick={onCancel}
           disabled={loading}
-          style={{
-            ...PILL_BUTTON.gray,
-            ...(loading ? disabled : {}),
-          }}
+          variant="gray"
         >
           Cancel
-        </button>
+        </DramsButton>
       </div>
     </form>
   );

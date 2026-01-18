@@ -2,34 +2,12 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@ondc-website/shared';
 import type { UCPQuote, UCPAddress } from '@ondc-website/shared';
-import { DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, BADGE, CARD, TEXT_BOX, PILL_BUTTON } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, BADGE, CARD, TEXT_BOX, PILL_BUTTON, GRID } from '@ondc-agent/shared/design-system';
 import { BillingForm } from '../components/BillingForm';
 import { PaymentSelector } from '../components/PaymentSelector';
 import { QuoteDisplay } from '../components/QuoteDisplay';
 
 const API_BASE = 'http://localhost:3001';
-
-// DRAMS: Clean white background
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: '#ffffff',
-  padding: SPACING.xl,
-};
-
-const CONTENT_STYLE = {
-  maxWidth: '1200px',
-  margin: '0 auto',
-};
-
-const HEADER_STYLE = {
-  marginBottom: SPACING.xl,
-};
-
-const PAGE_TITLE_STYLE = {
-  ...TYPOGRAPHY.h2,
-  color: DRAMS.textDark,
-  margin: `0 0 ${SPACING.md} 0`,
-};
 
 const ERROR_ALERT_STYLE = {
   ...BADGE.error,
@@ -50,12 +28,6 @@ const ERROR_CLOSE_STYLE = {
   padding: '0',
   width: '24px',
   height: '24px',
-};
-
-const FORM_LAYOUT_STYLE = {
-  display: 'grid',
-  gridTemplateColumns: '2fr 1fr',
-  gap: SPACING.xl,
 };
 
 const FORMS_SECTION_STYLE = {
@@ -167,101 +139,94 @@ export function CheckoutPage() {
 
   if (loading && !session) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
+      <PageLayout>
         <div style={LOADING_STYLE}>
           Loading checkout...
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error && !session) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
+      <PageLayout>
         <div style={{ ...BADGE.error, padding: SPACING.lg, textAlign: 'center' }}>
           <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
           <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
           <button
             onClick={() => navigate('/cart')}
-            style={{
-              ...BUTTON.secondary,
-              marginTop: SPACING.lg,
-            }}
+            style={BUTTON.secondary}
           >
             Back to Cart
           </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const currency = session?.items[0]?.item.price?.currency || 'INR';
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={CONTENT_STYLE}>
-        <div style={HEADER_STYLE}>
-          <h1 style={PAGE_TITLE_STYLE}>Checkout</h1>
-        </div>
+    <PageLayout>
+      <PageHeader title="Checkout" />
 
-        {submitError && (
-          <div style={ERROR_ALERT_STYLE}>
-            {submitError}
-            <button
-              onClick={() => setSubmitError(null)}
-              style={ERROR_CLOSE_STYLE}
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={FORM_LAYOUT_STYLE}>
-            <div style={FORMS_SECTION_STYLE}>
-              <BillingForm session={session} />
-              <DeliveryAddressForm
-                address={deliveryAddress}
-                onChange={setDeliveryAddress}
-              />
-              <PaymentSelector />
-            </div>
-
-            <div style={SIDEBAR_STYLE}>
-              {quote ? (
-                <QuoteDisplay quote={quote} currency={currency} />
-              ) : (
-                <CartSummary currency={currency} />
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting || !session?.buyer?.name || !session?.buyer?.email}
-                style={submitting ? BUTTON_DISABLED_STYLE : BUTTON_PRIMARY_STYLE}
-              >
-                {submitting ? 'Processing...' : quote ? 'Place Order' : 'Get Quote'}
-              </button>
-
-              {!session?.buyer?.name && (
-                <p style={VALIDATION_MESSAGE_STYLE}>
-                  Please complete billing information to continue
-                </p>
-              )}
-            </div>
-          </div>
-        </form>
-
-        <div style={FOOTER_STYLE}>
+      {submitError && (
+        <div style={ERROR_ALERT_STYLE}>
+          {submitError}
           <button
-            type="button"
-            onClick={() => navigate('/cart')}
-            style={BUTTON.secondary}
+            onClick={() => setSubmitError(null)}
+            style={ERROR_CLOSE_STYLE}
           >
-            ← Back to Cart
+            ×
           </button>
         </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <div style={GRID.twoColumnsWide}>
+          <div style={FORMS_SECTION_STYLE}>
+            <BillingForm session={session} />
+            <DeliveryAddressForm
+              address={deliveryAddress}
+              onChange={setDeliveryAddress}
+            />
+            <PaymentSelector />
+          </div>
+
+          <div style={SIDEBAR_STYLE}>
+            {quote ? (
+              <QuoteDisplay quote={quote} currency={currency} />
+            ) : (
+              <CartSummary currency={currency} />
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting || !session?.buyer?.name || !session?.buyer?.email}
+              style={submitting ? BUTTON_DISABLED_STYLE : BUTTON_PRIMARY_STYLE}
+            >
+              {submitting ? 'Processing...' : quote ? 'Place Order' : 'Get Quote'}
+            </button>
+
+            {!session?.buyer?.name && (
+              <p style={VALIDATION_MESSAGE_STYLE}>
+                Please complete billing information to continue
+              </p>
+            )}
+          </div>
+        </div>
+      </form>
+
+      <div style={FOOTER_STYLE}>
+        <button
+          type="button"
+          onClick={() => navigate('/cart')}
+          style={BUTTON.secondary}
+        >
+          ← Back to Cart
+        </button>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 
@@ -273,16 +238,6 @@ interface DeliveryAddressFormProps {
 function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
   const handleChange = (field: keyof UCPAddress, value: string) => {
     onChange({ ...address, [field]: value });
-  };
-
-  const SECTION_STYLE = {
-    ...CARD.base,
-  };
-
-  const SECTION_TITLE_STYLE = {
-    ...TYPOGRAPHY.h3,
-    color: DRAMS.textDark,
-    margin: `0 0 ${SPACING.lg} 0`,
   };
 
   const LABEL_STYLE = {
@@ -308,8 +263,8 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
   };
 
   return (
-    <div style={SECTION_STYLE}>
-      <h2 style={SECTION_TITLE_STYLE}>Delivery Address</h2>
+    <div style={CARD.base}>
+      <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.lg} 0` }}>Delivery Address</h2>
 
       <div>
         <div style={FORM_GROUP_STYLE}>

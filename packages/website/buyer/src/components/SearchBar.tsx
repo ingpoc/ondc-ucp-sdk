@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
-import { PILL_BUTTON, SELECT_BOX, TEXT_BOX, SPACING } from '@ondc-agent/shared/design-system';
+import { SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsSelect, DramsButton } from '@ondc-agent/shared/design-system';
 
 const CATEGORY_OPTIONS = [
   { value: 'grocery', label: 'Grocery' },
@@ -15,15 +16,16 @@ const FORM_STYLE = {
   flexWrap: 'wrap' as const,
 };
 
-const SELECT_BASE = {
-  ...SELECT_BOX.base,
-  minWidth: '120px',
-};
-
-const INPUT_BASE = {
-  ...TEXT_BOX.track,
-  flex: '1',
-  minWidth: '200px',
+const LABEL_STYLE = {
+  position: 'absolute' as const,
+  width: '1px',
+  height: '1px',
+  padding: '0',
+  margin: '-1px',
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)' as const,
+  whiteSpace: 'nowrap' as const,
+  borderWidth: '0',
 };
 
 export interface SearchBarProps {
@@ -45,65 +47,35 @@ export function SearchBar({
     onSearch(category, query);
   }
 
-  const handleFocus = (e: React.FocusEvent<HTMLSelectElement | HTMLInputElement>) => {
-    Object.assign(e.target.style, SELECT_BOX.focus);
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLSelectElement | HTMLInputElement>) => {
-    Object.assign(e.target.style, TEXT_BOX.track);
-  };
-
   return (
     <form onSubmit={handleSubmit} style={FORM_STYLE}>
-      <label htmlFor="category-select" className="visually-hidden">
+      <label htmlFor="category-select" style={LABEL_STYLE}>
         Category
       </label>
-      <select
+      <DramsSelect
         id="category-select"
+        options={CATEGORY_OPTIONS}
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        style={SELECT_BASE}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-      >
-        {CATEGORY_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        style={{ minWidth: '120px' } as React.CSSProperties}
+      />
 
-      <label htmlFor="search-input" className="visually-hidden">
+      <label htmlFor="search-input" style={LABEL_STYLE}>
         Search products
       </label>
-      <input
+      <DramsInput
         id="search-input"
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search products..."
-        style={INPUT_BASE}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
+        fullWidth
+        style={{ flex: 1, minWidth: '200px' } as React.CSSProperties}
       />
 
-      <button type="submit" style={PILL_BUTTON.orange}>
+      <DramsButton type="submit">
         Search
-      </button>
-
-      <style>{`
-        .visually-hidden {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border-width: 0;
-        }
-      `}</style>
+      </DramsButton>
     </form>
   );
 }

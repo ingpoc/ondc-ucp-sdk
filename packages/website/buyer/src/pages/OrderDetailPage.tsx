@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus, UCPFulfillmentStatus } from '@ondc-website/shared';
-import { DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, CARD, BADGE } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, CARD, BADGE } from '@ondc-agent/shared/design-system';
 
 // Mock order fetch - to be replaced with API call
 const fetchOrder = async (_orderId: string): Promise<UCPOrder | null> => {
@@ -57,6 +57,37 @@ const getFulfillmentStatusLabel = (status: UCPFulfillmentStatus): string => {
 const formatPrice = (currency: string, value: string | undefined, quantity: number = 1): string => {
   const numValue = value ? parseFloat(value) : 0;
   return `${currency} ${(numValue * quantity).toFixed(2)}`;
+};
+
+const BACK_BUTTON_STYLE = {
+  ...BUTTON.secondary,
+  marginBottom: SPACING.xl,
+};
+
+const HEADER_STYLE = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: SPACING.xl,
+  paddingBottom: SPACING.xl,
+  borderBottom: `1px solid ${DRAMS.grayTrack}`,
+};
+
+const LOADING_STYLE = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: SPACING['3xl'],
+  color: DRAMS.textLight,
+  ...TYPOGRAPHY.body,
+};
+
+const ERROR_STYLE = {
+  ...CARD.base,
+  backgroundColor: '#fef2f2',
+  borderColor: '#fecaca',
+  color: COLORS.error,
+  textAlign: 'center' as const,
 };
 
 export function OrderDetailPage() {
@@ -132,66 +163,44 @@ export function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
-        <p style={{ ...TYPOGRAPHY.body }}>Loading order details...</p>
-      </div>
+      <PageLayout>
+        <div style={LOADING_STYLE}>Loading order details...</div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
-        <p style={{ ...BADGE.error, marginBottom: SPACING.lg }}>Error: {error}</p>
-        <button
-          onClick={() => navigate('/orders')}
-          style={BUTTON.secondary}
-        >
-          Back to Orders
-        </button>
-      </div>
+      <PageLayout>
+        <div style={ERROR_STYLE}>
+          <p style={{ margin: 0, ...BADGE.error }}>Error: {error}</p>
+          <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
+            Back to Orders
+          </button>
+        </div>
+      </PageLayout>
     );
   }
 
   if (!order) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
-        <p style={{ ...TYPOGRAPHY.body }}>Order not found</p>
-        <button
-          onClick={() => navigate('/orders')}
-          style={BUTTON.secondary}
-        >
-          Back to Orders
-        </button>
-      </div>
+      <PageLayout>
+        <div style={LOADING_STYLE}>Order not found</div>
+      </PageLayout>
     );
   }
 
   const canCancel = isCancellable(order.status);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
+    <PageLayout>
       {/* Back button */}
-      <button
-        onClick={() => navigate('/orders')}
-        style={{
-          ...BUTTON.secondary,
-          marginBottom: SPACING.xl,
-        }}
-      >
+      <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
         ← Back to Orders
       </button>
 
       {/* Order Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: SPACING.xl,
-          paddingBottom: SPACING.xl,
-          borderBottom: `1px solid ${DRAMS.grayTrack}`,
-        }}
-      >
+      <div style={HEADER_STYLE}>
         <div>
           <h1 style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.h2 }}>Order #{order.id}</h1>
           <p style={{ margin: '0', ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
@@ -538,6 +547,6 @@ export function OrderDetailPage() {
           </button>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

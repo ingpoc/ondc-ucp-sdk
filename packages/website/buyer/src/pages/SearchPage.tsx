@@ -1,37 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
-import { DRAMS, TYPOGRAPHY, SPACING } from '@ondc-agent/shared/design-system';
-
-// DRAMS: Clean, minimal search page
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: DRAMS.grayTrack,
-  display: 'flex',
-  flexDirection: 'column' as const,
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '80px 24px',
-  width: '100%',
-};
+import { PageLayout } from '@ondc-agent/shared/design-system';
 
 const HERO_STYLE = {
   maxWidth: '800px',
   width: '100%',
   textAlign: 'center' as const,
-};
-
-// DRAMS: Bold, clean typography
-const HEADING_STYLE = {
-  ...TYPOGRAPHY.h1,
-  color: DRAMS.textDark,
-  marginBottom: SPACING.lg,
-};
-
-const SUBHEADING_STYLE = {
-  ...TYPOGRAPHY.body,
-  color: DRAMS.textLight,
-  marginBottom: SPACING['2xl'],
-  lineHeight: 1.6,
 };
 
 const SEARCH_WRAPPER_STYLE = {
@@ -47,18 +21,18 @@ export function SearchPage(): JSX.Element {
   }
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
+    <PageLayout variant="gray">
       <div style={HERO_STYLE}>
-        <h1 style={HEADING_STYLE}>
+        <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#333', margin: '0 0 16px 0' }}>
           Find What You Need
         </h1>
-        <p style={SUBHEADING_STYLE}>
+        <p style={{ fontSize: '15px', color: '#999', margin: '0 0 32px 0', lineHeight: 1.6 }}>
           Search across thousands of products from verified sellers. Get the best prices and fastest delivery.
         </p>
         <div style={SEARCH_WRAPPER_STYLE}>
           <SearchBar onSearch={handleSearch} />
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

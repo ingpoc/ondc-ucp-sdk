@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import { DRAMS, NAV, SPACING, TYPOGRAPHY, TRANSITIONS } from '@ondc-agent/shared/design-system';
+import { RollingSearch } from '@ondc-agent/shared/design-system';
 import { SearchPage } from './pages/SearchPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -12,9 +13,12 @@ import { OrderDetailPage } from './pages/OrderDetailPage';
 // DRAMS: Clean white background, minimal chrome
 const APP_CONTAINER_STYLE = {
   width: '100%',
-  minHeight: '100vh',
+  height: '100vh',
   backgroundColor: '#ffffff',
   fontFamily: DRAMS.fontFamily,
+  display: 'flex',
+  flexDirection: 'column' as const,
+  overflow: 'hidden',
 };
 
 // DRAMS: Unobtrusive header with soft shadow
@@ -51,10 +55,15 @@ const NAV_STYLE = {
 
 export function App() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActivePath = (path: string): boolean => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
+  };
+
+  const handleSearch = (query: string) => {
+    navigate(`/results?category=grocery&q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -92,10 +101,11 @@ export function App() {
                 {label}
               </Link>
             ))}
+            <RollingSearch onSearch={handleSearch} />
           </nav>
         </div>
       </header>
-      <main>
+      <main style={{ flex: 1, overflow: 'auto', overflowY: 'auto', paddingBottom: SPACING.xl }}>
         <Routes>
           <Route path="/" element={<SearchPage />} />
           <Route path="/search" element={<SearchPage />} />

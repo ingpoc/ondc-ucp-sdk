@@ -4,37 +4,12 @@ import { useSearch, useCart } from '@ondc-website/shared/hooks';
 import { SearchBar, FilterSidebar, SortDropdown, ResultGrid } from '../components';
 import type { UCPItem } from '@ondc-website/shared';
 import type { SearchFilters } from '../components/FilterSidebar';
-import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, BUTTON, GRID, CARD, COLORS, RADIUS } from '@ondc-agent/shared/design-system';
 
 interface SearchResponse {
   items: UCPItem[];
   totalCount: number;
 }
-
-// DRAMS: Clean white page
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: '#ffffff',
-  padding: '0',
-  width: '100%',
-};
-
-// DRAMS: Clean search header
-const SEARCH_SECTION_STYLE = {
-  backgroundColor: DRAMS.grayTrack,
-  borderRadius: '0',
-  padding: '40px 80px',
-  marginBottom: '0',
-  boxShadow: 'none',
-  borderBottom: 'none',
-};
-
-const CONTENT_LAYOUT_STYLE = {
-  display: 'flex',
-  gap: SPACING['2xl'],
-  alignItems: 'flex-start',
-  padding: `${SPACING['3xl']} 80px`,
-};
 
 const FILTERS_STYLE = {
   width: '320px',
@@ -44,19 +19,6 @@ const FILTERS_STYLE = {
 const RESULTS_STYLE = {
   flex: 1,
   minWidth: 0,
-};
-
-const HEADER_STYLE = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: SPACING.xl,
-};
-
-const TITLE_STYLE = {
-  ...TYPOGRAPHY.h2,
-  color: DRAMS.textDark,
-  margin: 0,
 };
 
 const LOADING_STYLE = {
@@ -69,17 +31,10 @@ const LOADING_STYLE = {
 };
 
 const ERROR_STYLE = {
-  padding: SPACING.lg,
-  borderRadius: RADIUS.lg,
+  ...CARD.base,
   backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
+  borderColor: '#fecaca',
   color: '#dc2626',
-  ...TYPOGRAPHY.body,
-};
-
-// DRAMS: Pill-style secondary button
-const BUTTON_SECONDARY_STYLE = {
-  ...BUTTON.secondary,
 };
 
 export function ResultsPage(): JSX.Element {
@@ -124,41 +79,44 @@ export function ResultsPage(): JSX.Element {
     }
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
+      <PageLayout>
         <div style={LOADING_STYLE}>
           Loading results...
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
+      <PageLayout>
         <div style={ERROR_STYLE}>
           <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
-          <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+          <p style={{ margin: `${SPACING.xs} 0 ${SPACING.md} 0` }}>{error}</p>
           <button
             onClick={() => navigate('/')}
-            style={{
-              ...BUTTON_SECONDARY_STYLE,
-              marginTop: '16px',
-            }}
+            style={BUTTON.secondary}
           >
             Back to Search
           </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const items = (data as SearchResponse | null)?.items ?? [];
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={SEARCH_SECTION_STYLE}>
+    <PageLayout>
+      {/* Search Bar Section */}
+      <div style={{
+        background: DRAMS.grayTrack,
+        margin: `0 -80px`,
+        padding: `${SPACING.xl} 80px`,
+        marginBottom: SPACING.xl,
+      }}>
         <SearchBar
           onSearch={handleSearch}
           defaultCategory={category}
@@ -166,21 +124,21 @@ export function ResultsPage(): JSX.Element {
         />
       </div>
 
-      <div style={CONTENT_LAYOUT_STYLE}>
+      {/* Results Section */}
+      <div style={{
+        display: 'flex',
+        gap: SPACING['2xl'],
+        alignItems: 'flex-start',
+      }}>
         <div style={FILTERS_STYLE}>
           <FilterSidebar filters={filters} onChange={setFilters} />
         </div>
 
         <div style={RESULTS_STYLE}>
-          <div style={HEADER_STYLE}>
-            <h2 style={TITLE_STYLE}>
-              Results for "{query || category}" ({items.length} items)
-            </h2>
-            <SortDropdown
-              value={filters.sortBy ?? 'relevance'}
-              onChange={handleSortChange}
-            />
-          </div>
+          <PageHeader
+            title={`Results for "${query || category}" (${items.length} items)`}
+            actions={<SortDropdown value={filters.sortBy ?? 'relevance'} onChange={handleSortChange} />}
+          />
           <ResultGrid
             items={items}
             onItemClick={handleItemClick}
@@ -189,6 +147,6 @@ export function ResultsPage(): JSX.Element {
           />
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

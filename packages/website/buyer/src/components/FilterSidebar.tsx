@@ -1,4 +1,5 @@
-import { TEXT_BOX, SELECT_BOX, SPACING, TYPOGRAPHY, DRAMS_CARD, DRAMS } from '@ondc-agent/shared/design-system';
+import { SPACING, TYPOGRAPHY, DRAMS, CARD } from '@ondc-agent/shared/design-system';
+import { DramsInput, DramsSelect } from '@ondc-agent/shared/design-system';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance' },
@@ -8,7 +9,7 @@ const SORT_OPTIONS = [
 ] as const;
 
 const CONTAINER_STYLE = {
-  ...DRAMS_CARD.base,
+  ...CARD.base,
   padding: SPACING.lg,
   minWidth: '200px',
 };
@@ -28,16 +29,6 @@ const LABEL_STYLE = {
   display: 'block',
   marginBottom: SPACING.xs,
   color: DRAMS.textDark,
-};
-
-const INPUT_BASE = {
-  ...TEXT_BOX.track,
-  width: '100%',
-};
-
-const SELECT_BASE = {
-  ...SELECT_BOX.base,
-  width: '100%',
 };
 
 export interface SearchFilters {
@@ -60,22 +51,6 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
     return value?.toString() ?? '';
   }
 
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, TEXT_BOX.focus);
-  };
-
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, TEXT_BOX.track);
-  };
-
-  const handleSelectFocus = (e: React.FocusEvent<HTMLSelectElement>) => {
-    Object.assign(e.target.style, SELECT_BOX.focus);
-  };
-
-  const handleSelectBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
-    Object.assign(e.target.style, SELECT_BOX.base);
-  };
-
   return (
     <div style={CONTAINER_STYLE}>
       <h3 style={HEADER_STYLE}>Filters</h3>
@@ -84,7 +59,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
         <label htmlFor="max-price" style={LABEL_STYLE}>
           Max Price
         </label>
-        <input
+        <DramsInput
           id="max-price"
           type="number"
           min="0"
@@ -94,9 +69,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          style={INPUT_BASE}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
+          fullWidth
         />
       </div>
 
@@ -104,7 +77,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
         <label htmlFor="min-rating" style={LABEL_STYLE}>
           Min Rating
         </label>
-        <input
+        <DramsInput
           id="min-rating"
           type="number"
           min="0"
@@ -115,9 +88,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
             handleChange('minRating', e.target.value ? Number(e.target.value) : undefined)
           }
           placeholder="Any"
-          style={INPUT_BASE}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
+          fullWidth
         />
       </div>
 
@@ -125,20 +96,13 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps): JSX.El
         <label htmlFor="sort-by" style={LABEL_STYLE}>
           Sort By
         </label>
-        <select
+        <DramsSelect
           id="sort-by"
+          options={SORT_OPTIONS}
           value={filters.sortBy ?? 'relevance'}
           onChange={(e) => handleChange('sortBy', e.target.value)}
-          style={SELECT_BASE}
-          onFocus={handleSelectFocus}
-          onBlur={handleSelectBlur}
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          fullWidth
+        />
       </div>
     </div>
   );

@@ -2,31 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi, useCart } from '@ondc-website/shared/hooks';
 import { RatingStars } from '@ondc-website/shared/components';
-import { DramsFlipCard, FlipCardFront, FlipCardBack, DramsAddButton } from '@ondc-agent/shared/design-system';
+import { DramsFlipCard, FlipCardFront, FlipCardBack, DramsAddButton, PageLayout, DRAMS, SPACING, TYPOGRAPHY, BUTTON, CARD, TRANSITIONS, COLORS, LAYOUT } from '@ondc-agent/shared/design-system';
 import type { UCPItem } from '@ondc-website/shared';
-import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, CARD, TRANSITIONS, COLORS } from '@ondc-agent/shared/design-system';
-
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: '#ffffff',
-  padding: SPACING.xl,
-};
-
-const CONTENT_STYLE = {
-  maxWidth: '1000px',
-  margin: '0 auto',
-};
 
 const BACK_BUTTON_STYLE = {
-  padding: `${SPACING.sm} ${SPACING.lg}`,
-  border: 'none',
-  borderRadius: RADIUS.pill,
-  backgroundColor: DRAMS.grayTrack,
-  color: DRAMS.textDark,
-  ...TYPOGRAPHY.body,
-  cursor: 'pointer',
+  ...BUTTON.secondary,
   marginBottom: SPACING.xl,
-  transition: TRANSITIONS.hover,
 };
 
 const LAYOUT_STYLE = {
@@ -98,12 +79,10 @@ const LOADING_STYLE = {
 };
 
 const ERROR_STYLE = {
-  padding: SPACING.lg,
-  borderRadius: RADIUS.lg,
+  ...CARD.base,
   backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
+  borderColor: '#fecaca',
   color: COLORS.error,
-  ...TYPOGRAPHY.body,
 };
 
 const MESSAGE_STYLE = {
@@ -147,28 +126,26 @@ export function ProductDetailPage(): JSX.Element {
 
   if (loading) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
+      <PageLayout>
         <div style={LOADING_STYLE}>Loading product details...</div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error || !data) {
     return (
-      <div style={PAGE_CONTAINER_STYLE}>
-        <div style={CONTENT_STYLE}>
-          <div style={ERROR_STYLE}>
-            <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
-            <p style={{ margin: '4px 0 0 0' }}>{error || 'Product not found'}</p>
-            <button
-              onClick={() => navigate(-1)}
-              style={{ ...BACK_BUTTON_STYLE, marginBottom: 0, marginTop: SPACING.md }}
-            >
-              Go Back
-            </button>
-          </div>
+      <PageLayout>
+        <div style={ERROR_STYLE}>
+          <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
+          <p style={{ margin: `${SPACING.xs} 0 ${SPACING.md} 0` }}>{error || 'Product not found'}</p>
+          <button
+            onClick={() => navigate(-1)}
+            style={BACK_BUTTON_STYLE}
+          >
+            Go Back
+          </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -188,90 +165,88 @@ export function ProductDetailPage(): JSX.Element {
   ];
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={CONTENT_STYLE}>
-        <button onClick={() => navigate(-1)} style={BACK_BUTTON_STYLE}>
-          ← Back
-        </button>
+    <PageLayout>
+      <button onClick={() => navigate(-1)} style={BACK_BUTTON_STYLE}>
+        ← Back
+      </button>
 
-        <div style={LAYOUT_STYLE}>
-          {/* Left: Product Image */}
-          <div style={IMAGE_SECTION_STYLE}>
-            <div style={IMAGE_CARD_STYLE}>
-              {data.images?.[0] ? (
-                <img src={data.images[0].url} alt={data.name} style={IMAGE_STYLE} />
-              ) : (
-                <div style={{ ...IMAGE_STYLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{
-                    width: '80px',
-                    height: '80px',
-                    background: `radial-gradient(50% 50% at 30% 30%, ${DRAMS.orangeHighlight} 0%, ${DRAMS.orange} 100%)`,
-                    borderRadius: RADIUS.circle,
-                    boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 4px 12px ${DRAMS.orange}33`,
-                  }} />
-                </div>
-              )}
-            </div>
+      <div style={LAYOUT_STYLE}>
+        {/* Left: Product Image */}
+        <div style={IMAGE_SECTION_STYLE}>
+          <div style={IMAGE_CARD_STYLE}>
+            {data.images?.[0] ? (
+              <img src={data.images[0].url} alt={data.name} style={IMAGE_STYLE} />
+            ) : (
+              <div style={{ ...IMAGE_STYLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  background: `radial-gradient(50% 50% at 30% 30%, ${DRAMS.orangeHighlight} 0%, ${DRAMS.orange} 100%)`,
+                  borderRadius: '50%',
+                  boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 4px 12px ${DRAMS.orange}33`,
+                }} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Product Details */}
+        <div style={DETAILS_SECTION_STYLE}>
+          <h1 style={TITLE_STYLE}>{data.name}</h1>
+
+          {data.description && (
+            <p style={DESCRIPTION_STYLE}>{data.description}</p>
+          )}
+
+          <div style={PRICE_SECTION_STYLE}>
+            <span style={PRICE_STYLE}>
+              {data.price?.currency} {data.price?.value ?? data.price?.amount}
+            </span>
+            {data.rating && (
+              <div style={RATING_STYLE}>
+                <RatingStars rating={data.rating.value} />
+              </div>
+            )}
           </div>
 
-          {/* Right: Product Details */}
-          <div style={DETAILS_SECTION_STYLE}>
-            <h1 style={TITLE_STYLE}>{data.name}</h1>
+          {/* Flip Card for Specs */}
+          <div style={SPECS_CARD_STYLE}>
+            <DramsFlipCard
+              height={240}
+              front={
+                <FlipCardFront
+                  title="Product Details"
+                  stats={stats}
+                  hint="Click for specifications"
+                />
+              }
+              back={
+                <FlipCardBack
+                  specs={specs}
+                />
+              }
+            />
+          </div>
 
-            {data.description && (
-              <p style={DESCRIPTION_STYLE}>{data.description}</p>
-            )}
-
-            <div style={PRICE_SECTION_STYLE}>
-              <span style={PRICE_STYLE}>
-                {data.price?.currency} {data.price?.value ?? data.price?.amount}
+          {/* Add to Cart Button */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <DramsAddButton
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              loading={addingToCart}
+              size="lg"
+              fullWidth
+            >
+              {addingToCart ? 'Adding...' : 'Add to Cart'}
+            </DramsAddButton>
+            {cartMessage && (
+              <span style={{ ...MESSAGE_STYLE, color: messageColor }}>
+                {cartMessage}
               </span>
-              {data.rating && (
-                <div style={RATING_STYLE}>
-                  <RatingStars rating={data.rating.value} />
-                </div>
-              )}
-            </div>
-
-            {/* Flip Card for Specs */}
-            <div style={SPECS_CARD_STYLE}>
-              <DramsFlipCard
-                height={240}
-                front={
-                  <FlipCardFront
-                    title="Product Details"
-                    stats={stats}
-                    hint="Click for specifications"
-                  />
-                }
-                back={
-                  <FlipCardBack
-                    specs={specs}
-                  />
-                }
-              />
-            </div>
-
-            {/* Add to Cart Button */}
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <DramsAddButton
-                onClick={handleAddToCart}
-                disabled={addingToCart}
-                loading={addingToCart}
-                size="lg"
-                fullWidth
-              >
-                {addingToCart ? 'Adding...' : 'Add to Cart'}
-              </DramsAddButton>
-              {cartMessage && (
-                <span style={{ ...MESSAGE_STYLE, color: messageColor }}>
-                  {cartMessage}
-                </span>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

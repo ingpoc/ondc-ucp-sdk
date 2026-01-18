@@ -1,4 +1,5 @@
-import { SELECT_BOX, SPACING, TYPOGRAPHY, COLORS } from '@ondc-agent/shared/design-system';
+import { SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
+import { DramsSelect } from '@ondc-agent/shared/design-system';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance' },
@@ -13,6 +14,11 @@ const CONTAINER_STYLE = {
   gap: SPACING.md,
 };
 
+const LABEL_STYLE = {
+  ...TYPOGRAPHY.label,
+  color: DRAMS.textLight,
+};
+
 export interface SortDropdownProps {
   value: string;
   onChange: (value: string) => void;
@@ -21,23 +27,15 @@ export interface SortDropdownProps {
 export function SortDropdown({ value, onChange }: SortDropdownProps): JSX.Element {
   return (
     <div style={CONTAINER_STYLE}>
-      <label htmlFor="sort-select" style={{ ...TYPOGRAPHY.label, color: COLORS.textSecondary }}>
+      <label htmlFor="sort-select" style={LABEL_STYLE}>
         Sort by:
       </label>
-      <select
+      <DramsSelect
         id="sort-select"
+        options={SORT_OPTIONS}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={SELECT_BOX.base}
-        onFocus={(e) => Object.assign(e.target.style, SELECT_BOX.focus)}
-        onBlur={(e) => Object.assign(e.target.style, SELECT_BOX.base)}
-      >
-        {SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { MessageBubble, type SDKMessage } from './MessageBubble.js';
+import { DRAMS, SPACING, TYPOGRAPHY, BUTTON, RADIUS, CARD } from '@ondc-agent/shared/design-system';
 
 interface AgentChatProps {
   endpoint: '/api/agent/buyer' | '/api/agent/seller';
@@ -13,52 +14,79 @@ interface AgentChatProps {
 const API_BASE = 'http://localhost:3001';
 const STORAGE_KEY = 'ondc-session-id';
 
-// Constant styles hoisted outside component
-const CHAT_CONTAINER_STYLE = {
+// DRAMS-styled chat container
+const CHAT_CONTAINER_STYLE: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'column' as const,
-  height: '100%',
-  maxHeight: '600px',
-  border: '1px solid #ddd',
-  borderRadius: '0.5rem',
-  overflow: 'hidden' as const
+  flexDirection: 'column',
+  height: '600px',
+  ...CARD.base,
+  padding: 0,
+  overflow: 'hidden',
 };
 
-const HEADER_STYLE = {
-  padding: '1rem',
-  borderBottom: '1px solid #eee',
-  backgroundColor: '#f8f9fa',
-  fontWeight: 'bold' as const
+const HEADER_STYLE: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  borderBottom: `1px solid ${DRAMS.grayTrack}`,
+  backgroundColor: '#ffffff',
 };
 
-const MESSAGES_CONTAINER_STYLE = {
+const HEADER_TITLE_STYLE: React.CSSProperties = {
+  ...TYPOGRAPHY.label,
+  color: DRAMS.textDark,
+  margin: 0,
+};
+
+const SESSION_ID_STYLE: React.CSSProperties = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+};
+
+const MESSAGES_CONTAINER_STYLE: React.CSSProperties = {
   flex: 1,
   overflowY: 'auto' as const,
-  padding: '1rem',
+  padding: SPACING.xl,
   display: 'flex',
-  flexDirection: 'column' as const
+  flexDirection: 'column',
+  gap: SPACING.md,
 };
 
-const INPUT_CONTAINER_STYLE = {
-  padding: '1rem',
-  borderTop: '1px solid #eee',
+const TYPING_INDICATOR_STYLE: React.CSSProperties = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  padding: `${SPACING.sm} ${SPACING.md}`,
+  backgroundColor: DRAMS.grayTrack,
+  borderRadius: RADIUS.pill,
+  alignSelf: 'flex-start',
+};
+
+const INPUT_CONTAINER_STYLE: React.CSSProperties = {
+  padding: SPACING.lg,
+  borderTop: `1px solid ${DRAMS.grayTrack}`,
   display: 'flex',
-  gap: '0.5rem'
+  gap: SPACING.md,
+  alignItems: 'center',
 };
 
-const TYPING_INDICATOR_STYLE = {
-  padding: '0.5rem 1rem',
-  color: '#666',
-  fontSize: '0.875rem'
-};
-
-const INPUT_STYLE = {
+const INPUT_STYLE: React.CSSProperties = {
   flex: 1,
-  padding: '0.5rem 0.75rem',
-  border: '1px solid #ddd',
-  borderRadius: '0.25rem',
-  fontSize: '1rem'
-} as const;
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  border: 'none',
+  borderRadius: RADIUS.pill,
+  backgroundColor: DRAMS.grayTrack,
+  color: DRAMS.textDark,
+  fontSize: TYPOGRAPHY.body.fontSize,
+  fontFamily: DRAMS.fontFamily,
+};
+
+const SEND_BUTTON_STYLE = (disabled: boolean): React.CSSProperties => ({
+  ...BUTTON.primary,
+  padding: `${SPACING.md} ${SPACING.xl}`,
+  opacity: disabled ? 0.5 : 1,
+  cursor: disabled ? 'not-allowed' : 'pointer',
+});
 
 /**
  * Get or create session ID from localStorage
@@ -250,15 +278,25 @@ export function AgentChat({
   return (
     <div className="agent-chat" style={CHAT_CONTAINER_STYLE}>
       <div className="chat-header" style={HEADER_STYLE}>
-        {title}
+        <span style={HEADER_TITLE_STYLE}>{title}</span>
         {sessionId && (
-          <span style={{ fontSize: '0.75rem', color: '#666', marginLeft: '0.5rem' }}>
+          <span style={SESSION_ID_STYLE}>
             Session: {sessionId.slice(0, 8)}
           </span>
         )}
       </div>
 
       <div className="chat-messages" style={MESSAGES_CONTAINER_STYLE}>
+        {messages.length === 0 && (
+          <div style={{
+            ...TYPOGRAPHY.body,
+            color: DRAMS.textLight,
+            textAlign: 'center',
+            padding: SPACING.xl,
+          }}>
+            Start a conversation with the AI agent
+          </div>
+        )}
         {messages.map((message, index) => (
           <MessageBubble
             key={`${message.type}-${index}-${message.timestamp || Date.now()}`}
@@ -287,26 +325,11 @@ export function AgentChat({
         <button
           onClick={sendMessage}
           disabled={isInputDisabled}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: isInputDisabled ? '#ccc' : '#3498db',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '0.25rem',
-            cursor: isInputDisabled ? 'not-allowed' : 'pointer',
-            fontSize: '1rem'
-          }}
+          style={SEND_BUTTON_STYLE(isInputDisabled)}
         >
           Send
         </button>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

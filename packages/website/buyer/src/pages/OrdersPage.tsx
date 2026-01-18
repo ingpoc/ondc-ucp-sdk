@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
-import { DRAMS, COLORS, SPACING, TYPOGRAPHY, CARD, BADGE, PILL_BUTTON, RADIUS, TRANSITIONS } from '@ondc-agent/shared/design-system';
+import { PageLayout, PageHeader, DRAMS, SPACING, TYPOGRAPHY, CARD, PILL_BUTTON, RADIUS, TRANSITIONS, BADGE, LAYOUT } from '@ondc-agent/shared/design-system';
 
 type StatusFilter = 'all' | 'pending' | 'active' | 'complete';
 
@@ -21,33 +21,7 @@ const isCompleteStatus = (status: UCPOrderStatus): boolean =>
 // Mock orders - to be replaced with API call in SDK-BUYER-ORDERS-003
 const mockOrders: UCPOrder[] = [];
 
-// DRAMS: Clean white background
-const PAGE_CONTAINER_STYLE = {
-  minHeight: '100vh',
-  backgroundColor: '#ffffff',
-  padding: '0',
-  width: '100%',
-};
-
-const CONTENT_STYLE = {
-  maxWidth: '100%',
-  padding: '0 80px',
-};
-
-// DRAMS: Minimal header with gray track background
-const HEADER_STYLE = {
-  marginBottom: SPACING['3xl'],
-  padding: `64px 80px ${SPACING.xl} 80px`,
-  background: DRAMS.grayTrack,
-};
-
-const PAGE_TITLE_STYLE = {
-  ...TYPOGRAPHY.h1,
-  color: DRAMS.textDark,
-  margin: `0 0 ${SPACING.xl} 0`,
-};
-
-// DRAMS: Pill-style filter tabs
+// DRAMS: Pill-style filter buttons
 const FILTERS_STYLE = {
   display: 'flex',
   gap: SPACING.sm,
@@ -56,7 +30,6 @@ const FILTERS_STYLE = {
   overflowX: 'auto' as const,
 };
 
-// DRAMS: Pill-style filter buttons (gray → orange when active)
 const FILTER_BUTTON_STYLE = {
   padding: `${SPACING.md} ${SPACING.xl}`,
   border: 'none',
@@ -127,132 +100,126 @@ export function OrdersPage() {
   };
 
   return (
-    <div style={PAGE_CONTAINER_STYLE}>
-      <div style={CONTENT_STYLE}>
-        <div style={HEADER_STYLE}>
-          <h1 style={PAGE_TITLE_STYLE}>My Orders</h1>
-
-          <div style={FILTERS_STYLE}>
-            {(['all', 'pending', 'active', 'complete'] as StatusFilter[]).map(
-              (filterOption) => (
-                <button
-                  key={filterOption}
-                  onClick={() => setFilter(filterOption)}
-                  style={{
-                    ...FILTER_BUTTON_STYLE,
-                    background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
-                    color: filter === filterOption ? 'white' : DRAMS.textDark,
-                    fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
-                  }}
-                >
-                  {filterOption}
-                  <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>
-                    {filterOption === 'all'
-                      ? mockOrders.length
-                      : mockOrders.filter((o) => {
-                          if (filterOption === 'pending') return isPendingStatus(o.status);
-                          if (filterOption === 'active') return isActiveStatus(o.status);
-                          if (filterOption === 'complete') return isCompleteStatus(o.status);
-                          return true;
-                        }).length}
-                  </span>
-                </button>
-              )
-            )}
-          </div>
-        </div>
-
-        {filteredOrders.length === 0 ? (
-          <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
-            <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
-              {filter === 'all'
-                ? "You haven't placed any orders yet"
-                : `No ${filter} orders`}
-            </p>
-            {filter === 'all' && (
-              <>
-                <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
-                  Start shopping to see your orders here
-                </p>
-                <button
-                  onClick={() => navigate('/search')}
-                  style={PILL_BUTTON.orange}
-                >
-                  Start Shopping
-                </button>
-              </>
-            )}
-          </div>
-        ) : (
-          <div style={ORDERS_GRID_STYLE}>
-            {filteredOrders.map((order) => (
-              <div
-                key={order.id}
-                onClick={() => handleOrderClick(order.id)}
-                style={ORDER_CARD_STYLE}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, ORDER_CARD_HOVER_STYLE);
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = CARD.base.boxShadow || 'none';
-                  e.currentTarget.style.transform = 'none';
-                }}
-              >
-                <div style={{ marginBottom: SPACING.lg, paddingBottom: SPACING.lg, borderBottom: `1px solid ${DRAMS.grayTrack}` }}>
-                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginBottom: SPACING.xs }}>
-                    Order #{order.id}
-                  </div>
-                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
-                    {new Date(order.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: SPACING.lg }}>
-                  {order.items.slice(0, 3).map((item) => (
-                    <div
-                      key={item.id}
-                      style={{ display: 'flex', justifyContent: 'space-between', marginBottom: SPACING.sm, ...TYPOGRAPHY.body }}
-                    >
-                      <span style={{ color: DRAMS.textDark }}>
-                        {item.quantity}x {item.name}
-                      </span>
-                      <span style={{ color: DRAMS.textLight }}>
-                        {item.price.currency} {item.price.value}
-                      </span>
-                    </div>
-                  ))}
-                  {order.items.length > 3 && (
-                    <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginTop: SPACING.sm }}>
-                      +{order.items.length - 3} more items
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: SPACING.md, borderTop: `1px solid ${DRAMS.grayTrack}` }}>
-                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
-                    {order.provider?.name}
-                  </div>
-                  <div style={{ ...TYPOGRAPHY.h4, color: DRAMS.textDark }}>
-                    {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
-                  </div>
-                </div>
-
-                <div style={{
-                  ...BADGE.base,
-                  ...BADGE[getStatusBadgeVariant(order.status)],
-                  marginTop: SPACING.md,
-                }}>
-                  {getStatusLabel(order.status)}
-                </div>
-              </div>
-            ))}
-          </div>
+    <PageLayout title="My Orders">
+      <div style={FILTERS_STYLE}>
+        {(['all', 'pending', 'active', 'complete'] as StatusFilter[]).map(
+          (filterOption) => (
+            <button
+              key={filterOption}
+              onClick={() => setFilter(filterOption)}
+              style={{
+                ...FILTER_BUTTON_STYLE,
+                background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
+                color: filter === filterOption ? 'white' : DRAMS.textDark,
+                fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
+              }}
+            >
+              {filterOption}
+              <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>
+                {filterOption === 'all'
+                  ? mockOrders.length
+                  : mockOrders.filter((o) => {
+                      if (filterOption === 'pending') return isPendingStatus(o.status);
+                      if (filterOption === 'active') return isActiveStatus(o.status);
+                      if (filterOption === 'complete') return isCompleteStatus(o.status);
+                      return true;
+                    }).length}
+              </span>
+            </button>
+          )
         )}
       </div>
-    </div>
+
+      {filteredOrders.length === 0 ? (
+        <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
+          <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
+            {filter === 'all'
+              ? "You haven't placed any orders yet"
+              : `No ${filter} orders`}
+          </p>
+          {filter === 'all' && (
+            <>
+              <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
+                Start shopping to see your orders here
+              </p>
+              <button
+                onClick={() => navigate('/search')}
+                style={PILL_BUTTON.orange}
+              >
+                Start Shopping
+              </button>
+            </>
+          )}
+        </div>
+      ) : (
+        <div style={ORDERS_GRID_STYLE}>
+          {filteredOrders.map((order) => (
+            <div
+              key={order.id}
+              onClick={() => handleOrderClick(order.id)}
+              style={ORDER_CARD_STYLE}
+              onMouseEnter={(e) => {
+                Object.assign(e.currentTarget.style, ORDER_CARD_HOVER_STYLE);
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = CARD.base.boxShadow || 'none';
+                e.currentTarget.style.transform = 'none';
+              }}
+            >
+              <div style={{ marginBottom: SPACING.lg, paddingBottom: SPACING.lg, borderBottom: `1px solid ${DRAMS.grayTrack}` }}>
+                <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginBottom: SPACING.xs }}>
+                  Order #{order.id}
+                </div>
+                <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
+                  {new Date(order.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: SPACING.lg }}>
+                {order.items.slice(0, 3).map((item) => (
+                  <div
+                    key={item.id}
+                    style={{ display: 'flex', justifyContent: 'space-between', marginBottom: SPACING.sm, ...TYPOGRAPHY.body }}
+                  >
+                    <span style={{ color: DRAMS.textDark }}>
+                      {item.quantity}x {item.name}
+                    </span>
+                    <span style={{ color: DRAMS.textLight }}>
+                      {item.price.currency} {item.price.value}
+                    </span>
+                  </div>
+                ))}
+                {order.items.length > 3 && (
+                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginTop: SPACING.sm }}>
+                    +{order.items.length - 3} more items
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: SPACING.md, borderTop: `1px solid ${DRAMS.grayTrack}` }}>
+                <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
+                  {order.provider?.name}
+                </div>
+                <div style={{ ...TYPOGRAPHY.h4, color: DRAMS.textDark }}>
+                  {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
+                </div>
+              </div>
+
+              <div style={{
+                ...BADGE.base,
+                ...BADGE[getStatusBadgeVariant(order.status)],
+                marginTop: SPACING.md,
+              }}>
+                {getStatusLabel(order.status)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </PageLayout>
   );
 }

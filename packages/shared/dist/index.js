@@ -1401,6 +1401,112 @@ var ERROR = {
     marginTop: SPACING.lg
   }
 };
+var APP = {
+  headerHeight: "64px",
+  maxWidth: "1400px",
+  contentMaxWidth: "1200px"
+};
+var GRID = {
+  // Container with max-width and horizontal centering
+  container: {
+    width: "100%",
+    maxWidth: APP.maxWidth,
+    margin: "0 auto",
+    paddingLeft: SPACING.xl,
+    paddingRight: SPACING.xl
+  },
+  // Container with wider padding for desktop
+  containerWide: {
+    width: "100%",
+    maxWidth: APP.maxWidth,
+    margin: "0 auto",
+    paddingLeft: "80px",
+    paddingRight: "80px"
+  },
+  // Grid gaps using SPACING scale
+  gap: {
+    xs: SPACING.xs,
+    sm: SPACING.sm,
+    md: SPACING.md,
+    lg: SPACING.lg,
+    xl: SPACING.xl,
+    "2xl": SPACING["2xl"],
+    "3xl": SPACING["3xl"]
+  },
+  // Common grid patterns
+  twoColumns: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: SPACING.xl
+  },
+  twoColumnsWide: {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr",
+    gap: SPACING.xl
+  },
+  threeColumns: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: SPACING.xl
+  },
+  fourColumns: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: SPACING.xl
+  },
+  // Auto-fill grid for responsive cards
+  autoFill: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: SPACING.xl
+  }
+};
+var LAYOUT = {
+  // Full page container
+  page: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: "#ffffff"
+  },
+  // Page with gray background
+  pageGray: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: DRAMS.grayTrack
+  },
+  // Content container with horizontal padding
+  content: {
+    padding: `0 ${SPACING.xl}`,
+    maxWidth: "100%"
+  },
+  // Content with wide padding
+  contentWide: {
+    padding: `0 80px`,
+    maxWidth: "100%"
+  },
+  // Centered content container
+  centered: {
+    maxWidth: APP.contentMaxWidth,
+    margin: "0 auto"
+  },
+  // Page header section
+  pageHeader: {
+    padding: `${SPACING.xl} 0`,
+    marginBottom: SPACING.xl,
+    background: DRAMS.grayTrack
+  },
+  // Grid layouts
+  gridTwoColumns: {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr",
+    gap: SPACING.xl
+  },
+  gridFilters: {
+    display: "flex",
+    gap: SPACING["2xl"],
+    alignItems: "flex-start"
+  }
+};
 
 // src/design-system/components.ts
 var PILL_BUTTON = {
@@ -2018,6 +2124,308 @@ function DramsAddButton({
   );
 }
 
+// src/design-system/components/RollingSearch.tsx
+import { useState as useState4, useRef, useEffect } from "react";
+import { jsx as jsx4, jsxs as jsxs4 } from "react/jsx-runtime";
+var CONTAINER_STYLE2 = {
+  position: "relative",
+  width: "234px",
+  height: "44px"
+};
+var GRAY_TRACK_STYLE = {
+  position: "absolute",
+  width: "42px",
+  height: "42px",
+  top: "1px",
+  left: "96px",
+  borderRadius: "48px",
+  background: DRAMS.grayTrack,
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+};
+var GRAY_TRACK_EXPANDED = {
+  width: "234px",
+  height: "44px",
+  top: "0",
+  left: "0"
+};
+var INPUT_STYLE = {
+  position: "absolute",
+  left: "52px",
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: "calc(100% - 100px)",
+  border: "none",
+  background: "transparent",
+  fontSize: "15px",
+  color: DRAMS.textDark,
+  outline: "none",
+  opacity: 0,
+  pointerEvents: "none",
+  transition: "opacity 0.3s ease",
+  caretColor: DRAMS.orange,
+  fontFamily: DRAMS.fontFamily
+};
+var INPUT_VISIBLE = {
+  opacity: 1,
+  pointerEvents: "auto"
+};
+var SHADOW_LAYER_1 = {
+  position: "absolute",
+  width: "32px",
+  height: "32px",
+  borderRadius: "56px",
+  top: "6px",
+  left: "102px",
+  pointerEvents: "none",
+  transition: "left 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  boxShadow: "rgba(0, 0, 0, 0.247) 0.84px 0.84px 1.19px -0.625px, rgba(0, 0, 0, 0.24) 1.99px 1.99px 2.81px -1.25px, rgba(0, 0, 0, 0.23) 3.63px 3.63px 5.13px -1.875px, rgba(0, 0, 0, 0.22) 6.04px 6.04px 8.54px -2.5px, rgba(0, 0, 0, 0.2) 9.75px 9.75px 13.79px -3.125px, rgba(0, 0, 0, 0.17) 15.96px 15.96px 22.57px -3.75px, rgba(0, 0, 0, 0.114) 27.48px 27.48px 38.86px -4.375px, rgba(0, 0, 0, 0) 50px 50px 70.71px -5px"
+};
+var SHADOW_LAYER_1_EXPANDED = {
+  left: "198px"
+};
+var SHADOW_LAYER_2 = {
+  position: "absolute",
+  width: "20px",
+  height: "19px",
+  borderRadius: "56px",
+  top: "13px",
+  left: "103px",
+  pointerEvents: "none",
+  transition: "left 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  boxShadow: "rgba(0, 0, 0, 0.208) 1.51px 0.2px 0.61px -0.53px, rgba(0, 0, 0, 0.204) 3.58px 0.48px 1.45px -1.06px, rgba(0, 0, 0, 0.2) 6.54px 0.87px 2.64px -1.59px, rgba(0, 0, 0, 0.192) 10.87px 1.45px 4.38px -2.125px, rgba(0, 0, 0, 0.176) 17.55px 2.34px 7.08px -2.66px, rgba(0, 0, 0, 0.157) 28.72px 3.83px 11.59px -3.19px, rgba(0, 0, 0, 0.118) 49.46px 6.59px 19.96px -3.72px, rgba(0, 0, 0, 0.04) 90px 12px 36.32px -4.25px, rgba(0, 0, 0, 0.25) 10px 10px 24px 0px"
+};
+var SHADOW_LAYER_2_EXPANDED = {
+  left: "199px"
+};
+var ORANGE_BALL = {
+  position: "absolute",
+  width: "42px",
+  height: "42px",
+  top: "0",
+  left: "96px",
+  borderRadius: "50%",
+  overflow: "hidden",
+  cursor: "pointer",
+  transition: "left 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  background: `radial-gradient(50% 50% at 29.1% 29.7%, ${DRAMS.orangeHighlight} 0%, ${DRAMS.orange} 100%)`,
+  boxShadow: "rgba(232, 61, 23, 0.35) 0px 0px 0px -0.75px inset, rgba(232, 61, 23, 0.7) 0px 0px 0px -1.5px inset, rgba(0, 0, 0, 0.25) -2px -1px 4px 0px inset, rgba(204, 44, 16, 0.455) -0.66px -0.06px 0.53px -0.75px inset, rgba(204, 44, 16, 0.475) -2.52px -0.23px 2.02px -1.5px inset, rgba(204, 44, 16, 0.55) -11px -1px 8.84px -2.25px inset"
+};
+var ORANGE_BALL_EXPANDED = {
+  left: "192px"
+};
+var ICON_STYLE = {
+  width: "20px",
+  height: "20px",
+  fill: "rgb(252, 252, 250)",
+  transition: "opacity 0.2s ease",
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "none"
+};
+function RollingSearch({ onSearch, placeholder = "Search products..." }) {
+  const [isExpanded, setIsExpanded] = useState4(false);
+  const [query, setQuery] = useState4("");
+  const inputRef = useRef(null);
+  useEffect(() => {
+    if (isExpanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isExpanded]);
+  const handleToggle = () => {
+    if (isExpanded && query.trim()) {
+      onSearch?.(query.trim());
+      setQuery("");
+      setIsExpanded(false);
+    } else if (isExpanded) {
+      setQuery("");
+      setIsExpanded(false);
+    } else {
+      setIsExpanded(true);
+    }
+  };
+  const handleBlur = () => {
+    setTimeout(() => {
+      if (!query.trim()) {
+        setIsExpanded(false);
+      }
+    }, 150);
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setQuery("");
+      setIsExpanded(false);
+    } else if (e.key === "Enter" && query.trim()) {
+      onSearch?.(query.trim());
+      setQuery("");
+      setIsExpanded(false);
+    }
+  };
+  const handleInputChange = (e) => {
+    setQuery(e.currentTarget.value);
+  };
+  return /* @__PURE__ */ jsxs4("div", { style: { ...CONTAINER_STYLE2 }, children: [
+    /* @__PURE__ */ jsx4(
+      "div",
+      {
+        style: {
+          ...GRAY_TRACK_STYLE,
+          ...isExpanded ? GRAY_TRACK_EXPANDED : {}
+        }
+      }
+    ),
+    /* @__PURE__ */ jsx4(
+      "div",
+      {
+        style: {
+          ...SHADOW_LAYER_1,
+          ...isExpanded ? SHADOW_LAYER_1_EXPANDED : {}
+        }
+      }
+    ),
+    /* @__PURE__ */ jsx4(
+      "div",
+      {
+        style: {
+          ...SHADOW_LAYER_2,
+          ...isExpanded ? SHADOW_LAYER_2_EXPANDED : {}
+        }
+      }
+    ),
+    /* @__PURE__ */ jsx4(
+      "input",
+      {
+        ref: inputRef,
+        type: "text",
+        value: query,
+        onChange: handleInputChange,
+        onBlur: handleBlur,
+        onKeyDown: handleKeyDown,
+        placeholder,
+        style: {
+          ...INPUT_STYLE,
+          ...isExpanded ? INPUT_VISIBLE : {}
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxs4(
+      "div",
+      {
+        onClick: handleToggle,
+        style: {
+          ...ORANGE_BALL,
+          ...isExpanded ? ORANGE_BALL_EXPANDED : {},
+          zIndex: 1
+        },
+        children: [
+          /* @__PURE__ */ jsx4(
+            "svg",
+            {
+              style: { ...ICON_STYLE, opacity: isExpanded ? 0 : 1 },
+              viewBox: "0 0 256 256",
+              children: /* @__PURE__ */ jsx4("path", { d: "M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" })
+            }
+          ),
+          /* @__PURE__ */ jsx4(
+            "svg",
+            {
+              style: { ...ICON_STYLE, opacity: isExpanded ? 1 : 0 },
+              viewBox: "0 0 256 256",
+              children: /* @__PURE__ */ jsx4("path", { d: "M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z" })
+            }
+          )
+        ]
+      }
+    )
+  ] });
+}
+
+// src/design-system/components/PageLayout.tsx
+import { jsx as jsx5, jsxs as jsxs5 } from "react/jsx-runtime";
+var PAGE_STYLES = {
+  default: {
+    ...LAYOUT.page
+  },
+  gray: {
+    ...LAYOUT.pageGray,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  centered: {
+    ...LAYOUT.page,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center"
+  }
+};
+var CONTENT_STYLES = {
+  default: {
+    ...GRID.containerWide,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xl
+  },
+  gray: {
+    padding: SPACING.xl
+  },
+  centered: {
+    ...LAYOUT.centered,
+    textAlign: "center"
+  }
+};
+var HEADER_STYLES = {
+  ...GRID.containerWide,
+  paddingTop: SPACING.xl,
+  paddingBottom: 0
+};
+var TITLE_STYLE = {
+  ...TYPOGRAPHY.h1,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.md} 0`
+};
+var SUBTITLE_STYLE = {
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  margin: 0
+};
+function PageLayout({
+  children,
+  variant = "default",
+  title,
+  subtitle,
+  showHeader = false
+}) {
+  const pageStyle = PAGE_STYLES[variant];
+  const contentStyle = CONTENT_STYLES[variant];
+  return /* @__PURE__ */ jsxs5("div", { style: pageStyle, children: [
+    (showHeader || title || subtitle) && /* @__PURE__ */ jsxs5("div", { style: HEADER_STYLES, children: [
+      title && /* @__PURE__ */ jsx5("h1", { style: TITLE_STYLE, children: title }),
+      subtitle && /* @__PURE__ */ jsx5("p", { style: SUBTITLE_STYLE, children: subtitle })
+    ] }),
+    /* @__PURE__ */ jsx5("div", { style: contentStyle, children })
+  ] });
+}
+function PageHeader({ title, subtitle, actions }) {
+  return /* @__PURE__ */ jsxs5("div", { style: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: SPACING.xl
+  }, children: [
+    /* @__PURE__ */ jsxs5("div", { children: [
+      /* @__PURE__ */ jsx5("h1", { style: TITLE_STYLE, children: title }),
+      subtitle && /* @__PURE__ */ jsx5("p", { style: SUBTITLE_STYLE, children: subtitle })
+    ] }),
+    actions && /* @__PURE__ */ jsx5("div", { children: actions })
+  ] });
+}
+
+// src/design-system/components/DramsInput.tsx
+import { forwardRef, useState as useState5 } from "react";
+
 // src/design-system/tactile.ts
 var orangeBall = {
   background: "radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
@@ -2099,7 +2507,185 @@ var active = {
   scale: "scale(0.98)",
   press: "translateY(1px)"
 };
+
+// src/design-system/components/DramsInput.tsx
+import { Fragment as Fragment2, jsx as jsx6, jsxs as jsxs6 } from "react/jsx-runtime";
+var INPUT_UNIQUE_ID = "drams-input-";
+var DramsInput = forwardRef(
+  ({ id, error = false, disabled: disabled2 = false, fullWidth = false, className, style, ...rest }, ref) => {
+    const [isFocused, setIsFocused] = useState5(false);
+    const uniqueId = id || `${INPUT_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
+    const baseStyle = {
+      ...TEXT_BOX.track,
+      ...fullWidth ? { width: "100%" } : {},
+      ...disabled2 ? disabled : {},
+      ...error ? TEXT_BOX.error : {},
+      ...style || {}
+    };
+    return /* @__PURE__ */ jsxs6(Fragment2, { children: [
+      /* @__PURE__ */ jsx6(
+        "input",
+        {
+          ref,
+          id: uniqueId,
+          disabled: disabled2,
+          className,
+          ...rest,
+          "data-focused": isFocused,
+          "data-error": error,
+          style: baseStyle,
+          onFocus: (e) => {
+            setIsFocused(true);
+            rest.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            rest.onBlur?.(e);
+          }
+        }
+      ),
+      /* @__PURE__ */ jsx6("style", { children: `
+          input[data-focused="true"]#${uniqueId} {
+            background: ${DRAMS.grayHover} !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            outline: none;
+          }
+        ` })
+    ] });
+  }
+);
+DramsInput.displayName = "DramsInput";
+
+// src/design-system/components/DramsSelect.tsx
+import { forwardRef as forwardRef2, useState as useState6 } from "react";
+import { Fragment as Fragment3, jsx as jsx7, jsxs as jsxs7 } from "react/jsx-runtime";
+var SELECT_UNIQUE_ID = "drams-select-";
+var DramsSelect = forwardRef2(
+  ({ id, error = false, disabled: disabled2 = false, fullWidth = false, options, className, style, ...rest }, ref) => {
+    const [isFocused, setIsFocused] = useState6(false);
+    const uniqueId = id || `${SELECT_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
+    const baseStyle = {
+      ...SELECT_BOX.base,
+      ...fullWidth ? { width: "100%" } : {},
+      ...style || {}
+    };
+    return /* @__PURE__ */ jsxs7(Fragment3, { children: [
+      /* @__PURE__ */ jsx7(
+        "select",
+        {
+          ref,
+          id: uniqueId,
+          disabled: disabled2,
+          className,
+          ...rest,
+          "data-focused": isFocused,
+          "data-error": error,
+          style: baseStyle,
+          onFocus: (e) => {
+            setIsFocused(true);
+            rest.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            rest.onBlur?.(e);
+          },
+          children: options.map((option) => /* @__PURE__ */ jsx7("option", { value: option.value, children: option.label }, option.value))
+        }
+      ),
+      /* @__PURE__ */ jsx7("style", { children: `
+          select[data-focused="true"]#${uniqueId} {
+            background: ${DRAMS.grayHover} !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            outline: none;
+          }
+        ` })
+    ] });
+  }
+);
+DramsSelect.displayName = "DramsSelect";
+
+// src/design-system/components/DramsButton.tsx
+import { forwardRef as forwardRef3, useState as useState7 } from "react";
+import { Fragment as Fragment4, jsx as jsx8, jsxs as jsxs8 } from "react/jsx-runtime";
+var BUTTON_UNIQUE_ID = "drams-button-";
+var BUTTON_STYLES = {
+  primary: PILL_BUTTON.orange,
+  secondary: {
+    background: DRAMS.grayTrack,
+    color: DRAMS.textDark,
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.label.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    cursor: "pointer"
+  },
+  danger: {
+    background: COLORS.error,
+    color: "white",
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.label.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    cursor: "pointer"
+  },
+  gray: PILL_BUTTON.gray
+};
+var DramsButton = forwardRef3(
+  ({
+    id,
+    variant = "primary",
+    disabled: disabled2 = false,
+    fullWidth = false,
+    loading = false,
+    className,
+    children,
+    ...rest
+  }, ref) => {
+    const [isHovered, setIsHovered] = useState7(false);
+    const [isPressed, setIsPressed] = useState7(false);
+    const uniqueId = id || `${BUTTON_UNIQUE_ID}${Math.random().toString(36).slice(2, 9)}`;
+    const isDisabled = disabled2 || loading;
+    const baseStyle = {
+      ...BUTTON_STYLES[variant],
+      ...fullWidth ? { width: "100%" } : {},
+      ...isDisabled ? disabled : {},
+      ...isPressed && !isDisabled ? { transform: "translateY(1px)" } : {}
+    };
+    return /* @__PURE__ */ jsxs8(Fragment4, { children: [
+      /* @__PURE__ */ jsx8(
+        "button",
+        {
+          ref,
+          id: uniqueId,
+          disabled: isDisabled,
+          className,
+          "data-hovered": isHovered,
+          "data-variant": variant,
+          style: baseStyle,
+          onMouseEnter: () => setIsHovered(true),
+          onMouseLeave: () => {
+            setIsHovered(false);
+            setIsPressed(false);
+          },
+          onMouseDown: () => setIsPressed(true),
+          onMouseUp: () => setIsPressed(false),
+          ...rest,
+          children: loading ? "..." : children
+        }
+      ),
+      (variant === "secondary" || variant === "gray") && /* @__PURE__ */ jsx8("style", { children: `
+            button[data-hovered="true"]#${uniqueId} {
+              background: ${DRAMS.grayHover} !important;
+            }
+          ` })
+    ] });
+  }
+);
+DramsButton.displayName = "DramsButton";
 export {
+  APP,
   BADGE,
   BUTTON,
   CARD,
@@ -2109,24 +2695,32 @@ export {
   DRAMS_CARD,
   DRAMS_EMPTY_STATE,
   DramsAddButton,
+  DramsButton,
   DramsFlipCard,
+  DramsInput,
   DramsProductCard,
+  DramsSelect,
   EMPTY_STATE,
   ERROR,
   EnvVars,
   EnvironmentEnum,
   FlipCardBack,
   FlipCardFront,
+  GRID,
   GatewayConfigSchema,
   INPUT,
+  LAYOUT,
   LOADING,
   MissingEnvVarError,
   NAV,
   ONDCClient,
   ONDCError,
   PILL_BUTTON,
+  PageHeader,
+  PageLayout,
   QUANTITY_CONTROL,
   RADIUS,
+  RollingSearch,
   SELECT_BOX,
   SHADOWS,
   SLIDER,
