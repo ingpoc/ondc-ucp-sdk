@@ -1,66 +1,373 @@
-import {
-  buildAuthHeader,
-  generateKeyPair,
-  generateKeyPairFromSeed,
-  getPublicKey,
-  initCrypto,
-  parseAuthHeader,
-  signMessage,
-  verifyAuthHeader,
-  verifySignature
-} from "./chunk-JND4W6FD.js";
-import {
-  ONDCError,
-  SignatureError,
-  ValidationError
-} from "./chunk-ENZDRWLG.js";
-import {
-  BADGE,
-  BUTTON,
-  CARD,
-  COLORS,
-  DRAMS,
-  DRAMS_CARD,
-  DRAMS_EMPTY_STATE,
-  EMPTY_STATE,
-  ERROR,
-  INPUT,
-  LOADING,
-  NAV,
-  PILL_BUTTON,
-  QUANTITY_CONTROL,
-  RADIUS,
-  SELECT_BOX,
-  SHADOWS,
-  SLIDER,
-  SPACING,
-  TEXT_BOX,
-  TOGGLE_SWITCH,
-  TRANSITIONS,
-  TYPOGRAPHY,
-  active,
-  animations,
-  cardLift,
-  concave,
-  convex,
-  disabled,
-  focusRing,
-  grayTrack,
-  hover,
-  innerGlow,
-  mediumShadow,
-  orangeBall,
-  pressed,
-  shimmer,
-  softShadow
-} from "./chunk-DR3DDLGE.js";
-import {
-  allMCPTools,
-  ondcCancelTool,
-  ondcCheckoutTool,
+// src/types/mcp/schemas.ts
+var ondcSearchTool = {
+  name: "ondc_search",
+  description: "Search for products and services on the ONDC network. Returns items matching category, location, and preferences.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      category: {
+        type: "string",
+        description: 'Product or service category to search (e.g., "grocery", "restaurant", "fashion")'
+      },
+      query: {
+        type: "string",
+        description: "Free-text search query for specific items or keywords"
+      },
+      location: {
+        type: "object",
+        description: "Search location for nearby providers",
+        properties: {
+          latitude: {
+            type: "number",
+            description: "Latitude coordinate",
+            minimum: -90,
+            maximum: 90
+          },
+          longitude: {
+            type: "number",
+            description: "Longitude coordinate",
+            minimum: -180,
+            maximum: 180
+          },
+          radius: {
+            type: "number",
+            description: "Search radius in meters (default: 5000)",
+            minimum: 100,
+            maximum: 5e4
+          }
+        },
+        required: ["latitude", "longitude"]
+      },
+      preferences: {
+        type: "object",
+        description: "Search preferences for sorting and filtering",
+        properties: {
+          maxPrice: {
+            type: "number",
+            description: "Maximum price filter"
+          },
+          minRating: {
+            type: "number",
+            description: "Minimum rating filter (0-5)",
+            minimum: 0,
+            maximum: 5
+          },
+          sortBy: {
+            type: "string",
+            description: "Sort order for results",
+            enum: ["price", "rating", "distance", "relevance"]
+          }
+        }
+      },
+      maxResults: {
+        type: "number",
+        description: "Maximum number of results to return (default: 10)",
+        minimum: 1,
+        maximum: 100
+      },
+      expandSearch: {
+        type: "boolean",
+        description: "Include providers outside search radius (default: false)"
+      }
+    },
+    required: ["category"]
+  }
+};
+var ondcCheckoutTool = {
+  name: "ondc_checkout",
+  description: "Initiate checkout for selected items. Creates a session and returns payment details.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      items: {
+        type: "array",
+        description: "Items to checkout",
+        items: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "Item ID from search results"
+            },
+            providerId: {
+              type: "string",
+              description: "Provider/seller ID"
+            },
+            quantity: {
+              type: "number",
+              description: "Quantity to order",
+              minimum: 1
+            }
+          },
+          required: ["id", "providerId", "quantity"]
+        }
+      },
+      buyer: {
+        type: "object",
+        description: "Buyer information for delivery",
+        properties: {
+          name: {
+            type: "string",
+            description: "Buyer full name"
+          },
+          phone: {
+            type: "string",
+            description: "Contact phone number"
+          },
+          email: {
+            type: "string",
+            description: "Contact email (optional)",
+            format: "email"
+          },
+          address: {
+            type: "object",
+            description: "Delivery address",
+            properties: {
+              street: {
+                type: "string",
+                description: "Street address"
+              },
+              city: {
+                type: "string",
+                description: "City name"
+              },
+              state: {
+                type: "string",
+                description: "State name"
+              },
+              postalCode: {
+                type: "string",
+                description: "Postal or ZIP code"
+              },
+              country: {
+                type: "string",
+                description: "Country name (optional)"
+              }
+            },
+            required: ["street", "city", "state", "postalCode"]
+          }
+        },
+        required: ["name", "phone", "address"]
+      },
+      fulfillmentOptionId: {
+        type: "string",
+        description: "Fulfillment option ID (optional, uses default if not specified)"
+      },
+      instructions: {
+        type: "string",
+        description: "Special delivery instructions (optional)"
+      }
+    },
+    required: ["items", "buyer"]
+  }
+};
+var ondcStatusTool = {
+  name: "ondc_status",
+  description: "Check the status of an existing ONDC order or session. Returns current status, tracking, and updates.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      sessionId: {
+        type: "string",
+        description: "Session or order ID to check"
+      }
+    },
+    required: ["sessionId"]
+  }
+};
+var ondcCancelTool = {
+  name: "ondc_cancel",
+  description: "Cancel an existing ONDC order or session. Returns cancellation status and refund details.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      sessionId: {
+        type: "string",
+        description: "Session or order ID to cancel"
+      },
+      reason: {
+        type: "string",
+        description: "Reason for cancellation"
+      }
+    },
+    required: ["sessionId", "reason"]
+  }
+};
+var allMCPTools = [
   ondcSearchTool,
-  ondcStatusTool
-} from "./chunk-PO3HPXUR.js";
+  ondcCheckoutTool,
+  ondcStatusTool,
+  ondcCancelTool
+];
+
+// src/crypto/keys.ts
+import _sodium from "libsodium-wrappers";
+async function initCrypto() {
+  await _sodium.ready;
+}
+async function getSodium() {
+  await _sodium.ready;
+  return _sodium;
+}
+async function generateKeyPair() {
+  const sodium = await getSodium();
+  const keyPair = sodium.crypto_sign_keypair();
+  const publicKey = sodium.to_base64(
+    keyPair.publicKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  const privateKey = sodium.to_base64(
+    keyPair.privateKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  return {
+    publicKey,
+    privateKey
+  };
+}
+async function generateKeyPairFromSeed(seed) {
+  const sodium = await getSodium();
+  const seedBytes = sodium.from_base64(
+    seed,
+    sodium.base64_variants.ORIGINAL
+  );
+  const keyPair = sodium.crypto_sign_seed_keypair(seedBytes);
+  const publicKey = sodium.to_base64(
+    keyPair.publicKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  const privateKey = sodium.to_base64(
+    keyPair.privateKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  return {
+    publicKey,
+    privateKey
+  };
+}
+async function getPublicKey(privateKey) {
+  const sodium = await getSodium();
+  const privateKeyBytes = sodium.from_base64(
+    privateKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  const publicKeyBytes = privateKeyBytes.subarray(32);
+  return sodium.to_base64(
+    publicKeyBytes,
+    sodium.base64_variants.ORIGINAL
+  );
+}
+
+// src/crypto/signing.ts
+import _sodium2 from "libsodium-wrappers";
+async function getSodium2() {
+  await _sodium2.ready;
+  return _sodium2;
+}
+async function signMessage(message, privateKey) {
+  const sodium = await getSodium2();
+  const messageBytes = sodium.from_string(message);
+  const privateKeyBytes = sodium.from_base64(
+    privateKey,
+    sodium.base64_variants.ORIGINAL
+  );
+  const signatureBytes = sodium.crypto_sign_detached(
+    messageBytes,
+    privateKeyBytes
+  );
+  return sodium.to_base64(
+    signatureBytes,
+    sodium.base64_variants.ORIGINAL
+  );
+}
+function verifySignature(message, signature, publicKey) {
+  try {
+    const sodium = _sodium2;
+    const messageBytes = sodium.from_string(message);
+    const signatureBytes = sodium.from_base64(
+      signature,
+      sodium.base64_variants.ORIGINAL
+    );
+    const publicKeyBytes = sodium.from_base64(
+      publicKey,
+      sodium.base64_variants.ORIGINAL
+    );
+    return sodium.crypto_sign_verify_detached(
+      signatureBytes,
+      messageBytes,
+      publicKeyBytes
+    );
+  } catch {
+    return false;
+  }
+}
+
+// src/crypto/auth.ts
+import { createHash } from "crypto";
+function sha256Base64(input) {
+  const hash = createHash("sha256");
+  hash.update(input);
+  return hash.digest("base64");
+}
+async function buildAuthHeader(subscriberId, privateKey, request) {
+  const hashBase64 = sha256Base64(request.body);
+  const signingString = `${hashBase64}.${request.created}`;
+  const signature = await signMessage(signingString, privateKey);
+  const keyIdPart = `${subscriberId}|${request.keyId}|ed25519`;
+  return `Signature keyId="${keyIdPart}",signature="${signature}",created="${request.created}"`;
+}
+function parseAuthHeader(header) {
+  if (!header.startsWith("Signature ")) {
+    return null;
+  }
+  const pairsStr = header.slice("Signature ".length);
+  const pairs = {};
+  const regex = /(\w+)="([^"]*)"/g;
+  let match;
+  while ((match = regex.exec(pairsStr)) !== null) {
+    const key = match[1];
+    const value = match[2];
+    if (key !== void 0 && value !== void 0) {
+      pairs[key] = value;
+    }
+  }
+  if (!pairs.keyId || !pairs.signature || !pairs.created) {
+    return null;
+  }
+  const keyIdParts = pairs.keyId.split("|");
+  if (keyIdParts.length !== 3) {
+    return null;
+  }
+  const [subscriberId, keyId, algorithm] = keyIdParts;
+  if (algorithm !== "ed25519") {
+    return null;
+  }
+  return {
+    subscriberId: subscriberId ?? "",
+    keyId: keyId ?? "",
+    algorithm,
+    signature: pairs.signature,
+    created: pairs.created
+  };
+}
+async function verifyAuthHeader(header, body, publicKey) {
+  const parsed = parseAuthHeader(header);
+  if (!parsed) {
+    return {
+      subscriberId: "",
+      keyId: "",
+      valid: false
+    };
+  }
+  const hashBase64 = sha256Base64(body);
+  const signingString = `${hashBase64}.${parsed.created}`;
+  const isValid = verifySignature(signingString, parsed.signature, publicKey);
+  return {
+    subscriberId: parsed.subscriberId,
+    keyId: parsed.keyId,
+    valid: isValid
+  };
+}
 
 // src/config/schema.ts
 import { z } from "zod";
@@ -639,6 +946,28 @@ var ONDCClient = class {
   }
 };
 
+// src/errors/index.ts
+var ONDCError = class extends Error {
+  constructor(message, code, details) {
+    super(message);
+    this.code = code;
+    this.details = details;
+    this.name = "ONDCError";
+  }
+};
+var SignatureError = class extends ONDCError {
+  constructor(message, details) {
+    super(message, "SIGNATURE_ERROR", details);
+    this.name = "SignatureError";
+  }
+};
+var ValidationError = class extends ONDCError {
+  constructor(message, details) {
+    super(message, "VALIDATION_ERROR", details);
+    this.name = "ValidationError";
+  }
+};
+
 // src/scoring/preferences.ts
 var DEFAULT_WEIGHTS = {
   priceWeight: 0.3,
@@ -826,6 +1155,950 @@ function scoreAndSortItems(items, preferences = {}, userLocation) {
   }));
   return scored.sort((a, b) => b._score - a._score);
 }
+
+// src/design-system/tokens.ts
+var COLORS = {
+  // Backgrounds - Clean, unobtrusive
+  bgPage: "#ffffff",
+  // Pure white page
+  bgCard: "#ffffff",
+  // White cards
+  bgSubtle: "rgb(238, 238, 238)",
+  // Gray track (DRAMS)
+  bgHover: "rgb(232, 232, 232)",
+  // Gray hover (DRAMS)
+  // Text - Clear hierarchy
+  textPrimary: "#333",
+  // DRAMS primary text
+  textSecondary: "#666",
+  // DRAMS secondary text
+  textMuted: "#999",
+  // DRAMS muted text
+  textDisabled: "#ccc",
+  // Disabled state
+  // Borders - Minimal, unobtrusive
+  border: "rgba(0,0,0,0.08)",
+  // Subtle border
+  borderSubtle: "rgba(0,0,0,0.04)",
+  // Very subtle
+  // Semantic (Honest, Thorough)
+  success: "#10b981",
+  // emerald-500
+  warning: "#f59e0b",
+  // amber-500
+  error: "#ef4444",
+  // red-500
+  info: "#3b82f6"
+  // blue-500
+};
+var DRAMS = {
+  // Signature orange - primary action color
+  orange: "rgb(255, 97, 26)",
+  orangeHighlight: "rgb(255, 150, 102)",
+  // Gray tones for tracks and backgrounds
+  grayTrack: "rgb(238, 238, 238)",
+  grayHover: "rgb(232, 232, 232)",
+  // Text colors
+  textDark: "#333",
+  textLight: "#999",
+  // Font family
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+};
+var TRANSITIONS = {
+  standard: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+  hover: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+  bounce: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+};
+var SPACING = {
+  xs: "4px",
+  sm: "8px",
+  md: "12px",
+  lg: "16px",
+  xl: "24px",
+  "2xl": "32px",
+  "3xl": "48px",
+  "4xl": "64px"
+};
+var TYPOGRAPHY = {
+  // Display - DRAMS uses light weight (300), not bold
+  h1: { fontSize: "32px", fontWeight: 300, letterSpacing: "-0.5px", lineHeight: 1.2 },
+  h2: { fontSize: "28px", fontWeight: 300, letterSpacing: "-0.5px", lineHeight: 1.3 },
+  h3: { fontSize: "20px", fontWeight: 400, letterSpacing: "-0.25px", lineHeight: 1.4 },
+  h4: { fontSize: "18px", fontWeight: 500, letterSpacing: "0", lineHeight: 1.4 },
+  // Body
+  body: { fontSize: "15px", fontWeight: 400, lineHeight: 1.5 },
+  bodySmall: { fontSize: "13px", fontWeight: 400, lineHeight: 1.4 },
+  // Label - DRAMS uppercase style
+  label: { fontSize: "13px", fontWeight: 500, lineHeight: 1.5, textTransform: "uppercase", letterSpacing: "1px" },
+  // Navigation
+  nav: { fontSize: "14px", fontWeight: 400, lineHeight: 1.5 },
+  navActive: { fontSize: "14px", fontWeight: 500, lineHeight: 1.5 }
+};
+var SHADOWS = {
+  sm: "0 1px 2px rgba(0,0,0,0.05)",
+  md: "0 4px 6px -1px rgba(0,0,0,0.1)",
+  lg: "0 10px 15px -3px rgba(0,0,0,0.1)",
+  xl: "0 20px 25px -5px rgba(0,0,0,0.1)"
+};
+var RADIUS = {
+  sm: "4px",
+  md: "6px",
+  lg: "8px",
+  xl: "12px",
+  "2xl": "16px",
+  // DRAMS pill and circle shapes
+  pill: "48px",
+  circle: "50%",
+  card: "20px"
+};
+var BUTTON = {
+  primary: {
+    background: "radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
+    color: "white",
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.label.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    cursor: "pointer",
+    transition: TRANSITIONS.standard,
+    boxShadow: "rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px rgba(255, 97, 26, 0.3)"
+  },
+  secondary: {
+    background: DRAMS.grayTrack,
+    color: DRAMS.textDark,
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.label.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    cursor: "pointer",
+    transition: TRANSITIONS.hover
+  },
+  danger: {
+    background: COLORS.error,
+    color: "white",
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.label.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    cursor: "pointer",
+    transition: TRANSITIONS.hover
+  }
+};
+var INPUT = {
+  base: {
+    border: "none",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    fontSize: TYPOGRAPHY.body.fontSize,
+    color: DRAMS.textDark,
+    background: DRAMS.grayTrack,
+    transition: TRANSITIONS.standard
+  },
+  focus: {
+    outline: "none",
+    background: DRAMS.grayHover,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+  },
+  error: {
+    background: "#fef2f2"
+  }
+};
+var NAV = {
+  link: {
+    color: DRAMS.textDark,
+    textDecoration: "none",
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    borderRadius: RADIUS.pill,
+    fontSize: TYPOGRAPHY.nav.fontSize,
+    fontWeight: TYPOGRAPHY.nav.fontWeight,
+    transition: TRANSITIONS.hover,
+    background: "transparent"
+  },
+  linkActive: {
+    background: DRAMS.orange,
+    color: "white",
+    fontWeight: TYPOGRAPHY.navActive.fontWeight
+  },
+  linkHover: {
+    background: DRAMS.grayTrack,
+    color: DRAMS.textDark
+  }
+};
+var CARD = {
+  base: {
+    backgroundColor: "white",
+    borderRadius: RADIUS.card,
+    padding: SPACING.xl,
+    boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+    border: "none",
+    transition: "transform 0.2s, box-shadow 0.2s"
+  },
+  hover: {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+  }
+};
+var EMPTY_STATE = {
+  container: {
+    textAlign: "center",
+    padding: SPACING["3xl"],
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg
+  },
+  title: {
+    ...TYPOGRAPHY.h3,
+    color: COLORS.textPrimary,
+    margin: `0 0 ${SPACING.md} 0`
+  },
+  message: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textSecondary,
+    margin: `0 0 ${SPACING.xl} 0`
+  },
+  cta: {
+    ...BUTTON.primary,
+    marginTop: SPACING.xl
+  }
+};
+var LOADING = {
+  container: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: SPACING["3xl"],
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.body.fontSize
+  },
+  spinner: {
+    border: "3px solid #e2e8f0",
+    borderTop: "3px solid COLORS.info"
+  }
+};
+var ERROR = {
+  container: {
+    padding: `${SPACING.md} ${SPACING.lg}`
+  },
+  alert: {
+    backgroundColor: "#fef2f2",
+    border: `1px solid #fecaca`,
+    color: COLORS.error
+  },
+  title: {
+    ...TYPOGRAPHY.label,
+    color: COLORS.error,
+    fontWeight: 600,
+    marginBottom: SPACING.xs
+  },
+  message: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.md
+  },
+  actions: {
+    marginTop: SPACING.lg
+  }
+};
+
+// src/design-system/components.ts
+var PILL_BUTTON = {
+  orange: {
+    background: "radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    transition: TRANSITIONS.standard,
+    boxShadow: "rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px rgba(255, 97, 26, 0.3)"
+  },
+  gray: {
+    background: DRAMS.grayTrack,
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    color: DRAMS.textDark,
+    border: "none",
+    cursor: "pointer",
+    transition: TRANSITIONS.hover
+  }
+};
+var TEXT_BOX = {
+  track: {
+    background: DRAMS.grayTrack,
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.lg}`,
+    transition: TRANSITIONS.standard,
+    border: "none",
+    fontSize: TYPOGRAPHY.body.fontSize,
+    color: DRAMS.textDark
+  },
+  focus: {
+    background: DRAMS.grayHover,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    outline: "none"
+  },
+  error: {
+    background: "#fef2f2"
+  }
+};
+var DRAMS_CARD = {
+  base: {
+    background: "white",
+    borderRadius: RADIUS.card,
+    boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+    transition: "transform 0.2s, box-shadow 0.2s"
+  },
+  hover: {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+  }
+};
+var TOGGLE_SWITCH = {
+  track: {
+    background: DRAMS.grayTrack,
+    borderRadius: RADIUS.pill,
+    width: "48px",
+    height: "28px",
+    position: "relative",
+    cursor: "pointer",
+    transition: TRANSITIONS.standard
+  },
+  trackActive: {
+    background: DRAMS.orange
+  },
+  thumb: {
+    position: "absolute",
+    top: "2px",
+    left: "2px",
+    width: "24px",
+    height: "24px",
+    borderRadius: RADIUS.circle,
+    background: "white",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    transition: TRANSITIONS.standard
+  },
+  thumbActive: {
+    transform: "translateX(20px)"
+  },
+  ledIndicator: {
+    position: "absolute",
+    top: "4px",
+    right: "4px",
+    width: "6px",
+    height: "6px",
+    borderRadius: "50%",
+    background: DRAMS.orange,
+    boxShadow: "0 0 6px rgba(255, 97, 26, 0.6)"
+  }
+};
+var SLIDER = {
+  track: {
+    background: DRAMS.grayTrack,
+    borderRadius: RADIUS.pill,
+    height: "8px",
+    position: "relative"
+  },
+  fill: {
+    background: DRAMS.orange,
+    height: "100%",
+    borderRadius: RADIUS.pill
+  },
+  thumb: {
+    position: "absolute",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "24px",
+    height: "24px",
+    borderRadius: RADIUS.circle,
+    background: "radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
+    boxShadow: "0 2px 8px rgba(255, 97, 26, 0.4)",
+    cursor: "grab",
+    transition: TRANSITIONS.hover
+  },
+  thumbHover: {
+    transform: "translate(-50%, -50%) scale(1.1)",
+    boxShadow: "0 4px 12px rgba(255, 97, 26, 0.5)"
+  }
+};
+var SELECT_BOX = {
+  base: {
+    ...TEXT_BOX.track,
+    appearance: "none",
+    paddingRight: SPACING.xl,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: `right ${SPACING.md} center`,
+    cursor: "pointer"
+  },
+  focus: TEXT_BOX.focus
+};
+var QUANTITY_CONTROL = {
+  container: {
+    display: "flex",
+    alignItems: "center",
+    gap: SPACING.sm,
+    background: DRAMS.grayTrack,
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.xs} ${SPACING.md}`
+  },
+  button: {
+    width: "28px",
+    height: "28px",
+    borderRadius: RADIUS.circle,
+    border: "none",
+    background: "white",
+    color: DRAMS.textDark,
+    fontSize: "18px",
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: TRANSITIONS.hover,
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+  },
+  buttonActive: {
+    background: DRAMS.orange,
+    color: "white"
+  },
+  value: {
+    ...TYPOGRAPHY.label,
+    minWidth: "24px",
+    textAlign: "center"
+  }
+};
+var BADGE = {
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: `${SPACING.xs} ${SPACING.md}`,
+    borderRadius: RADIUS.pill,
+    fontSize: TYPOGRAPHY.bodySmall.fontSize,
+    fontWeight: TYPOGRAPHY.label.fontWeight,
+    textTransform: "capitalize"
+  },
+  success: {
+    background: "#f0fdf4",
+    color: "#10b981"
+  },
+  warning: {
+    background: "#fef3c7",
+    color: "#f59e0b"
+  },
+  error: {
+    background: "#fef2f2",
+    color: "#ef4444"
+  },
+  info: {
+    background: "#eff6ff",
+    color: "#3b82f6"
+  }
+};
+var DRAMS_EMPTY_STATE = {
+  container: {
+    textAlign: "center",
+    padding: `${SPACING["3xl"]} ${SPACING.xl}`,
+    background: "white",
+    borderRadius: RADIUS.card
+  },
+  icon: {
+    width: "64px",
+    height: "64px",
+    margin: `0 auto ${SPACING.lg}`,
+    opacity: 0.3
+  },
+  title: {
+    ...TYPOGRAPHY.h3,
+    color: DRAMS.textDark,
+    marginBottom: SPACING.sm
+  },
+  message: {
+    ...TYPOGRAPHY.body,
+    color: DRAMS.textLight,
+    marginBottom: SPACING.xl
+  },
+  cta: {
+    ...PILL_BUTTON.orange,
+    marginTop: SPACING.lg
+  }
+};
+
+// src/design-system/components/ProductCard.tsx
+import { useState } from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+var CARD_STYLE = {
+  background: "white",
+  borderRadius: RADIUS.card,
+  overflow: "hidden",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  cursor: "pointer"
+};
+var CARD_HOVER_STYLE = {
+  transform: "translateY(-4px)",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+};
+var IMAGE_STYLE = {
+  width: "100%",
+  height: "180px",
+  background: "linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative"
+};
+var BADGE_STYLE = {
+  position: "absolute",
+  top: "12px",
+  left: "12px",
+  padding: "6px 12px",
+  background: DRAMS.orange,
+  color: "white",
+  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  borderRadius: "20px",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px"
+};
+var PLACEHOLDER_STYLE = {
+  width: "80px",
+  height: "80px",
+  background: `radial-gradient(
+    50% 50% at 30% 30%,
+    ${DRAMS.orangeHighlight} 0%,
+    ${DRAMS.orange} 100%
+  )`,
+  borderRadius: RADIUS.circle,
+  boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 4px 12px ${DRAMS.orange}33`
+};
+var DETAILS_STYLE = {
+  padding: SPACING.xl
+};
+var NAME_STYLE = {
+  ...TYPOGRAPHY.h4,
+  color: DRAMS.textDark,
+  marginBottom: SPACING.sm
+};
+var CATEGORY_STYLE = {
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  marginBottom: SPACING.lg
+};
+var FOOTER_STYLE = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between"
+};
+var PRICE_STYLE = {
+  ...TYPOGRAPHY.h3,
+  color: DRAMS.textDark
+};
+var ADD_BUTTON_STYLE = {
+  width: "44px",
+  height: "44px",
+  borderRadius: RADIUS.circle,
+  border: "none",
+  background: `radial-gradient(
+    50% 50% at 30% 30%,
+    ${DRAMS.orangeHighlight} 0%,
+    ${DRAMS.orange} 100%
+  )`,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "transform 0.2s ease",
+  boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px ${DRAMS.orange}4d`
+};
+var ADD_BUTTON_HOVER_STYLE = {
+  transform: "scale(1.05)"
+};
+var ADD_BUTTON_ACTIVE_STYLE = {
+  transform: "scale(0.95)"
+};
+var ADD_BUTTON_DISABLED_STYLE = {
+  opacity: 0.5,
+  cursor: "not-allowed"
+};
+function DramsProductCard({
+  name,
+  category,
+  price,
+  image,
+  badge,
+  rating: _rating,
+  onAdd,
+  onClick,
+  isAdding = false
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [isButtonActive, setIsButtonActive] = useState(false);
+  const handleCardClick = () => {
+    if (!isAdding) onClick?.();
+  };
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    if (!isAdding) onAdd?.();
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      style: {
+        ...CARD_STYLE,
+        ...isHovered ? CARD_HOVER_STYLE : {}
+      },
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      onClick: handleCardClick,
+      children: [
+        /* @__PURE__ */ jsxs("div", { style: IMAGE_STYLE, children: [
+          badge && /* @__PURE__ */ jsx("span", { style: BADGE_STYLE, children: badge }),
+          image ? /* @__PURE__ */ jsx("img", { src: image, alt: name, style: { width: "100%", height: "100%", objectFit: "cover" } }) : /* @__PURE__ */ jsx("div", { style: PLACEHOLDER_STYLE })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { style: DETAILS_STYLE, children: [
+          /* @__PURE__ */ jsx("h3", { style: NAME_STYLE, children: name }),
+          category && /* @__PURE__ */ jsx("div", { style: CATEGORY_STYLE, children: category }),
+          /* @__PURE__ */ jsxs("div", { style: FOOTER_STYLE, children: [
+            /* @__PURE__ */ jsx("span", { style: PRICE_STYLE, children: price }),
+            onAdd && /* @__PURE__ */ jsx(
+              "button",
+              {
+                onClick: handleAdd,
+                disabled: isAdding,
+                onMouseEnter: () => setIsButtonHovered(true),
+                onMouseLeave: () => setIsButtonHovered(false),
+                onMouseDown: () => setIsButtonActive(true),
+                onMouseUp: () => setIsButtonActive(false),
+                style: {
+                  ...ADD_BUTTON_STYLE,
+                  ...isButtonHovered ? ADD_BUTTON_HOVER_STYLE : {},
+                  ...isButtonActive ? ADD_BUTTON_ACTIVE_STYLE : {},
+                  ...isAdding ? ADD_BUTTON_DISABLED_STYLE : {}
+                },
+                "aria-label": "Add to cart",
+                children: /* @__PURE__ */ jsx("svg", { width: "20", height: "20", viewBox: "0 0 256 256", fill: "white", style: { pointerEvents: "none" }, children: /* @__PURE__ */ jsx("path", { d: "M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z" }) })
+              }
+            )
+          ] })
+        ] })
+      ]
+    }
+  );
+}
+
+// src/design-system/components/FlipCard.tsx
+import { useState as useState2 } from "react";
+import React from "react";
+import { jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
+var CONTAINER_STYLE = {
+  perspective: "1000px",
+  width: "100%"
+};
+var CARD_STYLE2 = {
+  position: "relative",
+  width: "100%",
+  transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+  transformStyle: "preserve-3d",
+  cursor: "pointer"
+};
+var FACE_STYLE = {
+  position: "absolute",
+  width: "100%",
+  height: "100%",
+  backfaceVisibility: "hidden",
+  borderRadius: RADIUS.card,
+  overflow: "hidden",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.06)"
+};
+var FRONT_STYLE = {
+  ...FACE_STYLE,
+  background: "white"
+};
+var BACK_STYLE = {
+  ...FACE_STYLE,
+  background: DRAMS.grayTrack,
+  transform: "rotateY(180deg)",
+  padding: SPACING.xl,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center"
+};
+var HINT_STYLE = {
+  textAlign: "center",
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
+  padding: SPACING.lg,
+  background: DRAMS.grayTrack
+};
+var SPEC_STYLE = {
+  display: "flex",
+  alignItems: "center",
+  gap: SPACING.md,
+  padding: `${SPACING.sm} 0`
+};
+var SPEC_DOT_STYLE = {
+  width: "8px",
+  height: "8px",
+  borderRadius: RADIUS.circle,
+  background: DRAMS.orange,
+  flexShrink: 0
+};
+var SPEC_TEXT_STYLE = {
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textDark
+};
+function FlipCardFront({ title, subtitle, stats, hint = "Click to see specs" }) {
+  return /* @__PURE__ */ jsxs2(React.Fragment, { children: [
+    title || subtitle || stats ? /* @__PURE__ */ jsxs2("div", { style: { padding: SPACING.lg }, children: [
+      title && /* @__PURE__ */ jsx2("h3", { style: { ...TYPOGRAPHY.h4, color: DRAMS.textDark, marginBottom: SPACING.xs }, children: title }),
+      subtitle && /* @__PURE__ */ jsx2("div", { style: { ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginBottom: SPACING.sm }, children: subtitle })
+    ] }) : null,
+    stats && /* @__PURE__ */ jsx2("div", { style: { padding: `0 ${SPACING.lg} ${SPACING.lg}` }, children: stats.map((stat, index) => /* @__PURE__ */ jsxs2(
+      "div",
+      {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          padding: `${SPACING.md} 0`,
+          borderBottom: index < stats.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none"
+        },
+        children: [
+          /* @__PURE__ */ jsx2("span", { style: { ...TYPOGRAPHY.body, color: DRAMS.textLight }, children: stat.label }),
+          /* @__PURE__ */ jsx2("span", { style: { ...TYPOGRAPHY.body, fontWeight: 500, color: DRAMS.textDark }, children: stat.value })
+        ]
+      },
+      index
+    )) }),
+    /* @__PURE__ */ jsx2("div", { style: HINT_STYLE, children: hint })
+  ] });
+}
+function FlipCardBack({ title = "Specifications", specs }) {
+  return /* @__PURE__ */ jsxs2(React.Fragment, { children: [
+    title && /* @__PURE__ */ jsx2("h3", { style: { ...TYPOGRAPHY.h4, color: DRAMS.textDark, marginBottom: SPACING.lg, textAlign: "center" }, children: title }),
+    specs && /* @__PURE__ */ jsx2("div", { children: specs.map((spec, index) => /* @__PURE__ */ jsxs2("div", { style: SPEC_STYLE, children: [
+      /* @__PURE__ */ jsx2("div", { style: SPEC_DOT_STYLE }),
+      /* @__PURE__ */ jsxs2("span", { style: SPEC_TEXT_STYLE, children: [
+        spec.label,
+        ": ",
+        spec.value
+      ] })
+    ] }, index)) })
+  ] });
+}
+function DramsFlipCard({ front, back, height = 240, onFlipChange }) {
+  const [isFlipped, setIsFlipped] = useState2(false);
+  const [isFlipping, setIsFlipping] = useState2(false);
+  const handleFlip = () => {
+    if (isFlipping) return;
+    setIsFlipping(true);
+    const newFlippedState = !isFlipped;
+    setIsFlipped(newFlippedState);
+    onFlipChange?.(newFlippedState);
+    setTimeout(() => setIsFlipping(false), 600);
+  };
+  return /* @__PURE__ */ jsx2("div", { style: { ...CONTAINER_STYLE, height: `${height}px` }, children: /* @__PURE__ */ jsxs2(
+    "div",
+    {
+      style: {
+        ...CARD_STYLE2,
+        transform: isFlipped ? "rotateY(180deg)" : "none",
+        pointerEvents: isFlipping ? "none" : "auto"
+      },
+      onClick: handleFlip,
+      children: [
+        /* @__PURE__ */ jsx2("div", { style: { ...FRONT_STYLE, height: `${height}px` }, children: front }),
+        /* @__PURE__ */ jsx2("div", { style: { ...BACK_STYLE, height: `${height}px` }, children: back })
+      ]
+    }
+  ) });
+}
+
+// src/design-system/components/AddButton.tsx
+import { useState as useState3 } from "react";
+import { Fragment, jsx as jsx3, jsxs as jsxs3 } from "react/jsx-runtime";
+var SIZE_STYLES = {
+  sm: { padding: "8px 16px", fontSize: TYPOGRAPHY.bodySmall.fontSize },
+  md: { padding: "12px 20px", fontSize: TYPOGRAPHY.label.fontSize },
+  lg: { padding: "16px 24px", fontSize: TYPOGRAPHY.body.fontSize }
+};
+var BASE_STYLE = {
+  border: "none",
+  borderRadius: RADIUS.pill,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: SPACING.sm,
+  transition: "all 0.2s ease",
+  fontFamily: DRAMS.fontFamily,
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  textDecoration: "none"
+};
+var PRIMARY_STYLE = {
+  background: `radial-gradient(
+    50% 50% at 30% 30%,
+    ${DRAMS.orangeHighlight} 0%,
+    ${DRAMS.orange} 100%
+  )`,
+  color: "white",
+  boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px ${DRAMS.orange}4d`
+};
+var SECONDARY_STYLE = {
+  background: DRAMS.grayTrack,
+  color: DRAMS.textDark
+};
+var DANGER_STYLE = {
+  background: "#ef4444",
+  color: "white"
+};
+var HOVER_SCALE = 1.05;
+var ACTIVE_SCALE = 0.95;
+function DramsAddButton({
+  children,
+  onClick,
+  disabled: disabled2 = false,
+  loading = false,
+  variant = "primary",
+  size = "md",
+  fullWidth = false
+}) {
+  const [isHovered, setIsHovered] = useState3(false);
+  const [isActive, setIsActive] = useState3(false);
+  const variantStyle = variant === "primary" ? PRIMARY_STYLE : variant === "danger" ? DANGER_STYLE : SECONDARY_STYLE;
+  const sizeStyle = SIZE_STYLES[size];
+  return /* @__PURE__ */ jsx3(
+    "button",
+    {
+      onClick,
+      disabled: disabled2 || loading,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      onMouseDown: () => setIsActive(true),
+      onMouseUp: () => setIsActive(false),
+      style: {
+        ...BASE_STYLE,
+        ...variantStyle,
+        ...sizeStyle,
+        width: fullWidth ? "100%" : "auto",
+        opacity: disabled2 ? 0.5 : 1,
+        cursor: disabled2 ? "not-allowed" : "pointer",
+        transform: isHovered && !disabled2 ? `scale(${HOVER_SCALE})` : isActive ? `scale(${ACTIVE_SCALE})` : "none",
+        pointerEvents: disabled2 || loading ? "none" : "auto"
+      },
+      children: loading ? /* @__PURE__ */ jsx3(Fragment, { children: /* @__PURE__ */ jsxs3(
+        "svg",
+        {
+          width: "16",
+          height: "16",
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          style: { animation: "spin 1s linear infinite" },
+          children: [
+            /* @__PURE__ */ jsx3(
+              "path",
+              {
+                d: "M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4m-2.83 6.17l-2.83 2.83m8.48-8.48l-2.83-2.83",
+                style: { stroke: "currentColor" }
+              }
+            ),
+            /* @__PURE__ */ jsx3("style", { children: `
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          ` })
+          ]
+        }
+      ) }) : children
+    }
+  );
+}
+
+// src/design-system/tactile.ts
+var orangeBall = {
+  background: "radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)",
+  boxShadow: "rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px rgba(255, 97, 26, 0.3)"
+};
+var grayTrack = {
+  background: DRAMS.grayTrack,
+  borderRadius: "48px"
+};
+var cardLift = {
+  transition: "transform 0.2s, box-shadow 0.2s",
+  transform: "translateY(-4px)",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+};
+var concave = {
+  boxShadow: "inset 0 2px 4px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(0,0,0,0.04)"
+};
+var convex = {
+  boxShadow: "0 2px 4px rgba(0,0,0,0.08), 0 -1px 2px rgba(0,0,0,0.04)"
+};
+var innerGlow = {
+  boxShadow: `inset 0 0 8px ${DRAMS.orange}40, 0 0 12px ${DRAMS.orange}30`
+};
+var softShadow = {
+  boxShadow: "0 4px 16px rgba(0,0,0,0.06)"
+};
+var mediumShadow = {
+  boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+};
+var focusRing = {
+  outline: "none",
+  boxShadow: `0 0 0 3px ${DRAMS.orange}30`
+};
+var pressed = {
+  transform: "translateY(1px)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.1)"
+};
+var disabled = {
+  opacity: 0.5,
+  cursor: "not-allowed",
+  filter: "grayscale(0.3)"
+};
+var shimmer = {
+  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+  backgroundSize: "200% 100%",
+  animation: "shimmer 1.5s infinite"
+};
+var animations = {
+  shimmer: `
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  `,
+  pulse: `
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  `,
+  bounce: `
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+  `,
+  slideUp: `
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `
+};
+var hover = {
+  lift: "translateY(-2px)",
+  brighten: "brightness(1.05)"
+};
+var active = {
+  scale: "scale(0.98)",
+  press: "translateY(1px)"
+};
 export {
   BADGE,
   BUTTON,
@@ -835,10 +2108,15 @@ export {
   DRAMS,
   DRAMS_CARD,
   DRAMS_EMPTY_STATE,
+  DramsAddButton,
+  DramsFlipCard,
+  DramsProductCard,
   EMPTY_STATE,
   ERROR,
   EnvVars,
   EnvironmentEnum,
+  FlipCardBack,
+  FlipCardFront,
   GatewayConfigSchema,
   INPUT,
   LOADING,

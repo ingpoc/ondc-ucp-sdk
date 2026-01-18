@@ -69,7 +69,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
         <p style={{ ...TYPOGRAPHY.body, margin: '0', color: DRAMS.textLight }}>
           Seller: {providerName}
         </p>
-        <p style={{ ...TYPOGRAPHY.label, margin: `${SPACING.sm} 0 0 0`, fontWeight: 600 }}>
+        <p style={{ ...TYPOGRAPHY.label, margin: `${SPACING.sm} 0 0 0` }}>
           {currency} {priceValue.toFixed(2)} per item
         </p>
       </div>
@@ -103,7 +103,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove, disabled = false }:
         </div>
 
         {/* Total Price */}
-        <p style={{ ...TYPOGRAPHY.label, margin: '0', fontWeight: 600, fontSize: '1.1em' }}>
+        <p style={{ ...TYPOGRAPHY.h4, margin: '0', color: DRAMS.orange }}>
           {currency} {totalPrice.toFixed(2)}
         </p>
 

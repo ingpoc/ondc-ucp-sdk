@@ -1,36 +1,39 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useSearch } from '@ondc-website/shared/hooks';
+import { useSearch, useCart } from '@ondc-website/shared/hooks';
 import { SearchBar, FilterSidebar, SortDropdown, ResultGrid } from '../components';
 import type { UCPItem } from '@ondc-website/shared';
 import type { SearchFilters } from '../components/FilterSidebar';
+import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON } from '@ondc-agent/shared/design-system';
 
 interface SearchResponse {
   items: UCPItem[];
   totalCount: number;
 }
 
+// DRAMS: Clean white page
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: '#ffffff',
   padding: '0',
   width: '100%',
 };
 
+// DRAMS: Clean search header
 const SEARCH_SECTION_STYLE = {
-  backgroundColor: 'white',
+  backgroundColor: DRAMS.grayTrack,
   borderRadius: '0',
   padding: '40px 80px',
   marginBottom: '0',
-  boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)',
-  borderBottom: '2px solid #e2e8f0',
+  boxShadow: 'none',
+  borderBottom: 'none',
 };
 
 const CONTENT_LAYOUT_STYLE = {
   display: 'flex',
-  gap: '32px',
+  gap: SPACING['2xl'],
   alignItems: 'flex-start',
-  padding: '48px 80px',
+  padding: `${SPACING['3xl']} 80px`,
 };
 
 const FILTERS_STYLE = {
@@ -47,14 +50,12 @@ const HEADER_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginBottom: '24px',
+  marginBottom: SPACING.xl,
 };
 
 const TITLE_STYLE = {
-  fontSize: '32px',
-  fontWeight: 800,
-  letterSpacing: '-1px',
-  color: '#0f172a',
+  ...TYPOGRAPHY.h2,
+  color: DRAMS.textDark,
   margin: 0,
 };
 
@@ -62,29 +63,23 @@ const LOADING_STYLE = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '48px',
-  color: '#475569',
-  fontSize: '14px',
+  padding: SPACING['3xl'],
+  color: DRAMS.textLight,
+  ...TYPOGRAPHY.body,
 };
 
 const ERROR_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
+  padding: SPACING.lg,
+  borderRadius: RADIUS.lg,
   backgroundColor: '#fef2f2',
   border: '1px solid #fecaca',
   color: '#dc2626',
-  fontSize: '14px',
+  ...TYPOGRAPHY.body,
 };
 
+// DRAMS: Pill-style secondary button
 const BUTTON_SECONDARY_STYLE = {
-  padding: '10px 20px',
-  border: '1px solid #e2e8f0',
-  borderRadius: '6px',
-  backgroundColor: 'white',
-  color: '#0f172a',
-  fontSize: '14px',
-  fontWeight: 500,
-  cursor: 'pointer',
+  ...BUTTON.secondary,
 };
 
 export function ResultsPage(): JSX.Element {
@@ -92,6 +87,7 @@ export function ResultsPage(): JSX.Element {
   const navigate = useNavigate();
   const category = searchParams.get('category') ?? 'grocery';
   const query = searchParams.get('q') ?? undefined;
+  const { addToCart } = useCart();
 
   const [filters, setFilters] = useState<SearchFilters>({});
 
@@ -120,6 +116,14 @@ export function ResultsPage(): JSX.Element {
     navigate(`/product/${item.id}`);
   }
 
+  async function handleAddToCart(item: UCPItem): Promise<void> {
+    try {
+      await addToCart(item as any);
+    } catch (err) {
+      console.error('Failed to add to cart:', err);
+    }
+  }
+
   if (loading) {
     return (
       <div style={PAGE_CONTAINER_STYLE}>
@@ -134,7 +138,7 @@ export function ResultsPage(): JSX.Element {
     return (
       <div style={PAGE_CONTAINER_STYLE}>
         <div style={ERROR_STYLE}>
-          <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
+          <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
           <p style={{ margin: '4px 0 0 0' }}>{error}</p>
           <button
             onClick={() => navigate('/')}
@@ -180,6 +184,7 @@ export function ResultsPage(): JSX.Element {
           <ResultGrid
             items={items}
             onItemClick={handleItemClick}
+            onAddToCart={handleAddToCart}
             loading={loading}
           />
         </div>

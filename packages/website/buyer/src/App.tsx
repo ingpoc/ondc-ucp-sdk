@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { DRAMS, NAV, SPACING, TYPOGRAPHY, TRANSITIONS } from '@ondc-agent/shared/design-system';
 import { SearchPage } from './pages/SearchPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -8,17 +9,22 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
 
+// DRAMS: Clean white background, minimal chrome
 const APP_CONTAINER_STYLE = {
   width: '100%',
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: '#ffffff',
+  fontFamily: DRAMS.fontFamily,
 };
 
+// DRAMS: Unobtrusive header with soft shadow
 const HEADER_STYLE = {
-  backgroundColor: 'white',
-  borderBottom: '2px solid #e2e8f0',
+  backgroundColor: '#ffffff',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
   padding: '0 80px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+  position: 'sticky' as const,
+  top: 0,
+  zIndex: 10,
 };
 
 const HEADER_CONTENT_STYLE = {
@@ -29,39 +35,18 @@ const HEADER_CONTENT_STYLE = {
   height: '64px',
 };
 
+// DRAMS: Bold, clean logo
 const LOGO_STYLE = {
-  fontSize: '20px',
-  fontWeight: 800,
-  letterSpacing: '-0.5px',
-  color: '#0f172a',
+  ...TYPOGRAPHY.h4,
+  color: DRAMS.textDark,
   textDecoration: 'none',
+  transition: TRANSITIONS.hover,
 };
 
 const NAV_STYLE = {
   display: 'flex',
-  gap: '8px',
+  gap: SPACING.sm,
   alignItems: 'center',
-};
-
-const NAV_LINK_STYLE = {
-  padding: '8px 16px',
-  borderRadius: '6px',
-  color: '#475569',
-  textDecoration: 'none',
-  fontSize: '14px',
-  fontWeight: '500',
-  transition: 'all 0.2s ease',
-  whiteSpace: 'nowrap' as const,
-};
-
-const NAV_LINK_ACTIVE_STYLE = {
-  backgroundColor: '#f1f5f9',
-  color: '#0f172a',
-};
-
-const NAV_LINK_HOVER_STYLE = {
-  backgroundColor: '#f8fafc',
-  color: '#0f172a',
 };
 
 export function App() {
@@ -80,42 +65,33 @@ export function App() {
             ONDC
           </Link>
           <nav style={NAV_STYLE}>
-            <Link
-              to="/search"
-              style={{
-                ...NAV_LINK_STYLE,
-                ...(isActivePath('/search') ? NAV_LINK_ACTIVE_STYLE : {}),
-              }}
-            >
-              Search
-            </Link>
-            <Link
-              to="/cart"
-              style={{
-                ...NAV_LINK_STYLE,
-                ...(isActivePath('/cart') ? NAV_LINK_ACTIVE_STYLE : {}),
-              }}
-            >
-              Cart
-            </Link>
-            <Link
-              to="/orders"
-              style={{
-                ...NAV_LINK_STYLE,
-                ...(isActivePath('/orders') ? NAV_LINK_ACTIVE_STYLE : {}),
-              }}
-            >
-              Orders
-            </Link>
-            <Link
-              to="/agent"
-              style={{
-                ...NAV_LINK_STYLE,
-                ...(isActivePath('/agent') ? NAV_LINK_ACTIVE_STYLE : {}),
-              }}
-            >
-              Agent
-            </Link>
+            {[
+              { path: '/search', label: 'Search' },
+              { path: '/cart', label: 'Cart' },
+              { path: '/orders', label: 'Orders' },
+              { path: '/agent', label: 'Agent' },
+            ].map(({ path, label }) => (
+              <Link
+                key={path}
+                to={path}
+                style={{
+                  ...NAV.link,
+                  ...(isActivePath(path) ? NAV.linkActive : {}),
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActivePath(path)) {
+                    Object.assign(e.currentTarget.style, NAV.linkHover);
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActivePath(path)) {
+                    Object.assign(e.currentTarget.style, { background: 'transparent', color: DRAMS.textDark });
+                  }
+                }}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
         </div>
       </header>

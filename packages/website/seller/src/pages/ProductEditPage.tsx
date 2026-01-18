@@ -4,11 +4,12 @@ import { useApi } from '@ondc-website/shared/hooks';
 import { ProductForm } from '../components';
 import type { BecknItem } from '@ondc-website/shared';
 import type { ProductFormData } from '../components/ProductForm';
+import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON } from '@ondc-agent/shared/design-system';
 
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
-  padding: '24px',
+  backgroundColor: DRAMS.grayTrack,
+  padding: SPACING.xl,
 };
 
 const CONTENT_STYLE = {
@@ -17,38 +18,36 @@ const CONTENT_STYLE = {
 };
 
 const HEADER_STYLE = {
-  marginBottom: '32px',
+  marginBottom: SPACING['3xl'],
 };
 
 const PAGE_TITLE_STYLE = {
-  fontSize: '28px',
-  fontWeight: 700,
-  letterSpacing: '-0.5px',
-  color: '#0f172a',
-  margin: '0 0 8px 0',
+  ...TYPOGRAPHY.h2,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.sm} 0`,
 };
 
 const SUBTITLE_STYLE = {
-  fontSize: '14px',
-  color: '#475569',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
   margin: 0,
 };
 
 const ERROR_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
+  padding: `${SPACING.md} ${SPACING.lg}`,
+  borderRadius: RADIUS.lg,
   backgroundColor: '#fef2f2',
   border: '1px solid #fecaca',
   color: '#dc2626',
-  fontSize: '14px',
-  marginBottom: '24px',
+  ...TYPOGRAPHY.bodySmall,
+  marginBottom: SPACING.xl,
 };
 
 const CARD_STYLE = {
   backgroundColor: 'white',
-  borderRadius: '8px',
-  padding: '32px',
-  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  borderRadius: RADIUS.card,
+  padding: SPACING['3xl'],
+  boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
 };
 
 export function ProductEditPage() {
@@ -129,7 +128,7 @@ export function ProductEditPage() {
 
         {error && (
           <div style={ERROR_STYLE}>
-            <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
+            <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
             <p style={{ margin: '4px 0 0 0' }}>{error}</p>
           </div>
         )}

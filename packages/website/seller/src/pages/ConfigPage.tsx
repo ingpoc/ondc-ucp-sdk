@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CARD, COLORS, SPACING, TYPOGRAPHY, TEXT_BOX, BUTTON, PILL_BUTTON, BADGE, DRAMS } from '@ondc-agent/shared/design-system';
 
 // Seller client configuration interface
 interface SellerClientConfig {
@@ -210,7 +211,7 @@ export function ConfigPage() {
 
   if (loading && !config.subscriberId) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
         <h1>Seller Configuration</h1>
         <p>Loading configuration...</p>
       </div>
@@ -218,9 +219,9 @@ export function ConfigPage() {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1>Seller Configuration</h1>
-      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl, backgroundColor: '#ffffff', minHeight: '100vh' }}>
+      <h1 style={{ ...TYPOGRAPHY.h1, color: DRAMS.textDark, margin: `0 0 ${SPACING.md} 0` }}>Seller Configuration</h1>
+      <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, marginBottom: SPACING.xl }}>
         Configure your ONDC seller credentials and connection settings
       </p>
 
@@ -228,12 +229,9 @@ export function ConfigPage() {
       {testResult && (
         <div
           style={{
-            padding: '12px 16px',
-            borderRadius: '6px',
-            marginBottom: '20px',
-            backgroundColor: testResult.success ? '#dcfce7' : '#fee2e2',
-            border: `1px solid ${testResult.success ? '#86efac' : '#fca5a5'}`,
-            color: testResult.success ? '#166534' : '#991b1b',
+            ...BADGE.base,
+            ...(testResult.success ? BADGE.success : BADGE.error),
+            marginBottom: SPACING.xl,
           }}
         >
           {testResult.message}
@@ -243,24 +241,20 @@ export function ConfigPage() {
       {/* Configuration Form */}
       <div
         style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-          marginBottom: '24px',
+          ...CARD.base,
+          marginBottom: SPACING.xl,
         }}
       >
-        <h2 style={{ fontSize: '1.2em', marginBottom: '20px' }}>ONDC Credentials</h2>
+        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>ONDC Credentials</h2>
 
         {/* Gateway URL */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Gateway URL *
@@ -271,32 +265,25 @@ export function ConfigPage() {
             onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
             placeholder="https://gateway.ondc.org"
             style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-              ...(getFieldError('baseUrl')
-                ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' }
-                : {}),
+              ...TEXT_BOX.track,
+              ...(getFieldError('baseUrl') ? TEXT_BOX.error : {}),
             }}
           />
           {getFieldError('baseUrl') && (
-            <p style={{ margin: '4px 0 0 0', color: '#dc2626', fontSize: '0.85em' }}>
+            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('baseUrl')}
             </p>
           )}
         </div>
 
         {/* Subscriber ID */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Subscriber ID *
@@ -307,40 +294,33 @@ export function ConfigPage() {
             onChange={(e) => setConfig({ ...config, subscriberId: e.target.value })}
             placeholder="ondc.example.com"
             style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-              ...(getFieldError('subscriberId')
-                ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' }
-                : {}),
+              ...TEXT_BOX.track,
+              ...(getFieldError('subscriberId') ? TEXT_BOX.error : {}),
             }}
           />
           {getFieldError('subscriberId') && (
-            <p style={{ margin: '4px 0 0 0', color: '#dc2626', fontSize: '0.85em' }}>
+            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('subscriberId')}
             </p>
           )}
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             Your unique ONDC subscriber identifier (e.g., ondc.example.com)
           </p>
         </div>
 
         {/* Private Key */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Private Key *
           </label>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: SPACING.sm }}>
             <input
               type={showPrivateKey ? 'text' : 'password'}
               value={config.privateKey}
@@ -348,68 +328,52 @@ export function ConfigPage() {
               placeholder="Base64 encoded Ed25519 private key"
               style={{
                 flex: 1,
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                fontSize: '0.9em',
+                ...TEXT_BOX.track,
                 fontFamily: 'monospace',
-                ...(getFieldError('privateKey')
-                  ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' }
-                  : {}),
+                ...(getFieldError('privateKey') ? TEXT_BOX.error : {}),
               }}
             />
             <button
               type="button"
               onClick={() => setShowPrivateKey(!showPrivateKey)}
               style={{
-                padding: '10px 16px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                fontSize: '0.9em',
+                ...BUTTON.secondary,
+                fontSize: TYPOGRAPHY.body.fontSize,
               }}
             >
               {showPrivateKey ? 'Hide' : 'Show'}
             </button>
           </div>
           {getFieldError('privateKey') && (
-            <p style={{ margin: '4px 0 0 0', color: '#dc2626', fontSize: '0.85em' }}>
+            <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.error, ...TYPOGRAPHY.bodySmall }}>
               {getFieldError('privateKey')}
             </p>
           )}
-          <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+          <div style={{ marginTop: SPACING.sm, display: 'flex', gap: SPACING.sm }}>
             <button
               type="button"
               onClick={handleGenerateKeyPair}
               style={{
-                padding: '8px 16px',
-                border: '1px solid #16a34a',
-                borderRadius: '6px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                fontSize: '0.9em',
-                fontWeight: '600',
-                cursor: 'pointer',
+                ...BUTTON.primary,
+                fontSize: TYPOGRAPHY.body.fontSize,
               }}
             >
               Generate New Key Pair
             </button>
           </div>
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             Ed25519 private key for signing ONDC requests
           </p>
         </div>
 
         {/* Key ID */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Key ID
@@ -419,15 +383,9 @@ export function ConfigPage() {
             value={config.keyId}
             onChange={(e) => setConfig({ ...config, keyId: e.target.value })}
             placeholder="ondc.example.com-1234567890"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-            }}
+            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             Unique identifier for this key (auto-generated when using Generate Key Pair)
           </p>
         </div>
@@ -436,24 +394,20 @@ export function ConfigPage() {
       {/* Location Settings */}
       <div
         style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-          marginBottom: '24px',
+          ...CARD.base,
+          marginBottom: SPACING.xl,
         }}
       >
-        <h2 style={{ fontSize: '1.2em', marginBottom: '20px' }}>Location Settings</h2>
+        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, marginBottom: SPACING.xl }}>Location Settings</h2>
 
         {/* Domain */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Domain
@@ -463,28 +417,21 @@ export function ConfigPage() {
             value={config.domain}
             onChange={(e) => setConfig({ ...config, domain: e.target.value })}
             placeholder="nic2004:52110"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-            }}
+            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             ONDC domain code (default: nic2004:52110 for Retail)
           </p>
         </div>
 
         {/* City */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             City
@@ -494,28 +441,21 @@ export function ConfigPage() {
             value={config.city}
             onChange={(e) => setConfig({ ...config, city: e.target.value })}
             placeholder="std:080"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-            }}
+            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             City code (e.g., std:080 for Bangalore)
           </p>
         </div>
 
         {/* Country */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
           <label
             style={{
               display: 'block',
-              marginBottom: '6px',
-              fontWeight: '600',
-              fontSize: '0.9em',
-              color: '#374151',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.label,
+              color: COLORS.textPrimary,
             }}
           >
             Country
@@ -526,33 +466,21 @@ export function ConfigPage() {
             onChange={(e) => setConfig({ ...config, country: e.target.value })}
             placeholder="IND"
             maxLength={3}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95em',
-            }}
+            style={{ ...TEXT_BOX.track }}
           />
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall }}>
             ISO 3166-1 alpha-2 country code (default: IND for India)
           </p>
         </div>
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: SPACING.md, flexWrap: 'wrap' }}>
         <button
           onClick={handleSave}
           disabled={loading}
           style={{
-            padding: '12px 24px',
-            border: '1px solid #16a34a',
-            borderRadius: '6px',
-            backgroundColor: '#16a34a',
-            color: 'white',
-            fontSize: '1em',
-            fontWeight: '600',
+            ...BUTTON.primary,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.6 : 1,
           }}
@@ -564,13 +492,7 @@ export function ConfigPage() {
           onClick={handleTestConnection}
           disabled={testing}
           style={{
-            padding: '12px 24px',
-            border: '1px solid #2563eb',
-            borderRadius: '6px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            fontSize: '1em',
-            fontWeight: '600',
+            ...PILL_BUTTON.gray,
             cursor: testing ? 'not-allowed' : 'pointer',
             opacity: testing ? 0.6 : 1,
           }}
@@ -585,14 +507,7 @@ export function ConfigPage() {
               setErrors([]);
             }}
             style={{
-              padding: '12px 24px',
-              border: '1px solid #6b7280',
-              borderRadius: '6px',
-              backgroundColor: 'white',
-              color: '#374151',
-              fontSize: '1em',
-              fontWeight: '600',
-              cursor: 'pointer',
+              ...BUTTON.secondary,
             }}
           >
             Clear Messages
@@ -603,17 +518,14 @@ export function ConfigPage() {
       {/* Info Section */}
       <div
         style={{
-          marginTop: '24px',
-          padding: '16px',
-          borderRadius: '6px',
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
+          marginTop: SPACING.xl,
+          ...BADGE.info,
         }}
       >
-        <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1e40af' }}>
+        <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label, color: COLORS.info }}>
           Configuration Help
         </p>
-        <ul style={{ margin: 0, paddingLeft: '20px', color: '#1e3a8a', fontSize: '0.9em' }}>
+        <ul style={{ margin: 0, paddingLeft: SPACING.xl, ...TYPOGRAPHY.body }}>
           <li>
             <strong>Generate New Key Pair:</strong> Creates a new Ed25519 key pair for signing
             ONDC requests

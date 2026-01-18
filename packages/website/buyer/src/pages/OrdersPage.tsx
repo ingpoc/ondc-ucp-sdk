@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
+import { DRAMS, COLORS, SPACING, TYPOGRAPHY, CARD, BADGE, PILL_BUTTON, RADIUS, TRANSITIONS } from '@ondc-agent/shared/design-system';
 
 type StatusFilter = 'all' | 'pending' | 'active' | 'complete';
 
@@ -20,9 +21,10 @@ const isCompleteStatus = (status: UCPOrderStatus): boolean =>
 // Mock orders - to be replaced with API call in SDK-BUYER-ORDERS-003
 const mockOrders: UCPOrder[] = [];
 
+// DRAMS: Clean white background
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: '#ffffff',
   padding: '0',
   width: '100%',
 };
@@ -32,87 +34,49 @@ const CONTENT_STYLE = {
   padding: '0 80px',
 };
 
+// DRAMS: Minimal header with gray track background
 const HEADER_STYLE = {
-  marginBottom: '48px',
-  padding: '64px 80px 40px 80px',
-  background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-  borderBottom: '2px solid #e2e8f0',
+  marginBottom: SPACING['3xl'],
+  padding: `64px 80px ${SPACING.xl} 80px`,
+  background: DRAMS.grayTrack,
 };
 
 const PAGE_TITLE_STYLE = {
-  fontSize: '42px',
-  fontWeight: 800,
-  letterSpacing: '-1.5px',
-  color: '#0f172a',
-  margin: '0 0 24px 0',
+  ...TYPOGRAPHY.h1,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.xl} 0`,
 };
 
+// DRAMS: Pill-style filter tabs
 const FILTERS_STYLE = {
   display: 'flex',
-  gap: '8px',
-  borderBottom: '1px solid #e2e8f0',
-  paddingBottom: '16px',
-  marginBottom: '32px',
+  gap: SPACING.sm,
+  paddingBottom: SPACING.lg,
+  marginBottom: SPACING['2xl'],
   overflowX: 'auto' as const,
 };
 
+// DRAMS: Pill-style filter buttons (gray → orange when active)
 const FILTER_BUTTON_STYLE = {
-  padding: '10px 20px',
+  padding: `${SPACING.md} ${SPACING.xl}`,
   border: 'none',
-  borderBottom: '2px solid transparent',
-  backgroundColor: 'transparent',
-  fontSize: '14px',
-  fontWeight: 500,
+  borderRadius: RADIUS.pill,
+  background: 'transparent',
+  ...TYPOGRAPHY.body,
   cursor: 'pointer',
   textTransform: 'capitalize' as const,
-  transition: 'all 0.2s ease',
   whiteSpace: 'nowrap' as const,
-};
-
-const EMPTY_STATE_STYLE = {
-  textAlign: 'center' as const,
-  padding: '48px 24px',
-  backgroundColor: 'white',
-  borderRadius: '8px',
-  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-};
-
-const EMPTY_TITLE_STYLE = {
-  fontSize: '18px',
-  fontWeight: 600,
-  color: '#0f172a',
-  margin: '0 0 8px 0',
-};
-
-const EMPTY_MESSAGE_STYLE = {
-  fontSize: '14px',
-  color: '#475569',
-  margin: '0 0 24px 0',
-};
-
-const BUTTON_PRIMARY_STYLE = {
-  padding: '12px 24px',
-  border: 'none',
-  borderRadius: '6px',
-  backgroundColor: '#10b981',
-  color: 'white',
-  fontSize: '14px',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease',
+  transition: TRANSITIONS.hover,
 };
 
 const ORDERS_GRID_STYLE = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-  gap: '24px',
+  gap: SPACING.xl,
 };
 
 const ORDER_CARD_STYLE = {
-  backgroundColor: 'white',
-  border: '1px solid #e2e8f0',
-  borderRadius: '12px',
-  padding: '20px',
+  ...CARD.base,
   cursor: 'pointer',
   transition: 'box-shadow 0.2s ease, transform 0.2s ease',
 };
@@ -150,12 +114,12 @@ export function OrdersPage() {
     return labels[status] || status;
   };
 
-  const getStatusColor = (status: UCPOrderStatus): string => {
-    if (status === 'cancelled' || status === 'returned') return '#dc2626';
-    if (status === 'delivered') return '#16a34a';
-    if (isPendingStatus(status)) return '#2563eb';
-    if (isActiveStatus(status)) return '#ea580c';
-    return '#6b7280';
+  const getStatusBadgeVariant = (status: UCPOrderStatus): keyof typeof BADGE => {
+    if (status === 'cancelled' || status === 'returned') return 'error';
+    if (status === 'delivered') return 'success';
+    if (isPendingStatus(status)) return 'info';
+    if (isActiveStatus(status)) return 'warning';
+    return 'success';
   };
 
   const handleOrderClick = (orderId: string) => {
@@ -176,13 +140,13 @@ export function OrdersPage() {
                   onClick={() => setFilter(filterOption)}
                   style={{
                     ...FILTER_BUTTON_STYLE,
-                    borderBottomColor: filter === filterOption ? '#10b981' : 'transparent',
-                    color: filter === filterOption ? '#10b981' : '#475569',
-                    fontWeight: filter === filterOption ? 600 : 500,
+                    background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
+                    color: filter === filterOption ? 'white' : DRAMS.textDark,
+                    fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
                   }}
                 >
                   {filterOption}
-                  <span style={{ marginLeft: '8px', color: '#94a3b8' }}>
+                  <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>
                     {filterOption === 'all'
                       ? mockOrders.length
                       : mockOrders.filter((o) => {
@@ -199,20 +163,20 @@ export function OrdersPage() {
         </div>
 
         {filteredOrders.length === 0 ? (
-          <div style={EMPTY_STATE_STYLE}>
-            <p style={EMPTY_TITLE_STYLE}>
+          <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
+            <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
               {filter === 'all'
                 ? "You haven't placed any orders yet"
                 : `No ${filter} orders`}
             </p>
             {filter === 'all' && (
               <>
-                <p style={EMPTY_MESSAGE_STYLE}>
+                <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.xl} 0` }}>
                   Start shopping to see your orders here
                 </p>
                 <button
                   onClick={() => navigate('/search')}
-                  style={BUTTON_PRIMARY_STYLE}
+                  style={PILL_BUTTON.orange}
                 >
                   Start Shopping
                 </button>
@@ -230,15 +194,15 @@ export function OrdersPage() {
                   Object.assign(e.currentTarget.style, ORDER_CARD_HOVER_STYLE);
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.boxShadow = CARD.base.boxShadow || 'none';
                   e.currentTarget.style.transform = 'none';
                 }}
               >
-                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
+                <div style={{ marginBottom: SPACING.lg, paddingBottom: SPACING.lg, borderBottom: `1px solid ${DRAMS.grayTrack}` }}>
+                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginBottom: SPACING.xs }}>
                     Order #{order.id}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
                     {new Date(order.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -247,46 +211,40 @@ export function OrdersPage() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
+                <div style={{ marginBottom: SPACING.lg }}>
                   {order.items.slice(0, 3).map((item) => (
                     <div
                       key={item.id}
-                      style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}
+                      style={{ display: 'flex', justifyContent: 'space-between', marginBottom: SPACING.sm, ...TYPOGRAPHY.body }}
                     >
-                      <span style={{ color: '#0f172a' }}>
+                      <span style={{ color: DRAMS.textDark }}>
                         {item.quantity}x {item.name}
                       </span>
-                      <span style={{ color: '#475569' }}>
+                      <span style={{ color: DRAMS.textLight }}>
                         {item.price.currency} {item.price.value}
                       </span>
                     </div>
                   ))}
                   {order.items.length > 3 && (
-                    <div style={{ fontSize: '12px', color: '#475569', marginTop: '8px' }}>
+                    <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginTop: SPACING.sm }}>
                       +{order.items.length - 3} more items
                     </div>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-                  <div style={{ fontSize: '12px', color: '#475569' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: SPACING.md, borderTop: `1px solid ${DRAMS.grayTrack}` }}>
+                  <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight }}>
                     {order.provider?.name}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a' }}>
+                  <div style={{ ...TYPOGRAPHY.h4, color: DRAMS.textDark }}>
                     {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
                   </div>
                 </div>
 
                 <div style={{
-                  padding: '4px 12px',
-                  borderRadius: '4px',
-                  backgroundColor: `${getStatusColor(order.status)}15`,
-                  color: getStatusColor(order.status),
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  textTransform: 'capitalize',
-                  display: 'inline-block',
-                  marginTop: '12px',
+                  ...BADGE.base,
+                  ...BADGE[getStatusBadgeVariant(order.status)],
+                  marginTop: SPACING.md,
                 }}>
                   {getStatusLabel(order.status)}
                 </div>

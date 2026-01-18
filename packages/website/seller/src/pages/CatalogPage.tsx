@@ -2,75 +2,62 @@ import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@ondc-website/shared/hooks';
 import { InventoryTable } from '../components';
-import type { BecknCatalog, BecknItem } from '@ondc-website/shared';
+import { DRAMS_CARD, PILL_BUTTON, CARD, SPACING, TYPOGRAPHY, DRAMS } from '@ondc-agent/shared/design-system';
+import type { BecknItem } from '@ondc-website/shared';
 
+// DRAMS: Clean white background
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: '#ffffff',
   padding: '0',
   width: '100%',
 };
 
 const CONTENT_STYLE = {
   maxWidth: '100%',
-  padding: '0 80px',
+  padding: `0 ${SPACING['3xl']}`,
 };
 
 const HEADER_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginBottom: '32px',
+  marginBottom: SPACING.xl,
 };
 
 const PAGE_TITLE_STYLE = {
-  fontSize: '28px',
-  fontWeight: 700,
-  letterSpacing: '-0.5px',
-  color: '#0f172a',
-  margin: 0,
-};
-
-const BUTTON_PRIMARY_STYLE = {
-  padding: '12px 24px',
-  border: 'none',
-  borderRadius: '6px',
-  backgroundColor: '#10b981',
-  color: 'white',
-  fontSize: '14px',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease',
+  ...TYPOGRAPHY.h2,
+  color: DRAMS.textDark,
+  margin: '0',
 };
 
 const LOADING_STYLE = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '48px',
-  color: '#475569',
-  fontSize: '14px',
+  padding: SPACING['3xl'],
+  color: DRAMS.textLight,
+  fontSize: TYPOGRAPHY.body.fontSize,
 };
 
 const ERROR_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
+  ...DRAMS_CARD.base,
+  padding: SPACING.lg,
   backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
+  border: `1px solid #fecaca`,
   color: '#dc2626',
-  fontSize: '14px',
+  fontSize: TYPOGRAPHY.body.fontSize,
 };
 
 const CARD_STYLE = {
-  backgroundColor: 'white',
-  borderRadius: '8px',
-  padding: '24px',
-  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  ...DRAMS_CARD.base,
+  padding: SPACING.xl,
+  transition: 'transform 0.2s, box-shadow 0.2s',
 };
 
 export function CatalogPage() {
   const navigate = useNavigate();
-  const { data, loading, error, execute } = useApi<BecknCatalog>('/api/catalog');
+  const { data, loading, error, execute } = useApi<BecknItem[]>('/api/catalog');
 
   useEffect(() => {
     execute();
@@ -80,24 +67,8 @@ export function CatalogPage() {
     navigate(`/catalog/${item.id}`);
   }, [navigate]);
 
-  const handleDelete = useCallback(async (itemId: string) => {
-    try {
-      const response = await fetch(`/api/catalog/products/${itemId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete product');
-      }
-
-      execute();
-    } catch (err) {
-      alert('Failed to delete product');
-    }
-  }, [execute]);
-
-  const handleAddProduct = useCallback(() => {
-    navigate('/catalog/new');
+  const handleAdd = useCallback(() => {
+    navigate('/catalog/edit/new');
   }, [navigate]);
 
   if (loading) {
@@ -113,38 +84,108 @@ export function CatalogPage() {
   if (error) {
     return (
       <div style={PAGE_CONTAINER_STYLE}>
-        <div style={CONTENT_STYLE}>
-          <div style={ERROR_STYLE}>
-            <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
-            <p style={{ margin: '4px 0 0 0' }}>{error}</p>
-          </div>
+        <div style={ERROR_STYLE}>
+          Error loading catalog: {error}
         </div>
       </div>
     );
   }
 
-  const items = data?.['bpp/providers']?.[0]?.items ?? [];
-
   return (
     <div style={PAGE_CONTAINER_STYLE}>
       <div style={CONTENT_STYLE}>
         <div style={HEADER_STYLE}>
-          <h1 style={PAGE_TITLE_STYLE}>Product Catalog ({items.length})</h1>
-          <button
-            onClick={handleAddProduct}
-            style={BUTTON_PRIMARY_STYLE}
-          >
-            Add Product
+          <h1 style={PAGE_TITLE_STYLE}>Product Catalog</h1>
+          <button onClick={handleAdd} style={{ ...PILL_BUTTON.orange }}>
+            Add New Product
           </button>
         </div>
 
-        <div style={CARD_STYLE}>
-          <InventoryTable
-            items={items}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        {data && (
+          <>
+            {data.length === 0 ? (
+              <div style={{ ...CARD_STYLE, textAlign: 'center', marginTop: SPACING.lg }}>
+                <p style={{ color: DRAMS.textLight, fontSize: TYPOGRAPHY.body.fontSize }}>
+                  No products found
+                </p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+                gap: SPACING.lg,
+              }}>
+                {data.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleEdit(item)}
+                    style={{
+                      ...CARD_STYLE,
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {item.images?.[0] ? (
+                      <img
+                        src={item.images[0].url}
+                        alt={item.descriptor?.name ?? item.name}
+                        style={{
+                          width: '100%',
+                          height: '180px',
+                          objectFit: 'cover',
+                          borderRadius: '16px',
+                          marginBottom: SPACING.md,
+                          backgroundColor: DRAMS.grayTrack,
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '180px',
+                          objectFit: 'cover',
+                          borderRadius: '16px',
+                          marginBottom: SPACING.md,
+                          backgroundColor: DRAMS.grayTrack,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        📦
+                      </div>
+                    )}
+                    <h3 style={{ ...TYPOGRAPHY.label, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
+                      {item.descriptor?.name || 'Unnamed Product'}
+                    </h3>
+                    {item.price && (
+                      <p style={{ ...TYPOGRAPHY.label, color: DRAMS.orange, margin: `0 0 ${SPACING.md} 0` }}>
+                        {item.price.currency} {item.price.value}
+                      </p>
+                    )}
+                    {item.descriptor?.short_desc && (
+                      <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: `0 0 ${SPACING.md} 0`, lineHeight: 1.4 }}>
+                        {item.descriptor.short_desc}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {data && data.length > 0 && (
+          <div style={{ marginTop: SPACING.xl }}>
+            <InventoryTable items={data} onEdit={handleEdit} onDelete={(id) => console.log('Delete', id)} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
+import { CARD, COLORS, SPACING, TYPOGRAPHY, BUTTON, BADGE, DRAMS, RADIUS, TRANSITIONS } from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 
@@ -28,12 +29,12 @@ const getStatusLabel = (status: UCPOrderStatus): string => {
   return labels[status] || status;
 };
 
-const getStatusColor = (status: UCPOrderStatus): string => {
-  if (isCancelledStatus(status)) return '#dc2626';
-  if (isCompletedStatus(status)) return '#16a34a';
-  if (isPendingStatus(status)) return '#2563eb';
-  if (isDispatchedStatus(status)) return '#ea580c';
-  return '#059669';
+const getStatusBadgeVariant = (status: UCPOrderStatus): keyof typeof BADGE => {
+  if (isCancelledStatus(status)) return 'error';
+  if (isCompletedStatus(status)) return 'success';
+  if (isPendingStatus(status)) return 'info';
+  if (isDispatchedStatus(status)) return 'warning';
+  return 'success';
 };
 
 type StatusFilter = 'all' | 'pending' | 'accepted' | 'dispatched' | 'completed' | 'cancelled';
@@ -69,111 +70,59 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
   const canAccept = isPendingStatus(order.status);
   const canReject = isPendingStatus(order.status);
 
-  const CARD_STYLE = {
-    border: '1px solid #e2e8f0',
-    borderRadius: '12px',
-    padding: '20px',
-    backgroundColor: 'white',
-    marginBottom: '16px',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-    transition: 'box-shadow 0.2s ease',
-  };
-
   const HEADER_STYLE = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
-    paddingBottom: '16px',
-    borderBottom: '1px solid #f1f5f9',
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    borderBottom: `1px solid ${DRAMS.grayTrack}`,
   };
 
   const ORDER_ID_STYLE = {
-    fontSize: '13px',
-    color: '#475569',
-    marginBottom: '4px',
+    ...TYPOGRAPHY.bodySmall,
+    color: DRAMS.textLight,
+    marginBottom: SPACING.xs,
   };
 
   const DATE_STYLE = {
-    fontSize: '12px',
-    color: '#94a3b8',
-  };
-
-  const STATUS_BADGE_STYLE = {
-    padding: '4px 12px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    fontWeight: 600,
-    textTransform: 'capitalize' as const,
+    ...TYPOGRAPHY.bodySmall,
+    color: DRAMS.textLight,
   };
 
   const ITEM_ROW_STYLE = {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '8px',
-    fontSize: '14px',
+    marginBottom: SPACING.sm,
+    ...TYPOGRAPHY.body,
   };
 
   const INFO_ROW_STYLE = {
-    fontSize: '13px',
-    color: '#475569',
-    marginBottom: '4px',
+    ...TYPOGRAPHY.bodySmall,
+    color: DRAMS.textLight,
+    marginBottom: SPACING.xs,
   };
 
   const FOOTER_STYLE = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: '12px',
-    borderTop: '1px solid #f1f5f9',
+    paddingTop: SPACING.md,
+    borderTop: `1px solid ${DRAMS.grayTrack}`,
   };
 
   const TOTAL_STYLE = {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: '#0f172a',
+    ...TYPOGRAPHY.h4,
+    color: DRAMS.textDark,
   };
 
   const ACTIONS_STYLE = {
     display: 'flex',
-    gap: '8px',
-  };
-
-  const BUTTON_SUCCESS_STYLE = {
-    padding: '8px 16px',
-    border: '1px solid #10b981',
-    borderRadius: '6px',
-    backgroundColor: '#10b981',
-    color: 'white',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
-  };
-
-  const BUTTON_DANGER_STYLE = {
-    padding: '8px 16px',
-    border: '1px solid #ef4444',
-    borderRadius: '6px',
-    backgroundColor: '#ef4444',
-    color: 'white',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
-  };
-
-  const BUTTON_SECONDARY_STYLE = {
-    padding: '8px 16px',
-    border: '1px solid #e2e8f0',
-    borderRadius: '6px',
-    backgroundColor: 'white',
-    color: '#0f172a',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
+    gap: SPACING.sm,
   };
 
   return (
-    <div style={CARD_STYLE}>
+    <div style={{ ...CARD.base, marginBottom: SPACING.lg }}>
       <div style={HEADER_STYLE}>
         <div>
           <div style={ORDER_ID_STYLE}>
@@ -189,37 +138,36 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
         </div>
         <div
           style={{
-            ...STATUS_BADGE_STYLE,
-            backgroundColor: `${getStatusColor(order.status)}15`,
-            color: getStatusColor(order.status),
+            ...BADGE.base,
+            ...BADGE[getStatusBadgeVariant(order.status)],
           }}
         >
           {getStatusLabel(order.status)}
         </div>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: SPACING.lg }}>
         {order.items.slice(0, 3).map((item) => (
           <div
             key={item.id}
             style={ITEM_ROW_STYLE}
           >
-            <span style={{ color: '#0f172a' }}>
+            <span style={{ color: DRAMS.textDark }}>
               {item.quantity}x {item.name}
             </span>
-            <span style={{ color: '#475569' }}>
+            <span style={{ color: DRAMS.textLight }}>
               {order.quote?.total?.currency} {item.price.value ?? item.price.amount}
             </span>
           </div>
         ))}
         {order.items.length > 3 && (
-          <div style={{ fontSize: '12px', color: '#475569', marginTop: '8px' }}>
+          <div style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, marginTop: SPACING.sm }}>
             +{order.items.length - 3} more items
           </div>
         )}
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: SPACING.lg }}>
         <div style={INFO_ROW_STYLE}>
           Customer: {order.buyer?.name}
         </div>
@@ -237,7 +185,7 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
           {canAccept && onAccept && (
             <button
               onClick={() => onAccept(order.id)}
-              style={BUTTON_SUCCESS_STYLE}
+              style={{ ...BUTTON.primary, padding: `${SPACING.md} ${SPACING.lg}`, ...TYPOGRAPHY.bodySmall }}
             >
               Accept
             </button>
@@ -245,14 +193,14 @@ export function OrderCard({ order, onAccept, onReject, onViewDetails }: OrderCar
           {canReject && onReject && (
             <button
               onClick={() => onReject(order.id)}
-              style={BUTTON_DANGER_STYLE}
+              style={{ ...BUTTON.danger, padding: `${SPACING.md} ${SPACING.lg}`, ...TYPOGRAPHY.bodySmall }}
             >
               Reject
             </button>
           )}
           <button
             onClick={() => onViewDetails?.(order.id)}
-            style={BUTTON_SECONDARY_STYLE}
+            style={{ ...BUTTON.secondary, padding: `${SPACING.md} ${SPACING.lg}`, ...TYPOGRAPHY.bodySmall }}
           >
             View Details
           </button>
@@ -338,8 +286,8 @@ export function OrdersPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '24px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', color: '#475569', fontSize: '14px' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: COLORS.bgPage, padding: SPACING.xl }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: SPACING['3xl'], color: COLORS.textSecondary, ...TYPOGRAPHY.body }}>
           Loading orders...
         </div>
       </div>
@@ -348,15 +296,15 @@ export function OrdersPage() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '24px' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: COLORS.bgPage, padding: SPACING.xl }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.5px', color: '#0f172a', margin: '0 0 24px 0' }}>Incoming Orders</h1>
-          <div style={{ padding: '16px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: '14px' }}>
-            <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
-            <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+          <h1 style={{ ...TYPOGRAPHY.h2, color: COLORS.textPrimary, margin: `0 0 ${SPACING.xl} 0` }}>Incoming Orders</h1>
+          <div style={{ ...BADGE.error, padding: SPACING.lg }}>
+            <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
+            <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
             <button
               onClick={loadOrders}
-              style={{ marginTop: '16px', padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: 'white', color: '#0f172a', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}
+              style={{ marginTop: SPACING.lg, ...BUTTON.secondary, ...TYPOGRAPHY.body }}
             >
               Retry
             </button>
@@ -368,9 +316,10 @@ export function OrdersPage() {
 
   const filterOptions: StatusFilter[] = ['all', 'pending', 'accepted', 'dispatched', 'completed', 'cancelled'];
 
+  // DRAMS: Clean white background
   const PAGE_CONTAINER_STYLE = {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
     padding: '0',
     width: '100%',
   };
@@ -380,67 +329,39 @@ export function OrdersPage() {
     padding: '0 80px',
   };
 
+  // DRAMS: Minimal header with gray track background
   const HEADER_STYLE = {
-    marginBottom: '32px',
-    padding: '64px 80px 40px 80px',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-    borderBottom: '2px solid #e2e8f0',
+    marginBottom: SPACING['2xl'],
+    padding: `64px 80px ${SPACING.xl} 80px`,
+    background: DRAMS.grayTrack,
   };
 
-  const PAGE_TITLE_STYLE = {
-    fontSize: '42px',
-    fontWeight: 800,
-    letterSpacing: '-1.5px',
-    color: '#0f172a',
-    margin: '0 0 24px 0',
-  };
-
+  // DRAMS: Pill-style filter tabs
   const FILTERS_STYLE = {
     display: 'flex',
-    gap: '8px',
-    borderBottom: '1px solid #e2e8f0',
-    paddingBottom: '16px',
+    gap: SPACING.sm,
+    paddingBottom: SPACING.lg,
     overflowX: 'auto' as const,
   };
 
+  // DRAMS: Pill-style filter buttons
   const FILTER_BUTTON_STYLE = {
-    padding: '10px 20px',
+    padding: `${SPACING.md} ${SPACING.xl}`,
     border: 'none',
-    borderBottom: '2px solid transparent',
-    backgroundColor: 'transparent',
-    fontSize: '14px',
-    fontWeight: 500,
+    borderRadius: RADIUS.pill,
+    background: 'transparent',
+    ...TYPOGRAPHY.body,
     cursor: 'pointer',
     textTransform: 'capitalize' as const,
     whiteSpace: 'nowrap' as const,
-  };
-
-  const EMPTY_STATE_STYLE = {
-    textAlign: 'center' as const,
-    padding: '48px 24px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-  };
-
-  const EMPTY_TITLE_STYLE = {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#0f172a',
-    margin: '0 0 8px 0',
-  };
-
-  const EMPTY_MESSAGE_STYLE = {
-    fontSize: '14px',
-    color: '#475569',
-    margin: 0,
+    transition: TRANSITIONS.hover,
   };
 
   return (
     <div style={PAGE_CONTAINER_STYLE}>
       <div style={CONTENT_STYLE}>
         <div style={HEADER_STYLE}>
-          <h1 style={PAGE_TITLE_STYLE}>Incoming Orders</h1>
+          <h1 style={{ ...TYPOGRAPHY.h1, color: DRAMS.textDark, margin: `0 0 ${SPACING.xl} 0` }}>Incoming Orders</h1>
 
           <div style={FILTERS_STYLE}>
             {filterOptions.map((filterOption) => {
@@ -451,13 +372,13 @@ export function OrdersPage() {
                   onClick={() => setFilter(filterOption)}
                   style={{
                     ...FILTER_BUTTON_STYLE,
-                    borderBottomColor: filter === filterOption ? '#10b981' : 'transparent',
-                    color: filter === filterOption ? '#10b981' : '#475569',
-                    fontWeight: filter === filterOption ? 600 : 500,
+                    background: filter === filterOption ? DRAMS.orange : DRAMS.grayTrack,
+                    color: filter === filterOption ? 'white' : DRAMS.textDark,
+                    fontWeight: filter === filterOption ? 600 : TYPOGRAPHY.label.fontWeight,
                   }}
                 >
                   {filterOption}
-                  <span style={{ marginLeft: '8px', color: '#94a3b8' }}>{count}</span>
+                  <span style={{ marginLeft: SPACING.sm, opacity: 0.7 }}>{count}</span>
                 </button>
               );
             })}
@@ -465,13 +386,13 @@ export function OrdersPage() {
         </div>
 
         {filteredOrders.length === 0 ? (
-          <div style={EMPTY_STATE_STYLE}>
-            <p style={EMPTY_TITLE_STYLE}>
+          <div style={{ ...CARD.base, textAlign: 'center', padding: `${SPACING['3xl']} ${SPACING.xl}` }}>
+            <p style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.sm} 0` }}>
               {filter === 'all'
                 ? "No incoming orders yet"
                 : `No ${filter} orders`}
             </p>
-            <p style={EMPTY_MESSAGE_STYLE}>
+            <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: 0 }}>
               {filter === 'all'
                 ? 'Orders will appear here when customers place them'
                 : `There are no ${filter} orders at the moment`}

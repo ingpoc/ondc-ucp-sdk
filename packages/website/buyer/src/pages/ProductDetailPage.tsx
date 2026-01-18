@@ -1,142 +1,118 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi, useCart } from '@ondc-website/shared/hooks';
-import { PriceDisplay, RatingStars } from '@ondc-website/shared/components';
+import { RatingStars } from '@ondc-website/shared/components';
+import { DramsFlipCard, FlipCardFront, FlipCardBack, DramsAddButton } from '@ondc-agent/shared/design-system';
 import type { UCPItem } from '@ondc-website/shared';
+import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, CARD, TRANSITIONS, COLORS } from '@ondc-agent/shared/design-system';
 
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
-  padding: '24px',
+  backgroundColor: '#ffffff',
+  padding: SPACING.xl,
 };
 
 const CONTENT_STYLE = {
-  maxWidth: '900px',
+  maxWidth: '1000px',
   margin: '0 auto',
 };
 
 const BACK_BUTTON_STYLE = {
-  padding: '8px 16px',
-  border: '1px solid #e2e8f0',
-  borderRadius: '6px',
-  backgroundColor: 'white',
-  color: '#0f172a',
-  fontSize: '14px',
-  fontWeight: 500,
+  padding: `${SPACING.sm} ${SPACING.lg}`,
+  border: 'none',
+  borderRadius: RADIUS.pill,
+  backgroundColor: DRAMS.grayTrack,
+  color: DRAMS.textDark,
+  ...TYPOGRAPHY.body,
   cursor: 'pointer',
-  marginBottom: '24px',
-  transition: 'all 0.2s ease',
+  marginBottom: SPACING.xl,
+  transition: TRANSITIONS.hover,
 };
 
-const CARD_STYLE = {
-  backgroundColor: 'white',
-  borderRadius: '12px',
-  padding: '32px',
-  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+const LAYOUT_STYLE = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: SPACING['3xl'],
+  alignItems: 'start',
+};
+
+const IMAGE_SECTION_STYLE = {
+  position: 'sticky' as const,
+  top: SPACING.xl,
+};
+
+const IMAGE_CARD_STYLE = {
+  ...CARD.base,
+  padding: 0,
+  overflow: 'hidden',
 };
 
 const IMAGE_STYLE = {
   width: '100%',
-  maxHeight: '400px',
-  objectFit: 'contain' as const,
-  borderRadius: '8px',
-  backgroundColor: '#f8fafc',
-  marginBottom: '24px',
+  height: '400px',
+  objectFit: 'cover' as const,
+  backgroundColor: DRAMS.grayTrack,
+};
+
+const DETAILS_SECTION_STYLE = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: SPACING.xl,
 };
 
 const TITLE_STYLE = {
-  fontSize: '32px',
-  fontWeight: 700,
-  letterSpacing: '-0.5px',
-  color: '#0f172a',
-  margin: '0 0 12px 0',
+  ...TYPOGRAPHY.h1,
+  color: DRAMS.textDark,
+  margin: 0,
 };
 
 const DESCRIPTION_STYLE = {
-  fontSize: '16px',
+  ...TYPOGRAPHY.body,
   lineHeight: 1.6,
-  color: '#475569',
-  margin: '0 0 24px 0',
+  color: DRAMS.textLight,
 };
 
-const SECTION_STYLE = {
-  padding: '20px',
-  borderRadius: '8px',
-  backgroundColor: '#f8fafc',
-  marginBottom: '16px',
-  border: '1px solid #e2e8f0',
-};
-
-const SECTION_TITLE_STYLE = {
-  fontSize: '16px',
-  fontWeight: 600,
-  color: '#0f172a',
-  margin: '0 0 12px 0',
-};
-
-const SELLER_NAME_STYLE = {
-  fontSize: '18px',
-  fontWeight: 600,
-  color: '#0f172a',
-  margin: '0 0 4px 0',
-};
-
-const VERIFIED_BADGE_STYLE = {
-  display: 'inline-flex',
+const PRICE_SECTION_STYLE = {
+  display: 'flex',
   alignItems: 'center',
-  fontSize: '12px',
-  fontWeight: 500,
-  color: '#10b981',
-  margin: '0',
+  gap: SPACING.md,
+  marginBottom: SPACING.md,
 };
 
-const CATEGORY_STYLE = {
-  fontSize: '14px',
-  color: '#475569',
-  marginTop: '16px',
+const PRICE_STYLE = {
+  ...TYPOGRAPHY.h2,
+  color: DRAMS.orange,
 };
 
-const BUTTON_STYLE = {
-  padding: '14px 28px',
-  border: 'none',
-  borderRadius: '8px',
-  backgroundColor: '#10b981',
-  color: 'white',
-  fontSize: '16px',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease',
-  marginTop: '24px',
-};
-
-const BUTTON_DISABLED_STYLE = {
-  ...BUTTON_STYLE,
-  backgroundColor: '#94a3b8',
-  cursor: 'not-allowed',
-};
-
-const MESSAGE_STYLE = {
-  marginLeft: '12px',
-  fontSize: '14px',
-  fontWeight: 500,
+const RATING_STYLE = {
+  marginBottom: SPACING.md,
 };
 
 const LOADING_STYLE = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '48px',
-  color: '#475569',
-  fontSize: '14px',
+  padding: SPACING['3xl'],
+  color: DRAMS.textLight,
+  ...TYPOGRAPHY.body,
 };
 
 const ERROR_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
+  padding: SPACING.lg,
+  borderRadius: RADIUS.lg,
   backgroundColor: '#fef2f2',
   border: '1px solid #fecaca',
-  color: '#dc2626',
-  fontSize: '14px',
+  color: COLORS.error,
+  ...TYPOGRAPHY.body,
+};
+
+const MESSAGE_STYLE = {
+  marginLeft: SPACING.md,
+  ...TYPOGRAPHY.bodySmall,
+};
+
+const SPECS_CARD_STYLE = {
+  ...CARD.base,
 };
 
 export function ProductDetailPage(): JSX.Element {
@@ -172,9 +148,7 @@ export function ProductDetailPage(): JSX.Element {
   if (loading) {
     return (
       <div style={PAGE_CONTAINER_STYLE}>
-        <div style={LOADING_STYLE}>
-          Loading product details...
-        </div>
+        <div style={LOADING_STYLE}>Loading product details...</div>
       </div>
     );
   }
@@ -184,15 +158,11 @@ export function ProductDetailPage(): JSX.Element {
       <div style={PAGE_CONTAINER_STYLE}>
         <div style={CONTENT_STYLE}>
           <div style={ERROR_STYLE}>
-            <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
+            <p style={{ margin: 0, fontWeight: TYPOGRAPHY.label.fontWeight }}>Error</p>
             <p style={{ margin: '4px 0 0 0' }}>{error || 'Product not found'}</p>
             <button
               onClick={() => navigate(-1)}
-              style={{
-                ...BACK_BUTTON_STYLE,
-                marginBottom: 0,
-                marginTop: '16px',
-              }}
+              style={{ ...BACK_BUTTON_STYLE, marginBottom: 0, marginTop: SPACING.md }}
             >
               Go Back
             </button>
@@ -202,7 +172,20 @@ export function ProductDetailPage(): JSX.Element {
     );
   }
 
-  const messageColor = cartMessage.includes('Failed') ? '#dc2626' : '#10b981';
+  const messageColor = cartMessage.includes('Failed') ? COLORS.error : DRAMS.orange;
+
+  // Build stats for flip card front
+  const stats = [
+    { label: 'Category', value: data.category || 'General' },
+    { label: 'Rating', value: data.rating ? `${data.rating.value}/5` : 'N/A' },
+  ];
+
+  // Build specs for flip card back
+  const specs = [
+    { label: 'Category', value: data.category || 'General' },
+    { label: 'Seller', value: data.provider?.name || 'Unknown' },
+    { label: 'Stock', value: 'In Stock' },
+  ];
 
   return (
     <div style={PAGE_CONTAINER_STYLE}>
@@ -211,57 +194,81 @@ export function ProductDetailPage(): JSX.Element {
           ← Back
         </button>
 
-        <div style={CARD_STYLE}>
-          {data.images?.[0] && (
-            <img
-              src={data.images[0].url}
-              alt={data.name}
-              style={IMAGE_STYLE}
-            />
-          )}
-
-          <h1 style={TITLE_STYLE}>{data.name}</h1>
-
-          {data.description && (
-            <p style={DESCRIPTION_STYLE}>{data.description}</p>
-          )}
-
-          <PriceDisplay price={data.price} />
-
-          {data.rating && (
-            <div style={{ marginBottom: '24px' }}>
-              <RatingStars rating={data.rating.value} />
+        <div style={LAYOUT_STYLE}>
+          {/* Left: Product Image */}
+          <div style={IMAGE_SECTION_STYLE}>
+            <div style={IMAGE_CARD_STYLE}>
+              {data.images?.[0] ? (
+                <img src={data.images[0].url} alt={data.name} style={IMAGE_STYLE} />
+              ) : (
+                <div style={{ ...IMAGE_STYLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    background: `radial-gradient(50% 50% at 30% 30%, ${DRAMS.orangeHighlight} 0%, ${DRAMS.orange} 100%)`,
+                    borderRadius: RADIUS.circle,
+                    boxShadow: `rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 4px 12px ${DRAMS.orange}33`,
+                  }} />
+                </div>
+              )}
             </div>
-          )}
-
-          <div style={SECTION_STYLE}>
-            <h3 style={SECTION_TITLE_STYLE}>Seller</h3>
-            <p style={SELLER_NAME_STYLE}>{data.provider?.name}</p>
-            {data.provider?.verified && (
-              <p style={VERIFIED_BADGE_STYLE}>✓ Verified Seller</p>
-            )}
-            {data.provider?.rating && <RatingStars rating={data.provider?.rating?.value} />}
           </div>
 
-          {data.category && (
-            <div style={CATEGORY_STYLE}>
-              <strong>Category:</strong> {data.category}
-            </div>
-          )}
+          {/* Right: Product Details */}
+          <div style={DETAILS_SECTION_STYLE}>
+            <h1 style={TITLE_STYLE}>{data.name}</h1>
 
-          <div>
-            <button
-              onClick={handleAddToCart}
-              disabled={addingToCart}
-              style={addingToCart ? BUTTON_DISABLED_STYLE : BUTTON_STYLE}
-            >
-              {addingToCart ? 'Adding...' : 'Add to Cart'}
-            </button>
-            {cartMessage && (
-              <span style={{ ...MESSAGE_STYLE, color: messageColor }}>
-                {cartMessage}
-              </span>
+            {data.description && (
+              <p style={DESCRIPTION_STYLE}>{data.description}</p>
             )}
+
+            <div style={PRICE_SECTION_STYLE}>
+              <span style={PRICE_STYLE}>
+                {data.price?.currency} {data.price?.value ?? data.price?.amount}
+              </span>
+              {data.rating && (
+                <div style={RATING_STYLE}>
+                  <RatingStars rating={data.rating.value} />
+                </div>
+              )}
+            </div>
+
+            {/* Flip Card for Specs */}
+            <div style={SPECS_CARD_STYLE}>
+              <DramsFlipCard
+                height={240}
+                front={
+                  <FlipCardFront
+                    title="Product Details"
+                    stats={stats}
+                    hint="Click for specifications"
+                  />
+                }
+                back={
+                  <FlipCardBack
+                    specs={specs}
+                  />
+                }
+              />
+            </div>
+
+            {/* Add to Cart Button */}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <DramsAddButton
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                loading={addingToCart}
+                size="lg"
+                fullWidth
+              >
+                {addingToCart ? 'Adding...' : 'Add to Cart'}
+              </DramsAddButton>
+              {cartMessage && (
+                <span style={{ ...MESSAGE_STYLE, color: messageColor }}>
+                  {cartMessage}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

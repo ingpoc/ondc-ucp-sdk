@@ -108,6 +108,9 @@ importers:
       libsodium-wrappers:
         specifier: ^0.8.0
         version: 0.8.0
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
       zod:
         specifier: ^3.24.1
         version: 3.25.76
@@ -115,6 +118,9 @@ importers:
       '@types/libsodium-wrappers':
         specifier: ^0.7.14
         version: 0.7.14
+      '@types/react':
+        specifier: ^18.0.0
+        version: 18.3.27
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)

@@ -1,25 +1,25 @@
 /**
  * Design System Tokens - Dieter Rams Principles
- * Minimal, timeless slate palette with consistent spacing, typography, and styles
+ * "Less but better" - DRAMS color palette with tactile, minimal aesthetics
  */
 
-// Color Palette - Slate-based (Aesthetic, Little Design)
+// Color Palette - DRAMS (Aesthetic, Little Design, Honest)
 export const COLORS = {
-  // Backgrounds
-  bgPage: '#f8fafc',      // slate-50
-  bgCard: '#ffffff',      // white
-  bgSubtle: '#f1f5f9',     // slate-100
-  bgHover: '#f8fafc',     // slate-50
+  // Backgrounds - Clean, unobtrusive
+  bgPage: '#ffffff',       // Pure white page
+  bgCard: '#ffffff',       // White cards
+  bgSubtle: 'rgb(238, 238, 238)', // Gray track (DRAMS)
+  bgHover: 'rgb(232, 232, 232)',  // Gray hover (DRAMS)
 
-  // Text
-  textPrimary: '#0f172a',  // slate-900
-  textSecondary: '#475569', // slate-600
-  textMuted: '#94a3b8',    // slate-400
-  textDisabled: '#cbd5e1',  // slate-300
+  // Text - Clear hierarchy
+  textPrimary: '#333',     // DRAMS primary text
+  textSecondary: '#666',   // DRAMS secondary text
+  textMuted: '#999',       // DRAMS muted text
+  textDisabled: '#ccc',    // Disabled state
 
-  // Borders
-  border: '#e2e8f0',       // slate-200
-  borderSubtle: '#f1f5f9', // slate-100
+  // Borders - Minimal, unobtrusive
+  border: 'rgba(0,0,0,0.08)',     // Subtle border
+  borderSubtle: 'rgba(0,0,0,0.04)', // Very subtle
 
   // Semantic (Honest, Thorough)
   success: '#10b981',      // emerald-500
@@ -39,6 +39,8 @@ export const DRAMS = {
   // Text colors
   textDark: '#333',
   textLight: '#999',
+  // Font family
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 } as const;
 
 // DRAMS Transitions - tactile, satisfying (Innovative, Thorough)
@@ -60,22 +62,24 @@ export const SPACING = {
   '4xl': '64px',
 } as const;
 
-// Typography Scale (Aesthetic)
+// Typography Scale (DRAMS: Light, clean, minimal)
 export const TYPOGRAPHY = {
-  // Display
-  h1: { fontSize: '48px', fontWeight: 800, letterSpacing: '-2px', lineHeight: 1.1 },
-  h2: { fontSize: '36px', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.2 },
-  h3: { fontSize: '24px', fontWeight: 600, letterSpacing: '-0.5px', lineHeight: 1.3 },
-  h4: { fontSize: '20px', fontWeight: 600, letterSpacing: '-0.25px', lineHeight: 1.4 },
+  // Display - DRAMS uses light weight (300), not bold
+  h1: { fontSize: '32px', fontWeight: 300, letterSpacing: '-0.5px', lineHeight: 1.2 },
+  h2: { fontSize: '28px', fontWeight: 300, letterSpacing: '-0.5px', lineHeight: 1.3 },
+  h3: { fontSize: '20px', fontWeight: 400, letterSpacing: '-0.25px', lineHeight: 1.4 },
+  h4: { fontSize: '18px', fontWeight: 500, letterSpacing: '0', lineHeight: 1.4 },
 
   // Body
-  body: { fontSize: '14px', fontWeight: 400, lineHeight: 1.5 },
-  bodySmall: { fontSize: '12px', fontWeight: 400, lineHeight: 1.4 },
-  label: { fontSize: '14px', fontWeight: 500, lineHeight: 1.5 },
+  body: { fontSize: '15px', fontWeight: 400, lineHeight: 1.5 },
+  bodySmall: { fontSize: '13px', fontWeight: 400, lineHeight: 1.4 },
+
+  // Label - DRAMS uppercase style
+  label: { fontSize: '13px', fontWeight: 500, lineHeight: 1.5, textTransform: 'uppercase' as const, letterSpacing: '1px' },
 
   // Navigation
-  nav: { fontSize: '14px', fontWeight: 500, lineHeight: 1.5 },
-  navActive: { fontSize: '14px', fontWeight: 600, lineHeight: 1.5 },
+  nav: { fontSize: '14px', fontWeight: 400, lineHeight: 1.5 },
+  navActive: { fontSize: '14px', fontWeight: 500, lineHeight: 1.5 },
 } as const;
 
 // Shadows - Subtle depth (Unobtrusive)
@@ -99,97 +103,101 @@ export const RADIUS = {
   card: '20px',
 } as const;
 
-// Button Styles (Useful, Understandable, Honest)
+// Button Styles - DRAMS Pill Buttons (Useful, Understandable, Honest)
 export const BUTTON = {
   primary: {
-    backgroundColor: COLORS.success,
+    background: 'radial-gradient(circle at 30% 30%, rgb(255, 150, 102) 0%, rgb(255, 97, 26) 100%)',
     color: 'white',
     border: 'none',
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.pill,
     padding: `${SPACING.md} ${SPACING.xl}`,
     fontSize: TYPOGRAPHY.label.fontSize,
     fontWeight: TYPOGRAPHY.label.fontWeight,
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
+    transition: TRANSITIONS.standard,
+    boxShadow: 'rgba(232, 61, 23, 0.4) 0px 0px 2px -1px inset, 0 2px 8px rgba(255, 97, 26, 0.3)',
   },
   secondary: {
-    backgroundColor: COLORS.bgSubtle,
-    color: COLORS.textPrimary,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: RADIUS.md,
+    background: DRAMS.grayTrack,
+    color: DRAMS.textDark,
+    border: 'none',
+    borderRadius: RADIUS.pill,
     padding: `${SPACING.md} ${SPACING.xl}`,
     fontSize: TYPOGRAPHY.label.fontSize,
     fontWeight: TYPOGRAPHY.label.fontWeight,
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: TRANSITIONS.hover,
   },
   danger: {
-    backgroundColor: COLORS.error,
+    background: COLORS.error,
     color: 'white',
     border: 'none',
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.pill,
     padding: `${SPACING.md} ${SPACING.xl}`,
     fontSize: TYPOGRAPHY.label.fontSize,
     fontWeight: TYPOGRAPHY.label.fontWeight,
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
+    transition: TRANSITIONS.hover,
   },
 } as const;
 
-// Form Input Styles (Understandable, Honest)
+// Form Input Styles - DRAMS Pill Inputs (Understandable, Honest)
 export const INPUT = {
   base: {
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: RADIUS.md,
-    padding: `${SPACING.md} ${SPACING.lg}`,
+    border: 'none',
+    borderRadius: RADIUS.pill,
+    padding: `${SPACING.md} ${SPACING.xl}`,
     fontSize: TYPOGRAPHY.body.fontSize,
-    color: COLORS.textPrimary,
-    backgroundColor: 'white',
-    transition: 'all 0.2s ease',
+    color: DRAMS.textDark,
+    background: DRAMS.grayTrack,
+    transition: TRANSITIONS.standard,
   },
   focus: {
     outline: 'none',
-    borderColor: COLORS.info,
-    boxShadow: `0 0 0 3px rgba(59, 130, 246, 0.1)`,
+    background: DRAMS.grayHover,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
   },
   error: {
-    borderColor: COLORS.error,
+    background: '#fef2f2',
   },
 } as const;
 
-// Navigation Styles (Understandable, Honest)
+// Navigation Styles - DRAMS Pill Navigation (Understandable, Honest)
 export const NAV = {
   link: {
-    color: COLORS.textSecondary,
+    color: DRAMS.textDark,
     textDecoration: 'none',
-    padding: `${SPACING.md} ${SPACING.lg}`,
-    borderRadius: RADIUS.md,
+    padding: `${SPACING.md} ${SPACING.xl}`,
+    borderRadius: RADIUS.pill,
     fontSize: TYPOGRAPHY.nav.fontSize,
     fontWeight: TYPOGRAPHY.nav.fontWeight,
-    transition: 'all 0.2s ease',
+    transition: TRANSITIONS.hover,
+    background: 'transparent',
   },
   linkActive: {
-    backgroundColor: COLORS.bgSubtle,
-    color: COLORS.textPrimary,
+    background: DRAMS.orange,
+    color: 'white',
     fontWeight: TYPOGRAPHY.navActive.fontWeight,
   },
   linkHover: {
-    backgroundColor: COLORS.bgHover,
-    color: COLORS.textPrimary,
+    background: DRAMS.grayTrack,
+    color: DRAMS.textDark,
   },
 } as const;
 
-// Card Styles (Aesthetic, Unobtrusive)
+// Card Styles - DRAMS (Aesthetic, Unobtrusive)
 export const CARD = {
   base: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.lg,
+    backgroundColor: 'white',
+    borderRadius: RADIUS.card,
     padding: SPACING.xl,
-    boxShadow: SHADOWS.md,
-    border: `1px solid ${COLORS.border}`,
+    boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+    border: 'none',
+    transition: 'transform 0.2s, box-shadow 0.2s',
   },
   hover: {
-    boxShadow: SHADOWS.lg,
+    transform: 'translateY(-4px)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
   },
 } as const;
 

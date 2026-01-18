@@ -1,35 +1,36 @@
 import { AgentChat } from '@ondc-website/shared/components';
+import { DRAMS, SPACING, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
 
+// DRAMS: Clean white page
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: '#ffffff',
   padding: '0',
 };
 
 const CONTENT_STYLE = {
   maxWidth: '100%',
-  padding: '0 48px',
+  padding: `0 ${SPACING['3xl']}`,
 };
 
+// DRAMS: Gray track header (no gradient)
 const HEADER_STYLE = {
-  marginBottom: '48px',
-  padding: '56px 48px 40px 48px',
-  background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-  borderBottom: '2px solid #e2e8f0',
+  marginBottom: SPACING['3xl'],
+  padding: `56px ${SPACING['3xl']} 40px ${SPACING['3xl']}`,
+  background: DRAMS.grayTrack,
+  borderBottom: 'none',
   textAlign: 'center' as const,
 };
 
 const PAGE_TITLE_STYLE = {
-  fontSize: '48px',
-  fontWeight: 800,
-  letterSpacing: '-2px',
-  color: '#0f172a',
-  margin: '0 0 16px 0',
+  ...TYPOGRAPHY.h1,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.lg} 0`,
 };
 
 const DESCRIPTION_STYLE = {
-  fontSize: '16px',
-  color: '#475569',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
   margin: '0',
   lineHeight: 1.6,
 };

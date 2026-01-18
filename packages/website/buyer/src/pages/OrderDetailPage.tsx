@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus, UCPFulfillmentStatus } from '@ondc-website/shared';
+import { DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, CARD, BADGE } from '@ondc-agent/shared/design-system';
 
 // Mock order fetch - to be replaced with API call
 const fetchOrder = async (_orderId: string): Promise<UCPOrder | null> => {
@@ -28,11 +29,12 @@ const getOrderStatusLabel = (status: UCPOrderStatus): string => {
   return labels[status] || status;
 };
 
-const getOrderStatusColor = (status: UCPOrderStatus): string => {
-  if (status === 'cancelled' || status === 'returned') return '#dc2626';
-  if (status === 'delivered') return '#16a34a';
-  if (status === 'created' || status === 'accepted') return '#2563eb';
-  return '#ea580c';
+const getOrderStatusBadgeVariant = (status: UCPOrderStatus): keyof typeof BADGE => {
+  if (status === 'cancelled' || status === 'returned') return 'error';
+  if (status === 'delivered') return 'success';
+  if (status === 'created' || status === 'accepted') return 'info';
+  if (status === 'in_progress' || status === 'packed' || status === 'shipped' || status === 'out_for_delivery') return 'warning';
+  return 'success';
 };
 
 const getFulfillmentStatusLabel = (status: UCPFulfillmentStatus): string => {
@@ -130,25 +132,19 @@ export function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p>Loading order details...</p>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
+        <p style={{ ...TYPOGRAPHY.body }}>Loading order details...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p style={{ color: '#dc2626', marginBottom: '16px' }}>Error: {error}</p>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
+        <p style={{ ...BADGE.error, marginBottom: SPACING.lg }}>Error: {error}</p>
         <button
           onClick={() => navigate('/orders')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
+          style={BUTTON.secondary}
         >
           Back to Orders
         </button>
@@ -158,17 +154,11 @@ export function OrderDetailPage() {
 
   if (!order) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p>Order not found</p>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
+        <p style={{ ...TYPOGRAPHY.body }}>Order not found</p>
         <button
           onClick={() => navigate('/orders')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
+          style={BUTTON.secondary}
         >
           Back to Orders
         </button>
@@ -179,17 +169,13 @@ export function OrderDetailPage() {
   const canCancel = isCancellable(order.status);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: SPACING.xl }}>
       {/* Back button */}
       <button
         onClick={() => navigate('/orders')}
         style={{
-          padding: '8px 16px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-          marginBottom: '20px',
+          ...BUTTON.secondary,
+          marginBottom: SPACING.xl,
         }}
       >
         ← Back to Orders
@@ -201,32 +187,25 @@ export function OrderDetailPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          marginBottom: '24px',
-          paddingBottom: '20px',
-          borderBottom: '1px solid #e5e7eb',
+          marginBottom: SPACING.xl,
+          paddingBottom: SPACING.xl,
+          borderBottom: `1px solid ${DRAMS.grayTrack}`,
         }}
       >
         <div>
-          <h1 style={{ margin: '0 0 8px 0' }}>Order #{order.id}</h1>
-          <p style={{ margin: '0', color: '#6b7280', fontSize: '0.9em' }}>
+          <h1 style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.h2 }}>Order #{order.id}</h1>
+          <p style={{ margin: '0', ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
             Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
             })}
           </p>
         </div>
         <div
           style={{
-            padding: '8px 16px',
-            borderRadius: '6px',
-            backgroundColor: `${getOrderStatusColor(order.status)}15`,
-            color: getOrderStatusColor(order.status),
-            fontSize: '1em',
-            fontWeight: '600',
-            textTransform: 'capitalize',
+            ...BADGE.base,
+            ...BADGE[getOrderStatusBadgeVariant(order.status)],
           }}
         >
           {getOrderStatusLabel(order.status)}
@@ -237,25 +216,20 @@ export function OrderDetailPage() {
       {order.cancellation && (
         <div
           style={{
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            marginBottom: '24px',
+            ...BADGE.error,
+            marginBottom: SPACING.xl,
           }}
         >
-          <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#991b1b' }}>
-            Order Cancelled
-          </p>
-          <p style={{ margin: '0', color: '#7f1d1d', fontSize: '0.9em' }}>
+          <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label }}>Order Cancelled</p>
+          <p style={{ margin: '0', color: COLORS.error }}>
             Cancelled by: {order.cancellation.cancelledBy}
             {order.cancellation.reason && ` - ${order.cancellation.reason}`}
           </p>
-          <p style={{ margin: '4px 0 0 0', color: '#7f1d1d', fontSize: '0.85em' }}>
+          <p style={{ margin: `${SPACING.xs} 0 0 0`, ...TYPOGRAPHY.bodySmall }}>
             {new Date(order.cancellation.cancelledAt || '').toLocaleString()}
           </p>
           {order.cancellation.refund && (
-            <p style={{ margin: '8px 0 0 0', color: '#059669', fontSize: '0.9em' }}>
+            <p style={{ margin: `${SPACING.sm} 0 0 0`, color: COLORS.success, ...TYPOGRAPHY.bodySmall }}>
               Refund: {order.cancellation.refund.amount.currency}{' '}
               {order.cancellation.refund.amount.value} - {order.cancellation.refund.status}
             </p>
@@ -266,42 +240,39 @@ export function OrderDetailPage() {
       {/* Provider Info */}
       <div
         style={{
-          marginBottom: '24px',
-          padding: '16px',
-          borderRadius: '8px',
-          backgroundColor: '#f9fafb',
+          ...CARD.base,
+          backgroundColor: COLORS.bgPage,
+          marginBottom: SPACING.xl,
         }}
       >
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '1em' }}>Seller</h3>
-        <p style={{ margin: '0', fontWeight: '600' }}>{order.provider?.name}</p>
+        <h3 style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.h3 }}>Seller</h3>
+        <p style={{ margin: '0', ...TYPOGRAPHY.label }}>{order.provider?.name}</p>
         {order.provider?.verified && (
-          <span style={{ color: '#16a34a', fontSize: '0.9em' }}>✓ Verified</span>
+          <span style={{ color: COLORS.success, ...TYPOGRAPHY.bodySmall }}>✓ Verified</span>
         )}
       </div>
 
       {/* Order Items */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.2em', marginBottom: '16px' }}>Items</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.lg }}>Items</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: SPACING.lg }}>
           {order.items.map((item) => (
             <div
               key={item.id}
               style={{
+                ...CARD.base,
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '16px',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                backgroundColor: 'white',
+                padding: SPACING.lg,
               }}
             >
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{item.name}</p>
-                <p style={{ margin: '0', color: '#6b7280', fontSize: '0.9em' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.label }}>{item.name}</p>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
                   Quantity: {item.quantity}
                 </p>
                 {item.customizations && (
-                  <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.85em' }}>
+                  <p style={{ margin: `${SPACING.xs} 0 0 0`, ...TYPOGRAPHY.bodySmall, color: COLORS.textSecondary }}>
                     {Object.entries(item.customizations).map(([key, value]) => (
                       <span key={key}>
                         {key}: {value}
@@ -311,10 +282,10 @@ export function OrderDetailPage() {
                 )}
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: '0', fontWeight: '600' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.label }}>
                   {formatPrice(item.price.currency, (item.price.value ?? String(item.price.amount ?? 0)), item.quantity)}
                 </p>
-                <p style={{ margin: '0', color: '#6b7280', fontSize: '0.85em' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.bodySmall, color: COLORS.textSecondary }}>
                   {item.price.currency} {item.price.value ?? item.price.amount} each
                 </p>
               </div>
@@ -326,24 +297,22 @@ export function OrderDetailPage() {
       {/* Quote/Pricing Breakdown */}
       <div
         style={{
-          marginBottom: '24px',
-          padding: '16px',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
+          ...CARD.base,
+          marginBottom: SPACING.xl,
         }}
       >
-        <h2 style={{ fontSize: '1.2em', marginBottom: '16px' }}>Order Summary</h2>
+        <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.lg }}>Order Summary</h2>
         {order.quote?.breakup?.map((item, index) => (
           <div
             key={index}
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              marginBottom: '8px',
-              fontSize: '0.95em',
+              marginBottom: SPACING.sm,
+              ...TYPOGRAPHY.body,
             }}
           >
-            <span style={{ color: '#6b7280' }}>{item.title}</span>
+            <span style={{ color: COLORS.textSecondary }}>{item.title}</span>
             <span>{item.price.currency} {item.price.value ?? item.price.amount}</span>
           </div>
         ))}
@@ -351,11 +320,10 @@ export function OrderDetailPage() {
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            marginTop: '16px',
-            paddingTop: '12px',
-            borderTop: '1px solid #e5e7eb',
-            fontWeight: '600',
-            fontSize: '1.1em',
+            marginTop: SPACING.lg,
+            paddingTop: SPACING.md,
+            borderTop: `1px solid ${COLORS.border}`,
+            ...TYPOGRAPHY.label,
           }}
         >
           <span>Total</span>
@@ -366,16 +334,16 @@ export function OrderDetailPage() {
       </div>
 
       {/* Delivery Address */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>Delivery Address</h2>
-        <div style={{ color: '#374151', lineHeight: '1.6' }}>
-          <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.md }}>Delivery Address</h2>
+        <div style={{ color: COLORS.textPrimary, lineHeight: 1.6 }}>
+          <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.label }}>
             {order.deliveryAddress?.line1}
           </p>
           {order.deliveryAddress?.line2 && (
-            <p style={{ margin: '0 0 4px 0' }}>{order.deliveryAddress.line2}</p>
+            <p style={{ margin: `0 0 ${SPACING.xs} 0` }}>{order.deliveryAddress.line2}</p>
           )}
-          <p style={{ margin: '0 0 4px 0' }}>
+          <p style={{ margin: `0 0 ${SPACING.xs} 0` }}>
             {order.deliveryAddress?.city}, {order.deliveryAddress?.state}{' '}
             {order.deliveryAddress?.postalCode}
           </p>
@@ -384,22 +352,21 @@ export function OrderDetailPage() {
       </div>
 
       {/* Fulfillment & Tracking */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.md }}>
           {order.fulfillment?.type === 'delivery' ? 'Delivery' : 'Fulfillment'} Status
         </h2>
         <div
           style={{
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#f9fafb',
+            ...CARD.base,
+            backgroundColor: COLORS.bgPage,
           }}
         >
-          <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>
+          <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label }}>
             Status: {getFulfillmentStatusLabel(order.fulfillment?.status ?? 'pending')}
           </p>
           {order.fulfillment?.estimatedTime && (
-            <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
+            <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
               Est. Delivery:{' '}
               {order.fulfillment.estimatedTime.start
                 ? new Date(order.fulfillment.estimatedTime.start).toLocaleString()
@@ -411,22 +378,22 @@ export function OrderDetailPage() {
             </p>
           )}
           {order.fulfillment?.providerName && (
-            <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
+            <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
               Provider: {order.fulfillment?.providerName}
             </p>
           )}
 
           {/* Tracking Info */}
           {order.fulfillment?.tracking && (
-            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-              <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>Tracking</p>
+            <div style={{ marginTop: SPACING.md, paddingTop: SPACING.md, borderTop: `1px solid ${COLORS.border}` }}>
+              <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label }}>Tracking</p>
               {order.fulfillment?.tracking?.id && (
-                <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
                   Tracking ID: {order.fulfillment?.tracking?.id}
                 </p>
               )}
               {order.fulfillment?.tracking?.statusMessage && (
-                <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
                   {order.fulfillment?.tracking?.statusMessage}
                 </p>
               )}
@@ -436,9 +403,9 @@ export function OrderDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: '#16a34a',
+                    color: COLORS.info,
                     textDecoration: 'none',
-                    fontWeight: '600',
+                    fontWeight: TYPOGRAPHY.label.fontWeight,
                   }}
                 >
                   Track Package →
@@ -449,15 +416,15 @@ export function OrderDetailPage() {
 
           {/* Delivery Agent */}
           {order.fulfillment?.agent && (
-            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-              <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>Delivery Agent</p>
+            <div style={{ marginTop: SPACING.md, paddingTop: SPACING.md, borderTop: `1px solid ${COLORS.border}` }}>
+              <p style={{ margin: `0 0 ${SPACING.sm} 0`, ...TYPOGRAPHY.label }}>Delivery Agent</p>
               {order.fulfillment?.agent?.name && (
-                <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
+                <p style={{ margin: `0 0 ${SPACING.xs} 0`, ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
                   Name: {order.fulfillment?.agent?.name}
                 </p>
               )}
               {order.fulfillment?.agent?.phone && (
-                <p style={{ margin: '0', color: '#6b7280' }}>
+                <p style={{ margin: '0', ...TYPOGRAPHY.body, color: COLORS.textSecondary }}>
                   Phone: {order.fulfillment?.agent?.phone}
                 </p>
               )}
@@ -467,51 +434,49 @@ export function OrderDetailPage() {
       </div>
 
       {/* Payment Info */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>Payment</h2>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.md }}>Payment</h2>
         <div
           style={{
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#f9fafb',
+            ...CARD.base,
+            backgroundColor: COLORS.bgPage,
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ color: '#6b7280' }}>Method</span>
-            <span style={{ fontWeight: '600', textTransform: 'capitalize' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: SPACING.sm }}>
+            <span style={{ color: COLORS.textSecondary }}>Method</span>
+            <span style={{ ...TYPOGRAPHY.label, textTransform: 'capitalize' }}>
               {order.payment?.type}
             </span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ color: '#6b7280' }}>Amount</span>
-            <span style={{ fontWeight: '600' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: SPACING.sm }}>
+            <span style={{ color: COLORS.textSecondary }}>Amount</span>
+            <span style={{ ...TYPOGRAPHY.label }}>
               {order.payment?.amount?.currency} {order.payment?.amount?.value}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#6b7280' }}>Status</span>
+            <span style={{ color: COLORS.textSecondary }}>Status</span>
             <span
               style={{
-                fontWeight: '600',
+                ...TYPOGRAPHY.label,
                 color:
                   order.payment?.status === 'completed'
-                    ? '#16a34a'
+                    ? COLORS.success
                     : order.payment?.status === 'failed'
-                      ? '#dc2626'
-                      : '#ea580c',
-                textTransform: 'capitalize',
+                      ? COLORS.error
+                      : COLORS.warning,
               }}
             >
               {order.payment?.status}
             </span>
           </div>
           {order.payment?.transactionId && (
-            <p style={{ margin: '8px 0 0 0', color: '#6b7280', fontSize: '0.9em' }}>
+            <p style={{ margin: `${SPACING.xs} 0 0 0`, ...TYPOGRAPHY.bodySmall, color: COLORS.textSecondary }}>
               Transaction ID: {order.payment?.transactionId}
             </p>
           )}
           {order.payment?.completedAt && (
-            <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '0.9em' }}>
+            <p style={{ margin: `${SPACING.xs} 0 0 0`, ...TYPOGRAPHY.bodySmall, color: COLORS.textSecondary }}>
               Completed: {new Date(order.payment?.completedAt || '').toLocaleString()}
             </p>
           )}
@@ -520,9 +485,9 @@ export function OrderDetailPage() {
 
       {/* Documents */}
       {order.documents && order.documents.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.2em', marginBottom: '12px' }}>Documents</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ marginBottom: SPACING.xl }}>
+          <h2 style={{ ...TYPOGRAPHY.h3, marginBottom: SPACING.md }}>Documents</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: SPACING.sm }}>
             {order.documents.map((doc, index) => (
               <a
                 key={index}
@@ -530,15 +495,16 @@ export function OrderDetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  padding: '12px',
-                  borderRadius: '6px',
-                  backgroundColor: '#f9fafb',
-                  border: '1px solid #e5e7eb',
+                  ...CARD.base,
+                  backgroundColor: COLORS.bgPage,
+                  padding: SPACING.md,
                   textDecoration: 'none',
-                  color: '#16a34a',
-                  fontWeight: '600',
+                  color: COLORS.info,
+                  fontWeight: TYPOGRAPHY.label.fontWeight,
                   display: 'flex',
                   justifyContent: 'space-between',
+                  border: `1px solid ${COLORS.border}`,
+                  cursor: 'pointer',
                 }}
               >
                 <span>{doc.label || doc.type}</span>
@@ -553,28 +519,19 @@ export function OrderDetailPage() {
       {canCancel && !order.cancellation && (
         <div
           style={{
-            padding: '20px',
-            borderRadius: '8px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
+            ...BADGE.error,
+            padding: SPACING.xl,
           }}
         >
-          <p style={{ margin: '0 0 12px 0', color: '#991b1b' }}>
+          <p style={{ margin: `0 0 ${SPACING.md} 0`, color: COLORS.error, ...TYPOGRAPHY.label }}>
             Need to cancel this order?
           </p>
           <button
             onClick={handleCancel}
             disabled={cancelling}
             style={{
-              padding: '10px 20px',
-              border: '1px solid #dc2626',
-              borderRadius: '6px',
-              backgroundColor: '#dc2626',
-              color: 'white',
-              fontSize: '1em',
-              fontWeight: '600',
+              ...BUTTON.danger,
               cursor: cancelling ? 'not-allowed' : 'pointer',
-              opacity: cancelling ? 0.6 : 1,
             }}
           >
             {cancelling ? 'Cancelling...' : 'Cancel Order'}

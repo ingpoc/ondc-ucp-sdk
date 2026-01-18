@@ -1,53 +1,33 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { COLORS, SPACING, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
+import { COLORS, SPACING, TYPOGRAPHY, TEXT_BOX, BUTTON, CARD, BADGE, DRAMS } from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 const STORAGE_KEY = 'ondc-session-id';
 
 const FORM_CONTAINER_STYLE = {
-  backgroundColor: 'white',
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: '8px',
-  padding: SPACING.xl,
+  ...CARD.base,
   marginBottom: SPACING.xl,
 } as const;
 
 const INPUT_STYLE = {
+  ...TEXT_BOX.track,
   width: '100%',
-  padding: `${SPACING.md} ${SPACING.lg}`,
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: '4px',
-  fontSize: TYPOGRAPHY.body.fontSize,
-  color: COLORS.textPrimary,
 } as const;
 
 const LABEL_STYLE = {
   display: 'block' as const,
-  marginBottom: SPACING.xs,
-  fontWeight: TYPOGRAPHY.label.fontWeight,
+  marginBottom: SPACING.sm,
+  ...TYPOGRAPHY.label,
   color: COLORS.textPrimary,
 };
 
-const BUTTON_STYLE = {
-  padding: `${SPACING.md} ${SPACING.lg}`,
-  border: 'none',
-  borderRadius: '4px',
-  fontSize: TYPOGRAPHY.body.fontSize,
-  cursor: 'pointer' as const,
-} as const;
-
 const SAVED_BADGE_STYLE = {
-  padding: `${SPACING.md} ${SPACING.lg}`,
-  backgroundColor: COLORS.bgSubtle,
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: '4px',
-  color: COLORS.textSecondary,
+  ...BADGE.success,
   marginBottom: SPACING.lg,
-  fontSize: TYPOGRAPHY.bodySmall.fontSize,
 } as const;
 
 export interface BillingFormProps {
-  session: UCPSession | null;
+  session: any;
 }
 
 interface FormFieldProps {
@@ -159,17 +139,16 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
 
   return (
     <div style={FORM_CONTAINER_STYLE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ margin: 0 }}>Billing Information</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.lg }}>
+        <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: 0 }}>Billing Information</h2>
         {isDirty && (
           <button
             type="button"
             onClick={handleSave}
             disabled={saving || !isValid}
             style={{
-              ...BUTTON_STYLE,
-              backgroundColor: saving ? COLORS.textMuted : COLORS.success,
-              color: 'white',
+              ...BUTTON.primary,
+              opacity: saving || !isValid ? 0.5 : 1,
               cursor: saving || !isValid ? 'not-allowed' : 'pointer',
             }}
           >
@@ -184,7 +163,7 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: '16px' }}>
+      <div style={{ display: 'grid', gap: SPACING.lg }}>
         <FormField
           label="Full Name"
           value={name}
@@ -194,7 +173,7 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
           required
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING.lg }}>
           <FormField
             label="Email"
             value={email}
@@ -223,7 +202,7 @@ export function BillingForm({ session }: BillingFormProps): React.ReactElement {
           placeholder="29ABCDE1234F1Z5"
           maxLength={15}
         />
-        <p style={{ fontSize: TYPOGRAPHY.bodySmall.fontSize, color: COLORS.textMuted, marginTop: '-12px' }}>
+        <p style={{ ...TYPOGRAPHY.bodySmall, color: COLORS.textMuted, marginTop: `-${SPACING.md}` }}>
           For business purchases and GST invoices
         </p>
       </div>

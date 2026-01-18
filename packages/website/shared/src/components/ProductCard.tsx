@@ -68,8 +68,7 @@ const IMAGE_STYLE = {
 };
 
 const TITLE_STYLE = {
-  ...TYPOGRAPHY.label,
-  fontWeight: 600,
+  ...TYPOGRAPHY.h4,
   color: DRAMS.textDark,
   margin: `0 0 ${SPACING.sm} 0`,
   lineHeight: '1.4',
@@ -133,8 +132,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '48px',
-            color: '#cbd5e1',
+            ...TYPOGRAPHY.h1,
+            color: DRAMS.textLight,
           }}
         >
           📦
@@ -165,9 +164,9 @@ export interface PriceDisplayProps {
 }
 
 const PRICE_STYLE = {
-  fontWeight: '700',
-  fontSize: '18px',
-  color: '#16a34a',
+  fontWeight: TYPOGRAPHY.label.fontWeight,
+  fontSize: TYPOGRAPHY.label.fontSize,
+  color: DRAMS.orange,
   margin: '8px 0',
 };
 
@@ -193,13 +192,12 @@ const RATING_CONTAINER_STYLE = {
 };
 
 const STAR_STYLE = {
-  fontSize: '16px',
+  ...TYPOGRAPHY.body,
 };
 
 const RATING_TEXT_STYLE = {
-  fontSize: '14px',
-  fontWeight: '500',
-  color: '#475569',
+  ...TYPOGRAPHY.bodySmall,
+  color: DRAMS.textLight,
   marginLeft: '4px',
 };
 
@@ -213,7 +211,7 @@ export function RatingStars({ rating, max = 5 }: RatingStarsProps) {
       key={i}
       style={{
         ...STAR_STYLE,
-        color: i < rating ? '#f59e0b' : '#e2e8f0',
+        color: i < rating ? DRAMS.orange : DRAMS.grayTrack,
       }}
     >
       ★

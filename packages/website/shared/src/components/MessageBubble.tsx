@@ -154,7 +154,7 @@ function ProductCardComponent({
 
       {/* Price and rating */}
       <div style={{ marginBottom: SPACING.xs }}>
-        <span style={{ ...TYPOGRAPHY.label, fontWeight: 600, fontSize: '1rem', color: DRAMS.textDark }}>
+        <span style={{ ...TYPOGRAPHY.h4, color: DRAMS.orange }}>
           ₹{card.price}
         </span>
       </div>

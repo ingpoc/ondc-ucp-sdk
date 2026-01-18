@@ -4,5 +4,6 @@
  */
 
 export * from './tokens';
-export * from './components';
+export * from './components'; // Style patterns (PILL_BUTTON, TEXT_BOX, etc.)
+export * from './components/index'; // React components (DramsProductCard, DramsFlipCard, etc.)
 export * from './tactile';

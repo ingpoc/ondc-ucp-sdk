@@ -1,3 +1,5 @@
+import { SPACING, TYPOGRAPHY, RADIUS, BUTTON, DRAMS } from '@ondc-agent/shared/design-system';
+
 export interface CartSummaryProps {
   subtotal: number;
   currency?: string;
@@ -8,38 +10,32 @@ export interface CartSummaryProps {
   checkoutDisabled?: boolean;
 }
 
-// Extract static styles
 const CONTAINER_STYLE = {
-  border: '1px solid #ddd',
-  borderRadius: '8px',
-  padding: '20px',
-  backgroundColor: '#f9fafb',
+  border: `1px solid ${DRAMS.grayHover}`,
+  borderRadius: RADIUS.lg,
+  padding: SPACING.xl,
+  backgroundColor: DRAMS.grayTrack,
 };
 
 const LINE_ITEM_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
-  marginBottom: '8px',
+  marginBottom: SPACING.sm,
+  ...TYPOGRAPHY.body,
 };
 
 const TOTAL_STYLE = {
-  borderTop: '2px solid #ddd',
-  paddingTop: '16px',
-  marginBottom: '16px',
+  borderTop: `2px solid ${DRAMS.grayHover}`,
+  paddingTop: SPACING.lg,
+  marginBottom: SPACING.lg,
   display: 'flex',
   justifyContent: 'space-between',
-  fontSize: '1.2em',
+  ...TYPOGRAPHY.h4,
 };
 
 const CHECKOUT_BUTTON_STYLE = {
+  ...BUTTON.primary,
   width: '100%',
-  padding: '12px',
-  border: 'none',
-  borderRadius: '6px',
-  color: 'white',
-  fontSize: '1em',
-  fontWeight: 'bold',
-  cursor: 'pointer',
 };
 
 export function CartSummary({
@@ -56,7 +52,7 @@ export function CartSummary({
   const renderLineItem = (label: string, value: number, color?: string, showNegative = false) => (
     <div key={label} style={{ ...LINE_ITEM_STYLE, color: color || 'inherit' }}>
       <span>{label}:</span>
-      <span style={{ fontWeight: 'bold' }}>
+      <span style={{ fontWeight: TYPOGRAPHY.label.fontWeight }}>
         {showNegative && value > 0 ? '-' : ''}{currency} {value.toFixed(2)}
       </span>
     </div>
@@ -64,32 +60,29 @@ export function CartSummary({
 
   return (
     <div style={CONTAINER_STYLE}>
-      <h2 style={{ margin: '0 0 16px 0', fontSize: '1.3em' }}>Order Summary</h2>
+      <h2 style={{ ...TYPOGRAPHY.h3, margin: `0 0 ${SPACING.md} 0` }}>Order Summary</h2>
 
-      {/* Line Items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACING.sm, marginBottom: SPACING.lg }}>
         {renderLineItem('Subtotal', subtotal)}
         {deliveryCost !== undefined && renderLineItem('Delivery', deliveryCost)}
         {tax !== undefined && renderLineItem('Tax', tax)}
-        {discount !== undefined && discount > 0 && renderLineItem('Discount', discount, '#16a34a', true)}
+        {discount !== undefined && discount > 0 && renderLineItem('Discount', discount, DRAMS.orange, true)}
       </div>
 
-      {/* Total */}
       <div style={TOTAL_STYLE}>
-        <span style={{ fontWeight: 'bold' }}>Total:</span>
-        <span style={{ fontWeight: 'bold', color: '#16a34a' }}>
+        <span style={{ fontWeight: TYPOGRAPHY.label.fontWeight }}>Total:</span>
+        <span style={{ fontWeight: TYPOGRAPHY.label.fontWeight, color: DRAMS.orange }}>
           {currency} {total.toFixed(2)}
         </span>
       </div>
 
-      {/* Checkout Button */}
       {onCheckout && (
         <button
           onClick={onCheckout}
           disabled={checkoutDisabled}
           style={{
             ...CHECKOUT_BUTTON_STYLE,
-            backgroundColor: checkoutDisabled ? '#d1d5db' : '#16a34a',
+            opacity: checkoutDisabled ? 0.5 : 1,
             cursor: checkoutDisabled ? 'not-allowed' : 'pointer',
           }}
         >

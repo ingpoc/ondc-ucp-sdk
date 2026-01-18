@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UCPOrder, UCPOrderStatus } from '@ondc-website/shared';
+import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON, CARD, COLORS } from '@ondc-agent/shared/design-system';
 
 const API_BASE = 'http://localhost:3001';
 
-// Order statuses that can be acted on by seller
 const canAcceptOrder = (status: UCPOrderStatus): boolean => status === 'created';
 const canRejectOrder = (status: UCPOrderStatus): boolean => status === 'created';
 const canDispatchOrder = (status: UCPOrderStatus): boolean =>
@@ -26,11 +26,11 @@ const getStatusLabel = (status: UCPOrderStatus): string => {
 };
 
 const getStatusColor = (status: UCPOrderStatus): string => {
-  if (status === 'cancelled' || status === 'returned') return '#dc2626';
-  if (status === 'delivered') return '#16a34a';
-  if (status === 'created') return '#2563eb';
-  if (['accepted', 'packed'].includes(status)) return '#059669';
-  return '#ea580c';
+  if (status === 'cancelled' || status === 'returned') return COLORS.error;
+  if (status === 'delivered') return DRAMS.orange;
+  if (status === 'created') return DRAMS.textDark;
+  if (['accepted', 'packed'].includes(status)) return DRAMS.orange;
+  return DRAMS.orange;
 };
 
 interface TimelineEvent {
@@ -86,6 +86,92 @@ const getOrderTimeline = (order: UCPOrder): TimelineEvent[] => {
   return events;
 };
 
+const PAGE_STYLE = {
+  maxWidth: '800px',
+  margin: '0 auto',
+  padding: SPACING.xl,
+};
+
+const BACK_BUTTON_STYLE = {
+  ...BUTTON.secondary,
+  padding: `${SPACING.sm} ${SPACING.lg}`,
+  marginBottom: SPACING.xl,
+};
+
+const ORDER_HEADER_STYLE = {
+  ...CARD.base,
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: SPACING.xl,
+  paddingBottom: SPACING.xl,
+  borderBottom: `1px solid ${DRAMS.grayTrack}`,
+};
+
+const STATUS_BADGE_STYLE = {
+  padding: `${SPACING.sm} ${SPACING.lg}`,
+  borderRadius: RADIUS.md,
+  ...TYPOGRAPHY.label,
+  textTransform: 'capitalize' as const,
+};
+
+const ACTIONS_CARD_STYLE = {
+  ...CARD.base,
+  marginBottom: SPACING.xl,
+  display: 'flex',
+  gap: SPACING.md,
+  flexWrap: 'wrap' as const,
+};
+
+const SECTION_CARD_STYLE = {
+  ...CARD.base,
+  marginBottom: SPACING.xl,
+};
+
+const SECTION_TITLE_STYLE = {
+  ...TYPOGRAPHY.h3,
+  margin: `0 0 ${SPACING.md} 0`,
+};
+
+const ITEM_ROW_STYLE = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  padding: SPACING.md,
+  borderRadius: RADIUS.md,
+  border: `1px solid ${DRAMS.grayTrack}`,
+  backgroundColor: 'white',
+  marginBottom: SPACING.sm,
+};
+
+const TIMELINE_STYLE = {
+  position: 'relative' as const,
+};
+
+const TIMELINE_LINE_STYLE = {
+  position: 'absolute' as const,
+  left: '8px',
+  top: 0,
+  bottom: 0,
+  width: '2px',
+  backgroundColor: DRAMS.grayTrack,
+};
+
+const TIMELINE_EVENT_STYLE = {
+  position: 'relative' as const,
+  paddingLeft: SPACING['3xl'],
+  paddingBottom: SPACING.xl,
+};
+
+const TIMELINE_DOT_STYLE = {
+  position: 'absolute' as const,
+  left: 0,
+  top: '4px',
+  width: '18px',
+  height: '18px',
+  borderRadius: RADIUS.circle,
+  border: '2px solid white',
+};
+
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -94,7 +180,6 @@ export function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
 
-  // Load order data
   useEffect(() => {
     const loadOrder = async () => {
       if (!id) {
@@ -105,9 +190,7 @@ export function OrderDetailPage() {
 
       try {
         const response = await fetch(`${API_BASE}/api/seller/orders/${id}`);
-        if (!response.ok) {
-          throw new Error('Order not found');
-        }
+        if (!response.ok) throw new Error('Order not found');
         const data = await response.json();
         setOrder(data.order);
       } catch (err) {
@@ -120,18 +203,12 @@ export function OrderDetailPage() {
     loadOrder();
   }, [id]);
 
-  // Handle accept order
   const handleAccept = async () => {
     if (!order || !id) return;
-
     setProcessing('accept');
     try {
-      const response = await fetch(`${API_BASE}/api/seller/orders/${id}/accept`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to accept order');
-      }
+      const response = await fetch(`${API_BASE}/api/seller/orders/${id}/accept`, { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to accept order');
       const data = await response.json();
       setOrder(data.order);
     } catch (err) {
@@ -141,13 +218,9 @@ export function OrderDetailPage() {
     }
   };
 
-  // Handle reject order
   const handleReject = async () => {
     if (!order || !id) return;
-
-    if (!confirm('Are you sure you want to reject this order?')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to reject this order?')) return;
 
     setProcessing('reject');
     try {
@@ -156,9 +229,7 @@ export function OrderDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: 'Seller rejected the order' }),
       });
-      if (!response.ok) {
-        throw new Error('Failed to reject order');
-      }
+      if (!response.ok) throw new Error('Failed to reject order');
       const data = await response.json();
       setOrder(data.order);
     } catch (err) {
@@ -168,10 +239,8 @@ export function OrderDetailPage() {
     }
   };
 
-  // Handle dispatch order
   const handleDispatch = async () => {
     if (!order || !id) return;
-
     const trackingId = prompt('Enter tracking ID:');
     if (!trackingId) return;
 
@@ -180,14 +249,9 @@ export function OrderDetailPage() {
       const response = await fetch(`${API_BASE}/api/seller/orders/${id}/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trackingId,
-          providerName: 'Standard Courier',
-        }),
+        body: JSON.stringify({ trackingId, providerName: 'Standard Courier' }),
       });
-      if (!response.ok) {
-        throw new Error('Failed to dispatch order');
-      }
+      if (!response.ok) throw new Error('Failed to dispatch order');
       const data = await response.json();
       setOrder(data.order);
     } catch (err) {
@@ -199,26 +263,17 @@ export function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p>Loading order details...</p>
+      <div style={PAGE_STYLE}>
+        <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight }}>Loading order details...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p style={{ color: '#dc2626', marginBottom: '16px' }}>Error: {error}</p>
-        <button
-          onClick={() => navigate('/orders')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
-        >
+      <div style={PAGE_STYLE}>
+        <p style={{ color: COLORS.error, marginBottom: SPACING.md }}>Error: {error}</p>
+        <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
           Back to Orders
         </button>
       </div>
@@ -227,18 +282,9 @@ export function OrderDetailPage() {
 
   if (!order) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <p>Order not found</p>
-        <button
-          onClick={() => navigate('/orders')}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
-        >
+      <div style={PAGE_STYLE}>
+        <p style={{ ...TYPOGRAPHY.body }}>Order not found</p>
+        <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
           Back to Orders
         </button>
       </div>
@@ -246,38 +292,18 @@ export function OrderDetailPage() {
   }
 
   const timeline = getOrderTimeline(order);
+  const statusColor = getStatusColor(order.status);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      {/* Back button */}
-      <button
-        onClick={() => navigate('/orders')}
-        style={{
-          padding: '8px 16px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-          marginBottom: '20px',
-        }}
-      >
+    <div style={PAGE_STYLE}>
+      <button onClick={() => navigate('/orders')} style={BACK_BUTTON_STYLE}>
         ← Back to Orders
       </button>
 
-      {/* Order Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '24px',
-          paddingBottom: '20px',
-          borderBottom: '1px solid #e5e7eb',
-        }}
-      >
+      <div style={ORDER_HEADER_STYLE}>
         <div>
-          <h1 style={{ margin: '0 0 8px 0' }}>Order #{order.id}</h1>
-          <p style={{ margin: '0', color: '#6b7280', fontSize: '0.9em' }}>
+          <h1 style={{ ...TYPOGRAPHY.h2, margin: `0 0 ${SPACING.sm} 0` }}>Order #{order.id}</h1>
+          <p style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, margin: 0 }}>
             Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
@@ -287,47 +313,20 @@ export function OrderDetailPage() {
             })}
           </p>
         </div>
-        <div
-          style={{
-            padding: '8px 16px',
-            borderRadius: '6px',
-            backgroundColor: `${getStatusColor(order.status)}15`,
-            color: getStatusColor(order.status),
-            fontSize: '1em',
-            fontWeight: '600',
-            textTransform: 'capitalize',
-          }}
-        >
+        <div style={{ ...STATUS_BADGE_STYLE, backgroundColor: `${statusColor}15`, color: statusColor }}>
           {getStatusLabel(order.status)}
         </div>
       </div>
 
-      {/* Actions */}
-      <div
-        style={{
-          marginBottom: '24px',
-          padding: '16px',
-          borderRadius: '8px',
-          backgroundColor: '#f9fafb',
-          display: 'flex',
-          gap: '12px',
-          flexWrap: 'wrap',
-        }}
-      >
+      <div style={ACTIONS_CARD_STYLE}>
         {canAcceptOrder(order.status) && (
           <button
             onClick={handleAccept}
             disabled={processing === 'accept'}
             style={{
-              padding: '10px 20px',
-              border: '1px solid #16a34a',
-              borderRadius: '6px',
-              backgroundColor: '#16a34a',
-              color: 'white',
-              fontSize: '1em',
-              fontWeight: '600',
-              cursor: processing === 'accept' ? 'not-allowed' : 'pointer',
+              ...BUTTON.primary,
               opacity: processing === 'accept' ? 0.6 : 1,
+              cursor: processing === 'accept' ? 'not-allowed' : 'pointer',
             }}
           >
             {processing === 'accept' ? 'Processing...' : 'Accept Order'}
@@ -338,15 +337,9 @@ export function OrderDetailPage() {
             onClick={handleReject}
             disabled={processing === 'reject'}
             style={{
-              padding: '10px 20px',
-              border: '1px solid #dc2626',
-              borderRadius: '6px',
-              backgroundColor: '#dc2626',
-              color: 'white',
-              fontSize: '1em',
-              fontWeight: '600',
-              cursor: processing === 'reject' ? 'not-allowed' : 'pointer',
+              ...BUTTON.danger,
               opacity: processing === 'reject' ? 0.6 : 1,
+              cursor: processing === 'reject' ? 'not-allowed' : 'pointer',
             }}
           >
             {processing === 'reject' ? 'Processing...' : 'Reject Order'}
@@ -357,15 +350,9 @@ export function OrderDetailPage() {
             onClick={handleDispatch}
             disabled={processing === 'dispatch'}
             style={{
-              padding: '10px 20px',
-              border: '1px solid #ea580c',
-              borderRadius: '6px',
-              backgroundColor: '#ea580c',
-              color: 'white',
-              fontSize: '1em',
-              fontWeight: '600',
-              cursor: processing === 'dispatch' ? 'not-allowed' : 'pointer',
+              ...BUTTON.primary,
               opacity: processing === 'dispatch' ? 0.6 : 1,
+              cursor: processing === 'dispatch' ? 'not-allowed' : 'pointer',
             }}
           >
             {processing === 'dispatch' ? 'Processing...' : 'Dispatch Order'}
@@ -373,92 +360,61 @@ export function OrderDetailPage() {
         )}
       </div>
 
-      {/* Cancellation Notice */}
       {order.cancellation && (
-        <div
-          style={{
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            marginBottom: '24px',
-          }}
-        >
-          <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#991b1b' }}>
+        <div style={{ ...SECTION_CARD_STYLE, backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
+          <p style={{ ...TYPOGRAPHY.label, margin: `0 0 ${SPACING.sm} 0`, color: '#991b1b' }}>
             Order Cancelled
           </p>
-          <p style={{ margin: '0', color: '#7f1d1d', fontSize: '0.9em' }}>
+          <p style={{ ...TYPOGRAPHY.bodySmall, color: '#7f1d1d', margin: 0 }}>
             Cancelled by: {order.cancellation.cancelledBy}
             {order.cancellation.reason && ` - ${order.cancellation.reason}`}
           </p>
         </div>
       )}
 
-      {/* Buyer Information */}
-      <div
-        style={{
-          marginBottom: '24px',
-          padding: '16px',
-          borderRadius: '8px',
-          backgroundColor: '#f9fafb',
-        }}
-      >
-        <h3 style={{ margin: '0 0 12px 0', fontSize: '1em' }}>Buyer Information</h3>
-        <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{order.buyer?.name}</p>
+      <div style={SECTION_CARD_STYLE}>
+        <h3 style={SECTION_TITLE_STYLE}>Buyer Information</h3>
+        <p style={{ ...TYPOGRAPHY.h4, margin: `0 0 ${SPACING.xs} 0` }}>{order.buyer?.name}</p>
         {order.buyer?.contact?.phone && (
-          <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
+          <p style={{ ...TYPOGRAPHY.body, margin: `0 0 ${SPACING.xs} 0`, color: DRAMS.textLight }}>
             Phone: {order.buyer.contact.phone}
           </p>
         )}
         {order.buyer?.contact?.email && (
-          <p style={{ margin: '0', color: '#6b7280' }}>
+          <p style={{ ...TYPOGRAPHY.body, color: DRAMS.textLight, margin: 0 }}>
             Email: {order.buyer.contact.email}
           </p>
         )}
       </div>
 
-      {/* Delivery Address */}
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.1em', marginBottom: '12px' }}>Delivery Address</h3>
-        <div style={{ color: '#374151', lineHeight: '1.6' }}>
-          <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>
-            {order.deliveryAddress?.line1}
-          </p>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h3 style={SECTION_TITLE_STYLE}>Delivery Address</h3>
+        <div style={{ ...TYPOGRAPHY.body, lineHeight: 1.6, color: DRAMS.textDark }}>
+          <p style={{ ...TYPOGRAPHY.h4, margin: `0 0 ${SPACING.xs} 0` }}>{order.deliveryAddress?.line1}</p>
           {order.deliveryAddress?.line2 && (
-            <p style={{ margin: '0 0 4px 0' }}>{order.deliveryAddress.line2}</p>
+            <p style={{ margin: `0 0 ${SPACING.xs} 0` }}>{order.deliveryAddress.line2}</p>
           )}
-          <p style={{ margin: '0 0 4px 0' }}>
+          <p style={{ margin: `0 0 ${SPACING.xs} 0` }}>
             {order.deliveryAddress?.city}, {order.deliveryAddress?.state}{' '}
             {order.deliveryAddress?.postalCode}
           </p>
-          <p style={{ margin: '0' }}>{order.deliveryAddress?.country}</p>
+          <p style={{ margin: 0 }}>{order.deliveryAddress?.country}</p>
         </div>
       </div>
 
-      {/* Order Items */}
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.1em', marginBottom: '12px' }}>Order Items</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h3 style={SECTION_TITLE_STYLE}>Order Items</h3>
+        <div>
           {order.items.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '12px',
-                borderRadius: '6px',
-                border: '1px solid #e5e7eb',
-                backgroundColor: 'white',
-              }}
-            >
+            <div key={item.id} style={ITEM_ROW_STYLE}>
               <div>
-                <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{item.name}</p>
-                <p style={{ margin: '0', color: '#6b7280', fontSize: '0.9em' }}>
+                <p style={{ ...TYPOGRAPHY.h4, margin: `0 0 ${SPACING.xs} 0` }}>{item.name}</p>
+                <p style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, margin: 0 }}>
                   Quantity: {item.quantity}
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: '0', fontWeight: '600' }}>
+                <p style={{ ...TYPOGRAPHY.h4, margin: 0, color: DRAMS.orange }}>
                   {order.quote?.total?.currency} {item.price.value ?? item.price.amount}
                 </p>
               </div>
@@ -467,72 +423,36 @@ export function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Order Total */}
-      <div
-        style={{
-          marginBottom: '24px',
-          padding: '16px',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span style={{ fontSize: '1.1em', fontWeight: '600' }}>Order Total</span>
-        <span style={{ fontSize: '1.2em', fontWeight: '700', color: '#16a34a' }}>
+      <div style={{ ...SECTION_CARD_STYLE, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ ...TYPOGRAPHY.h3 }}>Order Total</span>
+        <span style={{ ...TYPOGRAPHY.h2, color: DRAMS.orange }}>
           {order.quote?.total?.currency} {order.quote?.total?.value ?? order.quote?.total?.amount}
         </span>
       </div>
 
-      {/* Order Timeline */}
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.1em', marginBottom: '16px' }}>Order Timeline</h3>
-        <div style={{ position: 'relative' }}>
-          {/* Timeline line */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '8px',
-              top: 0,
-              bottom: 0,
-              width: '2px',
-              backgroundColor: '#e5e7eb',
-            }}
-          />
-
-          {/* Timeline events */}
+      <div style={{ marginBottom: SPACING.xl }}>
+        <h3 style={SECTION_TITLE_STYLE}>Order Timeline</h3>
+        <div style={TIMELINE_STYLE}>
+          <div style={TIMELINE_LINE_STYLE} />
           {timeline.map((event, index) => (
             <div
               key={index}
               style={{
-                position: 'relative',
-                paddingLeft: '32px',
-                paddingBottom: index < timeline.length - 1 ? '20px' : 0,
+                ...TIMELINE_EVENT_STYLE,
+                paddingBottom: index < timeline.length - 1 ? SPACING.xl : 0,
               }}
             >
-              {/* Timeline dot */}
               <div
                 style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: '4px',
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  backgroundColor: event.completed ? '#16a34a' : '#e5e7eb',
-                  border: '2px solid white',
-                  boxShadow: '0 0 0 2px ' + (event.completed ? '#16a34a' : '#e5e7eb'),
+                  ...TIMELINE_DOT_STYLE,
+                  backgroundColor: event.completed ? DRAMS.orange : DRAMS.grayTrack,
+                  boxShadow: `0 0 0 2px ${event.completed ? DRAMS.orange : DRAMS.grayTrack}`,
                 }}
               />
-
-              {/* Event content */}
               <div>
-                <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#374151' }}>
-                  {event.label}
-                </p>
+                <p style={{ ...TYPOGRAPHY.h4, margin: `0 0 ${SPACING.xs} 0` }}>{event.label}</p>
                 {event.timestamp && (
-                  <p style={{ margin: '0', color: '#6b7280', fontSize: '0.85em' }}>
+                  <p style={{ ...TYPOGRAPHY.bodySmall, color: DRAMS.textLight, margin: 0 }}>
                     {new Date(event.timestamp).toLocaleString()}
                   </p>
                 )}
@@ -542,19 +462,11 @@ export function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Tracking Info (if dispatched) */}
       {order.fulfillment?.tracking && (
-        <div
-          style={{
-            marginBottom: '24px',
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#f9fafb',
-          }}
-        >
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '1em' }}>Tracking Information</h3>
+        <div style={SECTION_CARD_STYLE}>
+          <h3 style={{ ...TYPOGRAPHY.h4, margin: `0 0 ${SPACING.md} 0` }}>Tracking Information</h3>
           {order.fulfillment.tracking.id && (
-            <p style={{ margin: '0 0 4px 0', color: '#6b7280' }}>
+            <p style={{ ...TYPOGRAPHY.body, margin: `0 0 ${SPACING.xs} 0`, color: DRAMS.textLight }}>
               Tracking ID: {order.fulfillment.tracking.id}
             </p>
           )}
@@ -563,11 +475,7 @@ export function OrderDetailPage() {
               href={order.fulfillment.tracking.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: '#16a34a',
-                textDecoration: 'none',
-                fontWeight: '600',
-              }}
+              style={{ color: DRAMS.orange, textDecoration: 'none', ...TYPOGRAPHY.label }}
             >
               Track Package →
             </a>

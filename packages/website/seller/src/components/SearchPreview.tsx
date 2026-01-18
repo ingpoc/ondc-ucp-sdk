@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ProductCard } from '@ondc-website/shared/components';
+import { DRAMS, SPACING, TYPOGRAPHY, RADIUS, BUTTON, TRANSITIONS } from '@ondc-agent/shared/design-system';
 
 export interface SearchPreviewProps {
   query: string;
@@ -8,106 +9,91 @@ export interface SearchPreviewProps {
 }
 
 const CONTAINER_STYLE = {
-  marginTop: '20px',
-  padding: '20px',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
+  marginTop: SPACING.xl,
+  padding: SPACING.xl,
+  backgroundColor: DRAMS.grayTrack,
+  borderRadius: RADIUS.lg,
+  border: `1px solid ${DRAMS.grayHover}`,
 };
 
 const HEADER_STYLE = {
-  fontSize: '16px',
-  fontWeight: '600',
-  color: '#1e293b',
-  margin: '0 0 6px 0',
+  ...TYPOGRAPHY.h4,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.sm} 0`,
 };
 
 const DESCRIPTION_STYLE = {
-  fontSize: '14px',
-  color: '#64748b',
-  margin: '0 0 16px 0',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  margin: `0 0 ${SPACING.lg} 0`,
 };
 
 const BUTTON_STYLE = {
-  padding: '10px 20px',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '14px',
-  fontWeight: '500',
+  ...BUTTON.secondary,
+  transition: TRANSITIONS.hover,
+};
+
+const BUTTON_ACTIVE_STYLE = {
+  ...BUTTON.primary,
   cursor: 'pointer',
-  transition: 'background-color 0.2s',
-};
-
-const BUTTON_PRIMARY_STYLE = {
-  backgroundColor: '#3b82f6',
-};
-
-const BUTTON_PRIMARY_HOVER_STYLE = {
-  backgroundColor: '#2563eb',
-};
-
-const BUTTON_LOADING_STYLE = {
-  backgroundColor: '#94a3b8',
-  cursor: 'not-allowed',
 };
 
 const BUTTON_DISABLED_STYLE = {
-  backgroundColor: '#cbd5e1',
+  ...BUTTON.secondary,
+  opacity: 0.5,
   cursor: 'not-allowed',
 };
 
 const RESULTS_CONTAINER_STYLE = {
-  marginTop: '20px',
+  marginTop: SPACING.xl,
 };
 
 const RESULTS_HEADER_STYLE = {
-  fontSize: '14px',
-  fontWeight: '600',
-  color: '#475569',
-  margin: '0 0 12px 0',
+  ...TYPOGRAPHY.label,
+  color: DRAMS.textLight,
+  margin: `0 0 ${SPACING.md} 0`,
 };
 
 const GRID_STYLE = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-  gap: '16px',
+  gap: SPACING.lg,
 };
 
 const LOADING_CONTAINER_STYLE = {
   display: 'flex',
   alignItems: 'center',
-  gap: '12px',
-  padding: '20px 0',
+  gap: SPACING.md,
+  padding: `${SPACING.xl} 0`,
 };
 
 const SPINNER_STYLE = {
   width: '20px',
   height: '20px',
-  border: '3px solid #e2e8f0',
-  borderTopColor: '#3b82f6',
+  border: `3px solid ${DRAMS.grayTrack}`,
+  borderTopColor: DRAMS.orange,
   borderRadius: '50%',
   animation: 'spin 1s linear infinite',
 };
 
 const LOADING_TEXT_STYLE = {
-  fontSize: '14px',
-  color: '#64748b',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
 };
 
 const EMPTY_STATE_STYLE = {
-  padding: '40px 20px',
+  padding: `${SPACING['3xl']} ${SPACING.xl}`,
   textAlign: 'center' as const,
 };
 
 const EMPTY_STATE_ICON_STYLE = {
-  fontSize: '40px',
-  marginBottom: '12px',
+  ...TYPOGRAPHY.h1,
+  marginBottom: SPACING.md,
 };
 
 const EMPTY_STATE_TEXT_STYLE = {
-  fontSize: '14px',
-  color: '#64748b',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
   margin: '0',
 };
 
@@ -148,10 +134,8 @@ export function SearchPreview({ query, category, onSearch }: SearchPreviewProps)
         onClick={handlePreviewSearch}
         disabled={!canSearch}
         style={{
-          ...BUTTON_STYLE,
-          ...(loading ? BUTTON_LOADING_STYLE : {}),
-          ...(canSearch ? BUTTON_PRIMARY_STYLE : BUTTON_DISABLED_STYLE),
-          ...(isButtonHovered && canSearch ? BUTTON_PRIMARY_HOVER_STYLE : {}),
+          ...(canSearch ? BUTTON_ACTIVE_STYLE : BUTTON_DISABLED_STYLE),
+          ...(loading ? { opacity: 0.7 } : {}),
         }}
         onMouseEnter={() => canSearch && setIsButtonHovered(true)}
         onMouseLeave={() => setIsButtonHovered(false)}

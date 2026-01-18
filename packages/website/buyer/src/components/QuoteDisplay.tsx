@@ -13,7 +13,7 @@ const BREAKUP_TITLES: Record<string, string> = {
 const CONTAINER_STYLE = {
   backgroundColor: 'white',
   border: `1px solid ${COLORS.border}`,
-  borderRadius: '8px',
+  borderRadius: RADIUS.lg,
   padding: SPACING.xl,
 };
 

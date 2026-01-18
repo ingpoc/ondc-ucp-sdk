@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
+import { DRAMS, TYPOGRAPHY, SPACING } from '@ondc-agent/shared/design-system';
 
+// DRAMS: Clean, minimal search page
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
+  backgroundColor: DRAMS.grayTrack,
   display: 'flex',
   flexDirection: 'column' as const,
   alignItems: 'center',
@@ -18,20 +20,17 @@ const HERO_STYLE = {
   textAlign: 'center' as const,
 };
 
+// DRAMS: Bold, clean typography
 const HEADING_STYLE = {
-  fontSize: '56px',
-  fontWeight: 800,
-  letterSpacing: '-2px',
-  color: '#0f172a',
-  marginBottom: '16px',
-  lineHeight: 1.1,
+  ...TYPOGRAPHY.h1,
+  color: DRAMS.textDark,
+  marginBottom: SPACING.lg,
 };
 
 const SUBHEADING_STYLE = {
-  fontSize: '18px',
-  fontWeight: 400,
-  color: '#475569',
-  marginBottom: '40px',
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  marginBottom: SPACING['2xl'],
   lineHeight: 1.6,
 };
 

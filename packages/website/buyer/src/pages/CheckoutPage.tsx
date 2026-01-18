@@ -2,16 +2,18 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@ondc-website/shared';
 import type { UCPQuote, UCPAddress } from '@ondc-website/shared';
+import { DRAMS, COLORS, SPACING, TYPOGRAPHY, BUTTON, BADGE, CARD, TEXT_BOX, PILL_BUTTON } from '@ondc-agent/shared/design-system';
 import { BillingForm } from '../components/BillingForm';
 import { PaymentSelector } from '../components/PaymentSelector';
 import { QuoteDisplay } from '../components/QuoteDisplay';
 
 const API_BASE = 'http://localhost:3001';
 
+// DRAMS: Clean white background
 const PAGE_CONTAINER_STYLE = {
   minHeight: '100vh',
-  backgroundColor: '#f8fafc',
-  padding: '24px',
+  backgroundColor: '#ffffff',
+  padding: SPACING.xl,
 };
 
 const CONTENT_STYLE = {
@@ -20,37 +22,31 @@ const CONTENT_STYLE = {
 };
 
 const HEADER_STYLE = {
-  marginBottom: '24px',
+  marginBottom: SPACING.xl,
 };
 
 const PAGE_TITLE_STYLE = {
-  fontSize: '28px',
-  fontWeight: 700,
-  letterSpacing: '-0.5px',
-  color: '#0f172a',
-  margin: '0 0 8px 0',
+  ...TYPOGRAPHY.h2,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.md} 0`,
 };
 
 const ERROR_ALERT_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#dc2626',
-  fontSize: '14px',
-  marginBottom: '24px',
+  ...BADGE.error,
+  padding: SPACING.lg,
+  marginBottom: SPACING.xl,
   position: 'relative' as const,
 };
 
 const ERROR_CLOSE_STYLE = {
   position: 'absolute' as const,
-  top: '12px',
-  right: '12px',
+  top: SPACING.md,
+  right: SPACING.md,
   border: 'none',
   background: 'none',
   cursor: 'pointer',
-  fontSize: '20px',
-  color: '#dc2626',
+  ...TYPOGRAPHY.h3,
+  color: COLORS.error,
   padding: '0',
   width: '24px',
   height: '24px',
@@ -59,79 +55,52 @@ const ERROR_CLOSE_STYLE = {
 const FORM_LAYOUT_STYLE = {
   display: 'grid',
   gridTemplateColumns: '2fr 1fr',
-  gap: '24px',
+  gap: SPACING.xl,
 };
 
 const FORMS_SECTION_STYLE = {
   display: 'flex',
   flexDirection: 'column' as const,
-  gap: '24px',
+  gap: SPACING.xl,
 };
 
 const SIDEBAR_STYLE = {
   position: 'sticky' as const,
-  top: '24px',
+  top: SPACING.xl,
   alignSelf: 'start' as const,
 };
 
 const BUTTON_PRIMARY_STYLE = {
+  ...PILL_BUTTON.orange,
   width: '100%',
-  padding: '14px',
-  border: 'none',
-  borderRadius: '6px',
-  backgroundColor: '#10b981',
-  color: 'white',
-  fontSize: '16px',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease',
-  marginTop: '16px',
+  marginTop: SPACING.lg,
 };
 
 const BUTTON_DISABLED_STYLE = {
-  ...BUTTON_PRIMARY_STYLE,
-  backgroundColor: '#94a3b8',
+  ...BUTTON.primary,
+  width: '100%',
+  backgroundColor: COLORS.textMuted,
   cursor: 'not-allowed',
+  marginTop: SPACING.lg,
 };
 
 const VALIDATION_MESSAGE_STYLE = {
-  color: '#dc2626',
-  fontSize: '12px',
-  marginTop: '8px',
-};
-
-const BUTTON_SECONDARY_STYLE = {
-  padding: '10px 20px',
-  border: '1px solid #e2e8f0',
-  borderRadius: '6px',
-  backgroundColor: 'white',
-  color: '#0f172a',
-  fontSize: '14px',
-  fontWeight: 500,
-  cursor: 'pointer',
+  ...TYPOGRAPHY.bodySmall,
+  color: COLORS.error,
+  marginTop: SPACING.sm,
 };
 
 const LOADING_STYLE = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '48px',
-  color: '#475569',
-  fontSize: '14px',
-};
-
-const ERROR_STYLE = {
-  padding: '16px',
-  borderRadius: '8px',
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#dc2626',
-  fontSize: '14px',
-  textAlign: 'center' as const,
+  padding: SPACING['3xl'],
+  color: DRAMS.textLight,
+  ...TYPOGRAPHY.body,
 };
 
 const FOOTER_STYLE = {
-  marginTop: '24px',
+  marginTop: SPACING.xl,
 };
 
 export function CheckoutPage() {
@@ -209,14 +178,14 @@ export function CheckoutPage() {
   if (error && !session) {
     return (
       <div style={PAGE_CONTAINER_STYLE}>
-        <div style={ERROR_STYLE}>
-          <p style={{ margin: 0, fontWeight: 600 }}>Error</p>
-          <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+        <div style={{ ...BADGE.error, padding: SPACING.lg, textAlign: 'center' }}>
+          <p style={{ margin: 0, ...TYPOGRAPHY.label }}>Error</p>
+          <p style={{ margin: `${SPACING.xs} 0 0 0` }}>{error}</p>
           <button
             onClick={() => navigate('/cart')}
             style={{
-              ...BUTTON_SECONDARY_STYLE,
-              marginTop: '16px',
+              ...BUTTON.secondary,
+              marginTop: SPACING.lg,
             }}
           >
             Back to Cart
@@ -286,7 +255,7 @@ export function CheckoutPage() {
           <button
             type="button"
             onClick={() => navigate('/cart')}
-            style={BUTTON_SECONDARY_STYLE}
+            style={BUTTON.secondary}
           >
             ← Back to Cart
           </button>
@@ -307,44 +276,35 @@ function DeliveryAddressForm({ address, onChange }: DeliveryAddressFormProps) {
   };
 
   const SECTION_STYLE = {
-    backgroundColor: 'white',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    padding: '24px',
+    ...CARD.base,
   };
 
   const SECTION_TITLE_STYLE = {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#0f172a',
-    margin: '0 0 16px 0',
+    ...TYPOGRAPHY.h3,
+    color: DRAMS.textDark,
+    margin: `0 0 ${SPACING.lg} 0`,
   };
 
   const LABEL_STYLE = {
     display: 'block',
-    marginBottom: '8px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#0f172a',
+    marginBottom: SPACING.sm,
+    ...TYPOGRAPHY.label,
+    color: DRAMS.textDark,
   };
 
   const INPUT_STYLE = {
+    ...TEXT_BOX.track,
     width: '100%',
-    padding: '10px',
-    border: '1px solid #e2e8f0',
-    borderRadius: '6px',
-    fontSize: '14px',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   };
 
   const INPUT_GRID_STYLE = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
+    gap: SPACING.lg,
   };
 
   const FORM_GROUP_STYLE = {
-    marginBottom: '16px',
+    marginBottom: SPACING.lg,
   };
 
   return (
@@ -424,61 +384,46 @@ function CartSummary({ currency }: CartSummaryProps) {
 
   if (!session) return null;
 
-  const CARD_STYLE = {
-    backgroundColor: 'white',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-  };
-
-  const TITLE_STYLE = {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#0f172a',
-    margin: '0 0 16px 0',
-  };
-
   const ITEM_ROW_STYLE = {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '8px 0',
-    borderBottom: '1px solid #f1f5f9',
+    padding: `${SPACING.sm} 0`,
+    borderBottom: `1px solid ${DRAMS.grayTrack}`,
   };
 
   const SUMMARY_SECTION_STYLE = {
-    borderTop: '1px solid #e2e8f0',
-    paddingTop: '16px',
+    borderTop: `1px solid ${DRAMS.grayTrack}`,
+    paddingTop: SPACING.lg,
   };
 
   const TOTAL_ROW_STYLE = {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '8px',
-    fontSize: '14px',
+    marginBottom: SPACING.sm,
+    ...TYPOGRAPHY.body,
   };
 
   const NOTE_STYLE = {
-    fontSize: '12px',
-    color: '#475569',
-    marginTop: '12px',
+    ...TYPOGRAPHY.bodySmall,
+    color: DRAMS.textLight,
+    marginTop: SPACING.md,
     lineHeight: 1.5,
   };
 
   return (
-    <div style={CARD_STYLE}>
-      <h2 style={TITLE_STYLE}>Order Summary</h2>
+    <div style={CARD.base}>
+      <h2 style={{ ...TYPOGRAPHY.h3, color: DRAMS.textDark, margin: `0 0 ${SPACING.lg} 0` }}>Order Summary</h2>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: SPACING.lg }}>
         {session.items.map((item: any) => (
           <div
             key={item.item.id}
             style={ITEM_ROW_STYLE}
           >
-            <span style={{ fontSize: '14px', color: '#0f172a' }}>
+            <span style={{ ...TYPOGRAPHY.body, color: DRAMS.textDark }}>
               {item.item.descriptor?.name || item.item.id} × {item.quantity}
             </span>
-            <span style={{ fontSize: '14px', fontWeight: 500, color: '#0f172a' }}>
+            <span style={{ ...TYPOGRAPHY.label, color: DRAMS.textDark }}>
               {currency}{' '}
               {((parseFloat(item.item.price?.value || '0') * item.quantity).toFixed(2))}
             </span>
@@ -488,8 +433,8 @@ function CartSummary({ currency }: CartSummaryProps) {
 
       <div style={SUMMARY_SECTION_STYLE}>
         <div style={TOTAL_ROW_STYLE}>
-          <span style={{ color: '#475569' }}>Subtotal</span>
-          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+          <span style={{ color: DRAMS.textLight }}>Subtotal</span>
+          <span style={{ ...TYPOGRAPHY.label, color: DRAMS.textDark }}>
             {currency} {subtotal.toFixed(2)}
           </span>
         </div>

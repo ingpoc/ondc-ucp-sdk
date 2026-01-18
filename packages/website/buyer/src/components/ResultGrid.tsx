@@ -1,11 +1,11 @@
-import { ProductCard } from '@ondc-website/shared/components';
+import { DramsProductCard } from '@ondc-agent/shared/design-system';
 import type { UCPItem } from '@ondc-website/shared';
-import { DRAMS_EMPTY_STATE, SPACING, DRAMS, DRAMS_CARD, TYPOGRAPHY } from '@ondc-agent/shared/design-system';
+import { SPACING, DRAMS, TYPOGRAPHY, RADIUS } from '@ondc-agent/shared/design-system';
 
 const GRID_STYLE = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-  gap: SPACING.lg,
+  gap: SPACING.xl,
 };
 
 const LOADING_CONTAINER_STYLE = {
@@ -31,13 +31,36 @@ const LOADING_TEXT_STYLE = {
   color: DRAMS.textLight,
 };
 
+const EMPTY_STATE_STYLE = {
+  textAlign: 'center' as const,
+  padding: SPACING['3xl'],
+};
+
+const EMPTY_ICON_STYLE = {
+  ...TYPOGRAPHY.h1,
+  marginBottom: SPACING.md,
+};
+
+const EMPTY_TITLE_STYLE = {
+  ...TYPOGRAPHY.h3,
+  color: DRAMS.textDark,
+  margin: `0 0 ${SPACING.md} 0`,
+};
+
+const EMPTY_MESSAGE_STYLE = {
+  ...TYPOGRAPHY.body,
+  color: DRAMS.textLight,
+  margin: 0,
+};
+
 export interface ResultGridProps {
   items: UCPItem[];
   onItemClick?: (item: UCPItem) => void;
+  onAddToCart?: (item: UCPItem) => void;
   loading?: boolean;
 }
 
-export function ResultGrid({ items, onItemClick, loading }: ResultGridProps): JSX.Element {
+export function ResultGrid({ items, onItemClick, onAddToCart, loading }: ResultGridProps): JSX.Element {
   if (loading) {
     return (
       <div style={LOADING_CONTAINER_STYLE}>
@@ -54,10 +77,10 @@ export function ResultGrid({ items, onItemClick, loading }: ResultGridProps): JS
 
   if (items.length === 0) {
     return (
-      <div style={DRAMS_EMPTY_STATE.container}>
-        <div style={DRAMS_EMPTY_STATE.icon}>🔍</div>
-        <h3 style={DRAMS_EMPTY_STATE.title}>No results found</h3>
-        <p style={DRAMS_EMPTY_STATE.message}>
+      <div style={EMPTY_STATE_STYLE}>
+        <div style={EMPTY_ICON_STYLE}>🔍</div>
+        <h3 style={EMPTY_TITLE_STYLE}>No results found</h3>
+        <p style={EMPTY_MESSAGE_STYLE}>
           Try adjusting your search terms or filters to find what you're looking for
         </p>
       </div>
@@ -67,10 +90,14 @@ export function ResultGrid({ items, onItemClick, loading }: ResultGridProps): JS
   return (
     <div style={GRID_STYLE}>
       {items.map((item) => (
-        <ProductCard
+        <DramsProductCard
           key={item.id}
-          product={item}
+          name={item.name ?? 'Product'}
+          category={item.category}
+          price={`${item.price?.currency || '₹'} ${item.price?.value ?? item.price?.amount ?? '0'}`}
+          image={item.images?.[0]?.url ?? undefined}
           onClick={() => onItemClick?.(item)}
+          onAdd={onAddToCart ? () => onAddToCart(item) : undefined}
         />
       ))}
     </div>

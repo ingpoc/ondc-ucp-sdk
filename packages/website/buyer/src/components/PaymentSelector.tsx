@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@ondc-agent/shared/design-system';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS, CARD, TEXT_BOX, DRAMS } from '@ondc-agent/shared/design-system';
 
-export type PaymentMethod = UCPPayment['type'];
+export type PaymentMethod = any;
 
 const PAYMENT_METHODS = [
   {
@@ -37,16 +37,12 @@ const PAYMENT_METHODS = [
 ] as const;
 
 const CONTAINER_STYLE = {
-  backgroundColor: 'white',
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: RADIUS.lg,
-  padding: SPACING.xl,
+  ...CARD.base,
   marginBottom: SPACING.xl,
 };
 
 const HEADER_STYLE = {
-  fontSize: TYPOGRAPHY.h4.fontSize,
-  fontWeight: TYPOGRAPHY.h4.fontWeight,
+  ...TYPOGRAPHY.h4,
   color: COLORS.textPrimary,
   margin: `0 0 ${SPACING.lg} 0`,
 };
@@ -67,20 +63,21 @@ const OPTION_HOVER_STYLE = {
   backgroundColor: COLORS.bgHover,
 };
 
+// DRAMS: Orange border for selected state
 const OPTION_SELECTED_STYLE = {
-  border: `2px solid ${COLORS.success}`,
-  backgroundColor: COLORS.bgSubtle,
+  border: `2px solid ${DRAMS.orange}`,
+  backgroundColor: DRAMS.grayTrack,
 };
 
 const RADIO_STYLE = {
-  marginRight: '12px',
+  marginRight: SPACING.md,
   width: '20px',
   height: '20px',
   cursor: 'pointer',
 };
 
 const ICON_STYLE = {
-  fontSize: '24px',
+  ...TYPOGRAPHY.h2,
   marginRight: SPACING.md,
 };
 
@@ -89,20 +86,20 @@ const LABEL_STYLE = {
 };
 
 const LABEL_TITLE_STYLE = {
-  fontWeight: TYPOGRAPHY.label.fontWeight,
-  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  ...TYPOGRAPHY.label,
   color: COLORS.textPrimary,
   marginBottom: SPACING.xs,
 };
 
 const LABEL_DESC_STYLE = {
-  fontSize: TYPOGRAPHY.bodySmall.fontSize,
+  ...TYPOGRAPHY.bodySmall,
   color: COLORS.textSecondary,
 };
 
+// DRAMS: Orange checkmark
 const CHECKMARK_STYLE = {
-  color: COLORS.success,
-  fontSize: '20px',
+  color: DRAMS.orange,
+  ...TYPOGRAPHY.h3,
 };
 
 export interface PaymentSelectorProps {
@@ -132,7 +129,7 @@ export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps): J
     <div style={CONTAINER_STYLE}>
       <h2 style={HEADER_STYLE}>Payment Method</h2>
 
-      <div style={{ display: 'grid', gap: '12px' }}>
+      <div style={{ display: 'grid', gap: SPACING.md }}>
         {PAYMENT_METHODS.map((method) => (
           <label
             key={method.type}
@@ -167,11 +164,11 @@ export function PaymentSelector({ selected, onSelect }: PaymentSelectorProps): J
       </div>
 
       {currentSelected === 'upi' && (
-        <UPIInputForm style={{ marginTop: '20px' }} />
+        <UPIInputForm style={{ marginTop: SPACING.xl }} />
       )}
 
       {currentSelected === 'card' && (
-        <CardInputForm style={{ marginTop: '20px' }} />
+        <CardInputForm style={{ marginTop: SPACING.xl }} />
       )}
     </div>
   );
@@ -182,38 +179,22 @@ interface FormWrapperProps {
 }
 
 const FORM_CONTAINER_STYLE = {
-  padding: '16px',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
+  padding: SPACING.lg,
+  backgroundColor: COLORS.bgPage,
+  borderRadius: RADIUS.lg,
 };
 
 const FORM_LABEL_STYLE = {
   display: 'block',
-  marginBottom: '6px',
-  fontWeight: '500',
-  fontSize: '14px',
-  color: '#475569',
-};
-
-const FORM_INPUT_STYLE = {
-  width: '100%',
-  padding: '10px 12px',
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: '6px',
-  fontSize: '14px',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-};
-
-const FORM_INPUT_FOCUS_STYLE = {
-  outline: 'none',
-  borderColor: '#3b82f6',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+  marginBottom: SPACING.sm,
+  ...TYPOGRAPHY.label,
+  color: COLORS.textSecondary,
 };
 
 const FORM_HELP_TEXT_STYLE = {
-  fontSize: '12px',
-  color: '#64748b',
-  marginTop: '6px',
+  ...TYPOGRAPHY.bodySmall,
+  color: COLORS.textMuted,
+  marginTop: SPACING.sm,
   marginBottom: '0',
 };
 
@@ -221,11 +202,11 @@ function UPIInputForm({ style }: FormWrapperProps): JSX.Element {
   const [upiId, setUpiId] = useState('');
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, FORM_INPUT_FOCUS_STYLE);
+    Object.assign(e.target.style, TEXT_BOX.focus);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+    Object.assign(e.target.style, TEXT_BOX.track);
   };
 
   return (
@@ -240,7 +221,7 @@ function UPIInputForm({ style }: FormWrapperProps): JSX.Element {
         onChange={(e) => setUpiId(e.target.value)}
         placeholder="yourname@upi"
         pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"
-        style={FORM_INPUT_STYLE}
+        style={{ ...TEXT_BOX.track, width: '100%' }}
         onFocus={handleFocus}
         onBlur={handleBlur}
       />
@@ -268,19 +249,19 @@ function formatExpiry(value: string): string {
 
 const GRID_STYLE = {
   display: 'grid',
-  gap: '12px',
+  gap: SPACING.md,
 };
 
 const HALF_GRID_STYLE = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr' as const,
-  gap: '12px',
+  gap: SPACING.md,
 };
 
 const SECURITY_TEXT_STYLE = {
-  fontSize: '12px',
-  color: '#64748b',
-  marginTop: '8px',
+  ...TYPOGRAPHY.bodySmall,
+  color: COLORS.textMuted,
+  marginTop: SPACING.sm,
   marginBottom: '0',
 };
 
@@ -291,11 +272,11 @@ function CardInputForm({ style }: FormWrapperProps): JSX.Element {
   const [name, setName] = useState('');
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, FORM_INPUT_FOCUS_STYLE);
+    Object.assign(e.target.style, TEXT_BOX.focus);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    Object.assign(e.target.style, { borderColor: '#cbd5e1', boxShadow: 'none' });
+    Object.assign(e.target.style, TEXT_BOX.track);
   };
 
   return (
@@ -312,7 +293,7 @@ function CardInputForm({ style }: FormWrapperProps): JSX.Element {
             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
             placeholder="1234 5678 9012 3456"
             maxLength={19}
-            style={FORM_INPUT_STYLE}
+            style={{ ...TEXT_BOX.track, width: '100%' }}
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
@@ -328,7 +309,7 @@ function CardInputForm({ style }: FormWrapperProps): JSX.Element {
             value={name}
             onChange={(e) => setName(e.target.value.toUpperCase())}
             placeholder="JOHN DOE"
-            style={FORM_INPUT_STYLE}
+            style={{ ...TEXT_BOX.track, width: '100%' }}
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
@@ -346,7 +327,7 @@ function CardInputForm({ style }: FormWrapperProps): JSX.Element {
               onChange={(e) => setExpiry(formatExpiry(e.target.value.replace(/\D/g, '')))}
               placeholder="MM/YY"
               maxLength={5}
-              style={FORM_INPUT_STYLE}
+              style={{ ...TEXT_BOX.track, width: '100%' }}
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
@@ -363,7 +344,7 @@ function CardInputForm({ style }: FormWrapperProps): JSX.Element {
               onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
               placeholder="•••"
               maxLength={4}
-              style={FORM_INPUT_STYLE}
+              style={{ ...TEXT_BOX.track, width: '100%' }}
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
